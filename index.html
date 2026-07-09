@@ -16,13 +16,13 @@
         .holland-table th { background-color: #f8fafc; font-weight: 600; color: #475569; font-size: 0.875rem; }
         .loader { border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
+
         .full-screen-loader {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(255,255,255,0.95); z-index: 9999;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
-        
+
         .toast {
             position: fixed; bottom: 20px; right: 20px;
             padding: 1rem 1.5rem; border-radius: 0.5rem;
@@ -37,7 +37,7 @@
         .toast.error { background-color: #ef4444; }
         .toast.success { background-color: #10b981; }
         .toast.warning { background-color: #f59e0b; }
-        
+
         .tab-loading {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             min-height: 400px;
@@ -88,7 +88,7 @@
 </div>
 
 <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden my-8 mx-4">
-    
+
     <div class="flex border-b border-slate-200 bg-slate-50">
         <button id="btn-tab-vocacional" class="flex-1 py-4 px-6 text-sm font-bold text-blue-600 border-b-2 border-blue-600 bg-white transition-colors" onclick="switchTab('vocacional')">
             Vocacional (9° Grado)
@@ -454,36 +454,36 @@
     async function loadFromGitHub(tipo) {
         const fileName = tipo === 'vocacional' ? CONFIG.FILES.VOCACIONAL : CONFIG.FILES.APTITUDINAL;
         const url = `${CONFIG.GITHUB_BASE_URL}/${fileName}?v=${CONFIG.VERSION}&t=${Date.now()}`;
-        
+
         updateProgress(tipo, 'loading');
-        
+
         try {
             const response = await fetch(url);
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
-            
+
             const csvText = await response.text();
             procesarCSV(csvText, tipo);
-            
+
             updateProgress(tipo, 'success');
             loadStatus[tipo] = true;
-            
+
             if (loadStatus.vocacional && loadStatus.aptitudinal) {
                 document.getElementById('global-loader').classList.add('hidden');
                 showToast('Dashboard cargado correctamente', 'success');
             }
-            
+
         } catch (error) {
             console.error(`Error cargando ${tipo}:`, error);
             updateProgress(tipo, 'error');
-            
+
             document.getElementById('loader-message').innerHTML = `
                 <span class="text-red-600 font-bold">Error al cargar datos</span><br>
                 <span class="text-sm">${error.message}</span><br>
                 <span class="text-xs">Recarga la página para intentar de nuevo</span>
             `;
-            
+
             showToast(`Error al cargar ${tipo}: ${error.message}`, 'error');
         }
     }
@@ -503,7 +503,7 @@
             const headers = parsed.meta.fields;
             const required = REQUIRED_COLUMNS[tipo];
             const missing = required.filter(col => !headers.includes(col));
-            
+
             if (missing.length > 0) {
                 console.error('Columnas faltantes:', missing);
                 showToast(`Error: Faltan columnas: ${missing.join(', ')}`, 'error');
@@ -529,9 +529,9 @@
 
             document.getElementById(`loading-${tipo}`).classList.add('hidden');
             document.getElementById(`dashboard-${tipo}`).classList.remove('hidden');
-            
+
             renderDashboard(tipo);
-            
+
         } catch (error) {
             console.error('Error procesando CSV:', error);
             showToast(`Error al procesar datos: ${error.message}`, 'error');
@@ -543,14 +543,14 @@
         const sectorSet = new Set();
         const zonaSet = new Set();
         const sexoSet = new Set();
-        
+
         state.rows.forEach(r => {
             const sector = r['sede_sector'];
             const zona = r['sede_zona'];
-            
+
             // ✅ Usar la columna detectada
             const sexo = state.sexoColumn ? r[state.sexoColumn] : null;
-            
+
             if(sector && sector.trim() !== '') sectorSet.add(sector.trim());
             if(zona && zona.trim() !== '') zonaSet.add(zona.trim());
             if(sexo && sexo.trim() !== '') sexoSet.add(sexo.trim());
@@ -559,7 +559,7 @@
         const selSector = document.getElementById(`filter-sector-${tipo}`);
         const selZona = document.getElementById(`filter-zona-${tipo}`);
         const selSexo = document.getElementById(`filter-sexo-${tipo}`);
-        
+
         selSector.innerHTML = '<option value="TODOS">Todos los Sectores</option>';
         selZona.innerHTML = '<option value="TODOS">Todas las Zonas</option>';
         selSexo.innerHTML = '<option value="TODOS">Todos los Sexos</option>';
@@ -609,73 +609,90 @@
 
     function updateVisuals(tipo, filteredRows) {
         const state = appState[tipo];
-        
+
         if(tipo === 'vocacional') {
-            document.getElementById('kpi-voc-total').textContent = filteredRows.length.toLocaleString('es-SV');
-            
-            let modes = {};
-            let ocupaciones = new Set();
-            filteredRows.forEach(r => {
-                let p = r['LUGAR1'];
-                if(p) modes[p] = (modes[p] || 0) + 1;
-                let o = r['GRUPO OCUPACIONAL'];
-                if(o) ocupaciones.add(o);
-            });
-            
-            let topMode = 'N/A'; let max = 0;
-            for(let m in modes) { if(modes[m] > max) { max = modes[m]; topMode = m; } }
-            
-            document.getElementById('kpi-voc-perfil').textContent = topMode;
-            document.getElementById('kpi-voc-grupos').textContent = ocupaciones.size;
+    document.getElementById('kpi-voc-total').textContent = filteredRows.length.toLocaleString('es-SV');
+    
+    let modes = {};
+    let ocupaciones = new Set();
+    filteredRows.forEach(r => {
+        let p = r['LUGAR1'];
+        if(p) modes[p] = (modes[p] || 0) + 1;
+        let o = r['GRUPO OCUPACIONAL'];
+        if(o) ocupaciones.add(o);
+    });
+    
+    let topMode = 'N/A'; let max = 0;
+    for(let m in modes) { if(modes[m] > max) { max = modes[m]; topMode = m; } }
+    
+    document.getElementById('kpi-voc-perfil').textContent = topMode;
+    document.getElementById('kpi-voc-grupos').textContent = ocupaciones.size;
 
-            const avgs = getAverages(filteredRows, state.metrics);
-            const labels = state.metrics;
-            const data = labels.map(l => avgs[l]);
+    const avgs = getAverages(filteredRows, state.metrics);
+    const labels = state.metrics;
+    const data = labels.map(l => avgs[l]);
 
-            let sortedAves = [...labels].sort((a,b) => avgs[b] - avgs[a]); 
-            
-            document.getElementById('voc-table-scores').innerHTML = `
-                <tr><td>CIENTÍFICO</td><td class="font-bold text-blue-600">${avgs['cientifico'] || '-'}</td>
-                    <td>SOCIAL</td><td class="font-bold text-blue-600">${avgs['social'] || '-'}</td></tr>
-                <tr><td>ARTÍSTICO</td><td class="font-bold text-blue-600">${avgs['artistico'] || '-'}</td>
-                    <td>EMPRENDEDOR</td><td class="font-bold text-blue-600">${avgs['emprendedor'] || '-'}</td></tr>
-                <tr><td>REALISTA</td><td class="font-bold text-blue-600">${avgs['realista'] || '-'}</td>
-                    <td>OFICINA</td><td class="font-bold text-blue-600">${avgs['oficina'] || '-'}</td></tr>
-            `;
-            
-            document.getElementById('voc-codigo-ocupacional').textContent = sortedAves.slice(0,2).map(k => labelMapVocacional[k]).join(' - ');
+    // ✅ Calcular escala dinámica basada en los datos reales
+    const maxDataValue = Math.max(...data);
+    const maxScale = Math.ceil(maxDataValue / 5) * 5 + 5; // Redondear al siguiente múltiplo de 5 + margen
 
-            if(chartInstances.vocacional.radar) {
-                chartInstances.vocacional.radar.data.datasets[0].data = data;
-                chartInstances.vocacional.radar.data.datasets[0].label = filteredRows.length === 1 ? 'Puntaje Individual' : 'Puntaje Promedio';
-                chartInstances.vocacional.radar.update();
-            } else {
-                const ctx = document.getElementById('chart-voc-radar').getContext('2d');
-                chartInstances.vocacional.radar = new Chart(ctx, {
-                    type: 'radar',
-                    data: {
-                        labels: labels.map(l => labelMapVocacional[l]),
-                        datasets: [{
-                            label: filteredRows.length === 1 ? 'Puntaje Individual' : 'Puntaje Promedio',
-                            data: data,
-                            backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                            borderColor: 'rgba(59, 130, 246, 1)',
-                            pointBackgroundColor: 'rgba(59, 130, 246, 1)',
-                            borderWidth: 2
-                        }]
-                    },
-                    options: { 
-                        scales: { r: { beginAtZero: true, max: 20, ticks: { display: false } } }, 
-                        plugins: { legend: { display: false } },
-                        responsive: true,
-                        maintainAspectRatio: false
-                    }
-                });
+    let sortedAves = [...labels].sort((a,b) => avgs[b] - avgs[a]); 
+    
+    document.getElementById('voc-table-scores').innerHTML = `
+        <tr><td>CIENTÍFICO</td><td class="font-bold text-blue-600">${avgs['cientifico'] || '-'}</td>
+            <td>SOCIAL</td><td class="font-bold text-blue-600">${avgs['social'] || '-'}</td></tr>
+        <tr><td>ARTÍSTICO</td><td class="font-bold text-blue-600">${avgs['artistico'] || '-'}</td>
+            <td>EMPRENDEDOR</td><td class="font-bold text-blue-600">${avgs['emprendedor'] || '-'}</td></tr>
+        <tr><td>REALISTA</td><td class="font-bold text-blue-600">${avgs['realista'] || '-'}</td>
+            <td>OFICINA</td><td class="font-bold text-blue-600">${avgs['oficina'] || '-'}</td></tr>
+    `;
+    
+    document.getElementById('voc-codigo-ocupacional').textContent = sortedAves.slice(0,2).map(k => labelMapVocacional[k]).join(' - ');
+
+    if(chartInstances.vocacional.radar) {
+        chartInstances.vocacional.radar.data.datasets[0].data = data;
+        chartInstances.vocacional.radar.data.datasets[0].label = filteredRows.length === 1 ? 'Puntaje Individual' : 'Puntaje Promedio';
+        // ✅ Actualizar escala dinámica
+        chartInstances.vocacional.radar.options.scales.r.max = maxScale;
+        chartInstances.vocacional.radar.options.scales.r.ticks.stepSize = Math.ceil(maxScale / 5);
+        chartInstances.vocacional.radar.update();
+    } else {
+        const ctx = document.getElementById('chart-voc-radar').getContext('2d');
+        chartInstances.vocacional.radar = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: labels.map(l => labelMapVocacional[l]),
+                datasets: [{
+                    label: filteredRows.length === 1 ? 'Puntaje Individual' : 'Puntaje Promedio',
+                    data: data,
+                    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 2
+                }]
+            },
+            options: { 
+                scales: { 
+                    r: { 
+                        beginAtZero: true, 
+                        max: maxScale,  // ✅ Escala dinámica
+                        ticks: { 
+                            display: true,  // ✅ Mostrar ticks para referencia
+                            stepSize: Math.ceil(maxScale / 5),
+                            font: { size: 10 }
+                        }
+                    } 
+                }, 
+                plugins: { legend: { display: false } },
+                responsive: true,
+                maintainAspectRatio: false
             }
+        });
+    }
 
         } else if (tipo === 'aptitudinal') {
             document.getElementById('kpi-apt-total').textContent = filteredRows.length.toLocaleString('es-SV');
-            
+
             let centros = new Set();
             filteredRows.forEach(r => centros.add(r['sede_codigo']));
             document.getElementById('kpi-apt-centros').textContent = centros.size;
@@ -684,13 +701,13 @@
             const labels = state.metrics;
             const data = labels.map(l => avgs[l] || 0);
 
-            let topApt = 'N/A'; 
+            let topApt = 'N/A';
             let maxApt = 0;
-            for(let a in avgs) { 
-                if(avgs[a] > maxApt) { 
-                    maxApt = avgs[a]; 
-                    topApt = state.metricLabels[a] || a; 
-                } 
+            for(let a in avgs) {
+                if(avgs[a] > maxApt) {
+                    maxApt = avgs[a];
+                    topApt = state.metricLabels[a] || a;
+                }
             }
             document.getElementById('kpi-apt-alta').textContent = topApt;
 
@@ -714,10 +731,10 @@
                             borderRadius: 4
                         }]
                     },
-                    options: { 
-                        indexAxis: 'y', 
-                        responsive: true, 
-                        maintainAspectRatio: false, 
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
                         plugins: { legend: { display: false } },
                         scales: {
                             x: { beginAtZero: true, max: 40 }
@@ -740,7 +757,7 @@
                 chartInstances.aptitudinal.radar.update();
             } else {
                 const ctxRadar = document.getElementById('chart-apt-radar').getContext('2d');
-                
+
                 const zoneDatasets = zonasData.map(zona => ({
                     label: zona.label,
                     data: Array(labels.length).fill(zona.value),
@@ -773,12 +790,12 @@
                         labels: prettyLabels,
                         datasets: [...zoneDatasets, mainDataset]
                     },
-                    options: { 
-                        scales: { 
-                            r: { 
-                                beginAtZero: true, 
+                    options: {
+                        scales: {
+                            r: {
+                                beginAtZero: true,
                                 max: 40,
-                                ticks: { 
+                                ticks: {
                                     stepSize: 10,
                                     font: { size: 10 },
                                     backdropColor: 'transparent',
@@ -795,9 +812,9 @@
                                 angleLines: {
                                     color: 'rgba(148, 163, 184, 0.3)'
                                 }
-                            } 
-                        }, 
-                        plugins: { 
+                            }
+                        },
+                        plugins: {
                             legend: { display: false },
                             tooltip: {
                                 backgroundColor: 'rgba(15, 23, 42, 0.95)',
@@ -819,8 +836,8 @@
                                     }
                                 }
                             }
-                        }, 
-                        responsive: true, 
+                        },
+                        responsive: true,
                         maintainAspectRatio: false,
                         animation: {
                             duration: 800,
@@ -836,7 +853,7 @@
         const state = appState[tipo];
         const currentLevelIndex = state.path.length;
         const isMaxLevel = currentLevelIndex >= state.hierarchy.length;
-        
+
         renderBreadcrumbs(tipo);
 
         let filteredRows = state.rows;
@@ -852,7 +869,7 @@
         const selSector = document.getElementById(`filter-sector-${tipo}`).value;
         const selZona = document.getElementById(`filter-zona-${tipo}`).value;
         const selSexo = document.getElementById(`filter-sexo-${tipo}`).value;
-        
+
         if(selSector !== 'TODOS') {
             filteredRows = filteredRows.filter(r => r['sede_sector'] === selSector);
         }
@@ -876,7 +893,7 @@
 
         const currentHierachyDef = state.hierarchy[currentLevelIndex];
         document.getElementById(`th-name-${tipo}`).textContent = currentHierachyDef.label;
-        
+
         const groupColKey = currentHierachyDef.key;
         const groups = {};
 
@@ -886,12 +903,12 @@
                 const code = row[currentHierachyDef.prependCode];
                 groupName = code + " - " + groupName;
             }
-            
+
             if (!groups[groupName]) {
                 groups[groupName] = { count: 0, modes: {} };
             }
             groups[groupName].count++;
-            
+
             const diag = row['LUGAR1'];
             groups[groupName].modes[diag] = (groups[groupName].modes[diag] || 0) + 1;
         });
@@ -899,7 +916,7 @@
         const tbody = document.getElementById(`tbody-${tipo}`);
         tbody.innerHTML = '';
         const sortedGroups = Object.keys(groups).sort();
-        
+
         sortedGroups.forEach(name => {
             const g = groups[name];
             let topMode = 'N/A';
@@ -914,7 +931,7 @@
             const tr = document.createElement('tr');
             tr.className = "hover:bg-blue-50 cursor-pointer transition-colors group";
             tr.onclick = () => drillDown(tipo, name, currentHierachyDef.label);
-            
+
             tr.innerHTML = `
                 <td class="px-6 py-4 whitespace-nowrap text-slate-800 font-medium group-hover:text-blue-700">${name}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-center text-slate-600">${g.count.toLocaleString('es-SV')}</td>
@@ -935,7 +952,7 @@
     }
 
     function jumpToBreadcrumb(tipo, index) {
-        if (index === -1) { appState[tipo].path = []; } 
+        if (index === -1) { appState[tipo].path = []; }
         else { appState[tipo].path = appState[tipo].path.slice(0, index + 1); }
         renderDashboard(tipo);
     }
@@ -943,7 +960,7 @@
     function renderBreadcrumbs(tipo) {
         const ol = document.getElementById(`breadcrumb-${tipo}`);
         const path = appState[tipo].path;
-        
+
         let html = `
             <li class="inline-flex items-center">
                 <a href="#" onclick="jumpToBreadcrumb('${tipo}', -1); return false;" class="inline-flex items-center hover:text-blue-600 transition-colors font-bold text-slate-700">
@@ -972,8 +989,8 @@
 
     function exportToExcel(tipo) {
         const table = document.querySelector(`#dashboard-${tipo} table`);
-        let csv = '\uFEFF'; 
-        
+        let csv = '\uFEFF';
+
         const headers = [];
         table.querySelectorAll('thead th').forEach((th, index, array) => {
             if (index < array.length - 1) {
@@ -981,11 +998,11 @@
             }
         });
         csv += headers.join(',') + '\n';
-        
+
         table.querySelectorAll('tbody tr').forEach(tr => {
             const row = [];
             const cells = tr.querySelectorAll('td');
-            if (cells.length <= 1) return; 
+            if (cells.length <= 1) return;
             cells.forEach((td, index) => {
                 if (index < cells.length - 1) {
                     row.push('"' + td.innerText.replace(/"/g, '""') + '"');
@@ -993,11 +1010,11 @@
             });
             csv += row.join(',') + '\n';
         });
-        
+
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         const url = URL.createObjectURL(blob);
-        
+
         const pathState = appState[tipo].path;
         let filename = `Reporte_${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`;
         if (pathState.length > 0) {
@@ -1006,14 +1023,14 @@
             filename += `_Nacional`;
         }
         filename += '.csv';
-        
+
         link.setAttribute("href", url);
         link.setAttribute("download", filename);
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        
+
         showToast('Archivo exportado correctamente', 'success');
     }
 
