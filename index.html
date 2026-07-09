@@ -56,7 +56,7 @@
         .level-mid { background-color: rgba(245, 158, 11, 0.3); border: 2px solid rgba(245, 158, 11, 0.6); }
         .level-high { background-color: rgba(16, 185, 129, 0.3); border: 2px solid rgba(16, 185, 129, 0.6); }
 
-        /* ✅ STICKY: Gráficas siempre visibles */
+        /* ✅ STICKY CORREGIDO: Sin overflow en padre */
         .sticky-charts {
             position: sticky;
             top: 0;
@@ -67,7 +67,6 @@
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
         }
 
-        /* Top centros table styles */
         .top-centros-table {
             width: 100%;
             border-collapse: collapse;
@@ -123,9 +122,10 @@
     </div>
 </div>
 
-<div class="max-w-7xl mx-auto bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden my-8 mx-4">
+<!-- ✅ CORREGIDO: Sin overflow-hidden para permitir sticky -->
+<div class="max-w-7xl mx-auto bg-white rounded-xl shadow-lg border border-slate-200 my-8 mx-4">
     
-    <div class="flex border-b border-slate-200 bg-slate-50">
+    <div class="flex border-b border-slate-200 bg-slate-50 rounded-t-xl overflow-hidden">
         <button id="btn-tab-vocacional" class="flex-1 py-4 px-6 text-sm font-bold text-blue-600 border-b-2 border-blue-600 bg-white transition-colors" onclick="switchTab('vocacional')">
             Vocacional (9° Grado)
         </button>
@@ -142,7 +142,6 @@
         </div>
 
         <div id="dashboard-vocacional" class="hidden fade-in">
-            <!-- Breadcrumbs -->
             <div class="mb-4">
                 <nav class="flex text-sm text-slate-500 bg-slate-100 px-3 py-1.5 rounded-md inline-flex" aria-label="Breadcrumb">
                     <ol id="breadcrumb-vocacional" class="inline-flex items-center space-x-1 md:space-x-2"></ol>
@@ -151,7 +150,6 @@
 
             <!-- ✅ STICKY: Filtros + KPIs + Gráficas siempre visibles -->
             <div class="sticky-charts">
-                <!-- Filtros -->
                 <div class="flex flex-wrap items-center gap-3 mb-4">
                     <div class="flex bg-slate-50 p-1.5 rounded-lg border border-slate-200 flex-wrap gap-1">
                         <select id="filter-sector-vocacional" onchange="renderDashboard('vocacional')" class="text-sm bg-transparent font-medium text-slate-600 focus:outline-none px-2 border-r border-slate-300">
@@ -163,7 +161,6 @@
                         <select id="filter-sexo-vocacional" onchange="renderDashboard('vocacional')" class="text-sm bg-transparent font-medium text-slate-600 focus:outline-none px-2 border-r border-slate-300">
                             <option value="TODOS">Todos los Sexos</option>
                         </select>
-                        <!-- ✅ NUEVO: Filtro por interés -->
                         <select id="filter-interes-vocacional" onchange="renderDashboard('vocacional')" class="text-sm bg-amber-50 font-semibold text-amber-700 focus:outline-none px-2 border-l-2 border-amber-400">
                             <option value="TODOS">🎯 Todos los Intereses</option>
                             <option value="SOCIAL">SOCIAL</option>
@@ -179,7 +176,6 @@
                     </button>
                 </div>
 
-                <!-- KPIs -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex items-center">
                         <div class="p-3 bg-blue-100 text-blue-600 rounded-lg mr-4">
@@ -210,7 +206,6 @@
                     </div>
                 </div>
 
-                <!-- Gráficas -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col items-center justify-center">
                         <h3 class="text-base font-bold text-slate-700 mb-2">Hexágono de Holland</h3>
@@ -238,13 +233,11 @@
                     </div>
                 </div>
             </div>
-            <!-- FIN STICKY -->
 
-            <!-- ✅ NUEVA TABLA: Top Centros por Interés -->
             <div id="top-centros-vocacional-container" class="mt-6 hidden">
                 <div class="flex items-center justify-between mb-3">
                     <h3 class="text-lg font-bold text-slate-700">
-                        🏆 Top Centros Escolares con interés en 
+                         Top Centros Escolares con interés en 
                         <span id="interes-seleccionado-voc" class="text-amber-600"></span>
                     </h3>
                     <span class="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">
@@ -268,7 +261,6 @@
                 </div>
             </div>
 
-            <!-- Tabla Drill-Down -->
             <h3 class="text-lg font-bold text-slate-700 mb-3 mt-6">Desglose Geográfico / Institucional / Individual</h3>
             <div class="bg-white border border-slate-200 rounded-lg overflow-x-auto no-scrollbar shadow-sm">
                 <table class="min-w-full divide-y divide-slate-200 text-sm">
@@ -295,16 +287,13 @@
         </div>
 
         <div id="dashboard-aptitudinal" class="hidden fade-in">
-            <!-- Breadcrumbs -->
             <div class="mb-4">
                 <nav class="flex text-sm text-slate-500 bg-slate-100 px-3 py-1.5 rounded-md inline-flex" aria-label="Breadcrumb">
                     <ol id="breadcrumb-aptitudinal" class="inline-flex items-center space-x-1 md:space-x-2"></ol>
                 </nav>
             </div>
 
-            <!-- ✅ STICKY: Filtros + KPIs + Gráficas siempre visibles -->
             <div class="sticky-charts">
-                <!-- Filtros -->
                 <div class="flex flex-wrap items-center gap-3 mb-4">
                     <div class="flex bg-slate-50 p-1.5 rounded-lg border border-slate-200 flex-wrap gap-1">
                         <select id="filter-sector-aptitudinal" onchange="renderDashboard('aptitudinal')" class="text-sm bg-transparent font-medium text-slate-600 focus:outline-none px-2 border-r border-slate-300">
@@ -316,9 +305,8 @@
                         <select id="filter-sexo-aptitudinal" onchange="renderDashboard('aptitudinal')" class="text-sm bg-transparent font-medium text-slate-600 focus:outline-none px-2 border-r border-slate-300">
                             <option value="TODOS">Todos los Sexos</option>
                         </select>
-                        <!-- ✅ NUEVO: Filtro por aptitud -->
                         <select id="filter-aptitud-aptitudinal" onchange="renderDashboard('aptitudinal')" class="text-sm bg-purple-50 font-semibold text-purple-700 focus:outline-none px-2 border-l-2 border-purple-400">
-                            <option value="TODOS">🎯 Todas las Aptitudes</option>
+                            <option value="TODOS"> Todas las Aptitudes</option>
                             <option value="SUMA_COMPRENSIÓN VERBAL">COMPRENSIÓN VERBAL</option>
                             <option value="SUMA_FLUIDEZ VERBAL">FLUIDEZ VERBAL</option>
                             <option value="SUMA_APTITUD NUMÉRICA">APTITUD NUMÉRICA</option>
@@ -336,7 +324,6 @@
                     </button>
                 </div>
 
-                <!-- KPIs -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex items-center">
                         <div class="p-3 bg-purple-100 text-purple-600 rounded-lg mr-4">
@@ -367,7 +354,6 @@
                     </div>
                 </div>
 
-                <!-- Gráficas -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
                         <h3 class="text-base font-bold text-slate-700 mb-2">Desempeño Promedio por Aptitud</h3>
@@ -389,13 +375,11 @@
                     </div>
                 </div>
             </div>
-            <!-- FIN STICKY -->
 
-            <!-- ✅ NUEVA TABLA: Top Centros por Aptitud -->
             <div id="top-centros-aptitudinal-container" class="mt-6 hidden">
                 <div class="flex items-center justify-between mb-3">
                     <h3 class="text-lg font-bold text-slate-700">
-                        🏆 Top Centros Escolares con mayor desempeño en 
+                         Top Centros Escolares con mayor desempeño en 
                         <span id="aptitud-seleccionada-apt" class="text-purple-600"></span>
                     </h3>
                     <span class="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">
@@ -419,7 +403,6 @@
                 </div>
             </div>
 
-            <!-- Tabla Drill-Down -->
             <h3 class="text-lg font-bold text-slate-700 mb-3 mt-6">Desglose Geográfico / Institucional / Individual</h3>
             <div class="bg-white border border-slate-200 rounded-lg overflow-x-auto no-scrollbar shadow-sm">
                 <table class="min-w-full divide-y divide-slate-200 text-sm">
@@ -446,7 +429,7 @@
             VOCACIONAL: 'BD_Reporte_Vocacional_9_Ligero.csv',
             APTITUDINAL: 'BD_Reporte_Aptitudinal_6_Ligero.csv'
         },
-        VERSION: 'v3.0'
+        VERSION: 'v3.1'
     };
 
     let chartInstances = {
@@ -466,6 +449,9 @@
 
     const SEXO_COLUMN_CANDIDATES = ['est_nomb_sexo', 'sexo', 'genero', 'Sexo', 'GENERO'];
     const loadStatus = { vocacional: false, aptitudinal: false };
+
+    // ✅ Variable para guardar valores únicos de LUGAR1 (debug)
+    let lugar1ValoresUnicos = new Set();
 
     function showToast(message, type = 'success') {
         const toast = document.createElement('div');
@@ -588,6 +574,16 @@
             appState[tipo].rows = parsed.data;
             appState[tipo].cols = {};
             headers.forEach((h, idx) => { appState[tipo].cols[h.trim()] = idx; });
+            
+            // ✅ Debug: Recopilar valores únicos de LUGAR1 para vocacional
+            if (tipo === 'vocacional') {
+                lugar1ValoresUnicos.clear();
+                parsed.data.forEach(r => {
+                    if (r['LUGAR1']) lugar1ValoresUnicos.add(r['LUGAR1']);
+                });
+                console.log('🔍 Valores únicos de LUGAR1 en CSV:', Array.from(lugar1ValoresUnicos));
+            }
+            
             populateTransversalFilters(tipo);
             document.getElementById(`loading-${tipo}`).classList.add('hidden');
             document.getElementById(`dashboard-${tipo}`).classList.remove('hidden');
@@ -620,6 +616,16 @@
         if (sexoSet.size === 0) selSexo.style.display = 'none';
     }
 
+    // ✅ NUEVA FUNCIÓN: Normalizar texto para comparación
+    function normalizarTexto(texto) {
+        if (!texto) return '';
+        return texto.toString()
+            .trim()
+            .toUpperCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, ""); // Quitar tildes
+    }
+
     function getAverages(rows, metricsKeys) {
         let sums = {};
         metricsKeys.forEach(k => sums[k] = 0);
@@ -638,7 +644,7 @@
         return averages;
     }
 
-    // ✅ NUEVA FUNCIÓN: Renderizar Top Centros por Interés (9°)
+    // ✅ CORREGIDO: Comparación case-insensitive y sin tildes
     function renderTopCentrosVocacional(filteredRows, interesSeleccionado) {
         const container = document.getElementById('top-centros-vocacional-container');
         const tbody = document.getElementById('tbody-top-centros-vocacional');
@@ -652,42 +658,53 @@
         container.classList.remove('hidden');
         label.textContent = interesSeleccionado;
         
-        // Mapeo inverso: de nombre bonito a key de columna
-        const interesKeyMap = {
-            'SOCIAL': 'social', 'REALISTA': 'realista', 'CIENTÍFICO': 'cientifico',
-            'ARTÍSTICO': 'artistico', 'EMPRENDEDOR': 'emprendedor', 'OFICINA': 'oficina'
-        };
+        // ✅ Normalizar el interés seleccionado para comparación
+        const interesNormalizado = normalizarTexto(interesSeleccionado);
+        
+        // Debug: mostrar qué valores hay en LUGAR1
+        console.log(`🔍 Buscando interés: "${interesSeleccionado}" (normalizado: "${interesNormalizado}")`);
+        console.log(`🔍 Valores únicos en LUGAR1:`, Array.from(lugar1ValoresUnicos));
         
         // Agrupar por centro escolar
         const centros = {};
+        let totalConInteres = 0;
+        
         filteredRows.forEach(r => {
-            // Contar estudiantes cuyo LUGAR1 coincide con el interés seleccionado
-            if (r['LUGAR1'] !== interesSeleccionado) return;
+            const lugar1 = r['LUGAR1'];
+            if (!lugar1) return;
+            
+            // ✅ Comparación normalizada (case-insensitive y sin tildes)
+            const lugar1Normalizado = normalizarTexto(lugar1);
+            
+            if (lugar1Normalizado !== interesNormalizado) return;
             
             const codigo = r['sede_codigo'];
             if (!centros[codigo]) {
                 centros[codigo] = {
                     codigo: codigo,
-                    nombre: r['sede_nombre'],
-                    depto: r['sede_nomb_depto'],
-                    distrito: r['distrito'],
-                    count: 0,
-                    puntajes: { social: 0, realista: 0, cientifico: 0, artistico: 0, emprendedor: 0, oficina: 0 }
+                    nombre: r['sede_nombre'] || 'Sin nombre',
+                    depto: r['sede_nomb_depto'] || '-',
+                    distrito: r['distrito'] || '-',
+                    count: 0
                 };
             }
             centros[codigo].count++;
+            totalConInteres++;
         });
         
-        const totalConInteres = Object.values(centros).reduce((sum, c) => sum + c.count, 0);
+        console.log(`🔍 Total de estudiantes con interés "${interesSeleccionado}": ${totalConInteres}`);
+        console.log(`🔍 Centros encontrados: ${Object.keys(centros).length}`);
         
-        // Ordenar por cantidad descendente y tomar top 15
         const topCentros = Object.values(centros)
             .sort((a, b) => b.count - a.count)
             .slice(0, 15);
         
         tbody.innerHTML = '';
         if (topCentros.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-500">No hay datos para el interés seleccionado</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-500">
+                No hay datos para el interés seleccionado.<br>
+                <span class="text-xs">(Revisa la consola para ver los valores disponibles en LUGAR1)</span>
+            </td></tr>`;
             return;
         }
         
@@ -720,7 +737,6 @@
         });
     }
 
-    // ✅ NUEVA FUNCIÓN: Renderizar Top Centros por Aptitud (6°)
     function renderTopCentrosAptitudinal(filteredRows, aptitudSeleccionada) {
         const container = document.getElementById('top-centros-aptitudinal-container');
         const tbody = document.getElementById('tbody-top-centros-aptitudinal');
@@ -735,7 +751,6 @@
         const nombreAptitud = appState.aptitudinal.metricLabels[aptitudSeleccionada] || aptitudSeleccionada;
         label.textContent = nombreAptitud;
         
-        // Agrupar por centro escolar y calcular promedio de la aptitud
         const centros = {};
         filteredRows.forEach(r => {
             const puntaje = parseFloat(r[aptitudSeleccionada]);
@@ -756,14 +771,12 @@
             centros[codigo].suma += puntaje;
         });
         
-        // Calcular promedios
         Object.values(centros).forEach(c => {
             c.promedio = c.count > 0 ? (c.suma / c.count).toFixed(1) : 0;
         });
         
-        // Ordenar por promedio descendente y tomar top 15
         const topCentros = Object.values(centros)
-            .filter(c => c.count >= 5) // Mínimo 5 estudiantes para ser relevante
+            .filter(c => c.count >= 5)
             .sort((a, b) => b.promedio - a.promedio)
             .slice(0, 15);
         
@@ -780,7 +793,6 @@
             else if (rank === 2) rankClass = 'rank-2';
             else if (rank === 3) rankClass = 'rank-3';
             
-            // Color del puntaje según nivel
             let puntajeColor = 'text-slate-700';
             if (c.promedio >= 27) puntajeColor = 'text-emerald-600';
             else if (c.promedio >= 14) puntajeColor = 'text-amber-600';
@@ -961,7 +973,7 @@
                                             let nivel = '';
                                             if (valor <= 13) nivel = '🔴 Bajo';
                                             else if (valor <= 26) nivel = '🟡 Medio';
-                                            else nivel = '🟢 Alto';
+                                            else nivel = ' Alto';
                                             return `${context.label}: ${valor} pts (${nivel})`;
                                         }
                                         return null;
@@ -1003,7 +1015,6 @@
 
         updateVisuals(tipo, filteredRows);
 
-        // ✅ Renderizar tabla Top Centros según filtro específico
         if (tipo === 'vocacional') {
             const selInteres = document.getElementById('filter-interes-vocacional').value;
             renderTopCentrosVocacional(filteredRows, selInteres);
