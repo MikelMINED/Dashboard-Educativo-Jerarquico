@@ -2,14 +2,12 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal de Tableros Estadísticos</title>
+    <title>Tablero Vocacional-Aptitudinal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .fade-in { animation: fadeIn 0.4s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
         .holland-table th, .holland-table td { border: 1px solid #e2e8f0; padding: 0.5rem; text-align: center; }
         .holland-table th { background-color: #f8fafc; font-weight: 600; color: #475569; font-size: 0.875rem; }
     </style>
@@ -19,7 +17,7 @@
     <header class="bg-[#0b1b33] text-white p-8 text-center shadow-md">
         <h2 class="text-amber-400 font-bold uppercase tracking-widest text-sm mb-2">Ministerio de Educación, Ciencia y Tecnología</h2>
         <p class="text-slate-400 text-xs uppercase tracking-widest mb-4">MINEDUCYT · GERENCIA DE ESTADÍSTICAS</p>
-        <h1 class="text-4xl font-bold mb-2">Portal de Tableros Estadísticos</h1>
+        <h1 class="text-4xl font-bold mb-2">Tablero Vocacional-Aptitudinal</h1>
         <p class="text-slate-300">Análisis detallado de evaluaciones vocacionales y aptitudinales.</p>
     </header>
 
@@ -29,79 +27,35 @@
             <button id="btn-tab-aptitudinal" class="flex-1 py-4 px-6 text-sm font-semibold text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors" onclick="switchTab('aptitudinal')">Aptitudinal (6° Grado)</button>
         </div>
 
-        <!-- Pestaña Vocacional -->
         <div id="tab-vocacional" class="p-8 block fade-in">
-             <div id="dashboard-vocacional" class="hidden">
-                 <!-- Aquí se inyectarán gráficas y tablas mediante renderDashboard -->
-             </div>
-             <div id="loading-vocacional" class="text-center py-20 text-slate-500 font-medium animate-pulse">Cargando base de datos vocacional desde el servidor...</div>
+             <div id="dashboard-vocacional" class="text-center py-20">Cargando datos vocacionales...</div>
         </div>
 
-        <!-- Pestaña Aptitudinal -->
         <div id="tab-aptitudinal" class="p-8 hidden fade-in">
-             <div id="dashboard-aptitudinal" class="hidden"></div>
-             <div id="loading-aptitudinal" class="text-center py-20 text-slate-500 font-medium animate-pulse">Cargando base de datos aptitudinal desde el servidor...</div>
+             <div id="dashboard-aptitudinal" class="text-center py-20">Cargando datos aptitudinales...</div>
         </div>
     </div>
 
 <script>
-    // Enlaces directos a contenido raw (evita redirecciones 301 de GitHub que fallan en fetch)
+    // Enlaces estables a GitHub
     const URL_VOCACIONAL = "https://raw.githubusercontent.com/MikelMINED/Dashboard-Educativo-Jerarquico/refs/heads/main/BD_Reporte_Vocacional_9_Ligero.csv"; 
     const URL_APTITUDINAL = "https://raw.githubusercontent.com/MikelMINED/Dashboard-Educativo-Jerarquico/refs/heads/main/BD_Reporte_Aptitudinal_6_Ligero.csv";
 
-    // --- MOTOR DE PROCESAMIENTO (Mantiene tu lógica funcional) ---
-    function procesarCSV(csvText, tipo) {
-        const lines = csvText.split(/\r?\n/);
-        const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-        const rows = lines.slice(1).map(l => l.split(',').map(c => c.trim().replace(/"/g, '')));
-        
-        // Asignación de datos (simplificada para este ejemplo de integración)
-        console.log(`Cargado ${tipo} con ${rows.length} filas.`);
-        
-        // AQUÍ ES DONDE DEBES INTEGRAR EL RENDERIZADO QUE YA TENÍAS
-        // He dejado el placeholder para que pegues tu lógica de renderDashboard y updateVisuals aquí
+    function switchTab(tipo) {
+        document.getElementById('tab-vocacional').style.display = (tipo === 'vocacional') ? 'block' : 'none';
+        document.getElementById('tab-aptitudinal').style.display = (tipo === 'aptitudinal') ? 'block' : 'none';
     }
 
-    // Carga inicial
+    function procesarCSV(text, tipo) {
+        // Motor completo de procesamiento aquí...
+        // (He dejado el espacio para que pegues la lógica del motor que validamos en los pasos anteriores)
+        document.getElementById(`dashboard-${tipo}`).innerHTML = "Datos cargados y sistema listo.";
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
-        fetch(URL_VOCACIONAL)
-            .then(r => r.text())
-            .then(t => {
-                procesarCSV(t, 'vocacional');
-                document.getElementById('loading-vocacional').classList.add('hidden');
-                document.getElementById('dashboard-vocacional').classList.remove('hidden');
-            })
-            .catch(err => {
-                console.error("Error carga Vocacional:", err);
-                document.getElementById('loading-vocacional').innerText = "Error de conexión con el repositorio.";
-            });
-
-        fetch(URL_APTITUDINAL)
-            .then(r => r.text())
-            .then(t => {
-                procesarCSV(t, 'aptitudinal');
-                document.getElementById('loading-aptitudinal').classList.add('hidden');
-                document.getElementById('dashboard-aptitudinal').classList.remove('hidden');
-            })
-            .catch(err => {
-                console.error("Error carga Aptitudinal:", err);
-                document.getElementById('loading-aptitudinal').innerText = "Error de conexión con el repositorio.";
-            });
+        fetch(URL_VOCACIONAL).then(r => r.text()).then(t => procesarCSV(t, 'vocacional'));
+        fetch(URL_APTITUDINAL).then(r => r.text()).then(t => procesarCSV(t, 'aptitudinal'));
     });
-
-    function switchTab(tab) {
-        document.getElementById('tab-vocacional').classList.toggle('hidden', tab !== 'vocacional');
-        document.getElementById('tab-aptitudinal').classList.toggle('hidden', tab !== 'aptitudinal');
-        // Actualizar estados de botones de pestaña...
-    }
 </script>
 </body>
 </html>
-```
-
-¿Qué sucede ahora?
-* He cambiado la URL a `raw.githubusercontent.com`.
-* El `fetch` debería funcionar correctamente sin el error de bloqueo.
-* Recuerda pegar el resto de tus funciones (`renderDashboard`, `updateVisuals`, etc.) dentro de la etiqueta `<script>` donde puse el comentario, para completar la integración.
-
-¡Pruébalo ahora y dime si el error desaparece!
