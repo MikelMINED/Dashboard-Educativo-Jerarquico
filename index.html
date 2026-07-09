@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Educativo - Navegación Jerárquica</title>
+    <title>Informe Vocacional-Aptitudinal - MINEDUCYT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
@@ -17,14 +17,12 @@
         .loader { border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        /* Loader de pantalla completa */
         .full-screen-loader {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(255,255,255,0.95); z-index: 9999;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
         
-        /* Notificación toast */
         .toast {
             position: fixed; bottom: 20px; right: 20px;
             padding: 1rem 1.5rem; border-radius: 0.5rem;
@@ -40,14 +38,22 @@
         .toast.success { background-color: #10b981; }
         .toast.warning { background-color: #f59e0b; }
         
-        /* Estado de carga por pestaña */
         .tab-loading {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             min-height: 400px;
         }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-800 font-sans min-h-screen p-4 md:p-8">
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen">
+
+<!-- ENCABEZADO INSTITUCIONAL -->
+<header class="bg-[#0f172a] text-white py-8 px-4 shadow-lg">
+    <div class="max-w-7xl mx-auto text-center">
+        <h2 class="text-amber-400 font-bold text-lg md:text-xl mb-1">Ministerio de Educación, Ciencia y Tecnología</h2>
+        <p class="text-slate-400 text-xs md:text-sm uppercase tracking-wider mb-6">MINEDUCYT · GERENCIA DE ESTADÍSTICAS</p>
+        <h1 class="text-3xl md:text-5xl font-bold text-white leading-tight">Informe Vocacional-Aptitudinal</h1>
+    </div>
+</header>
 
 <!-- Loader de pantalla completa inicial -->
 <div id="global-loader" class="full-screen-loader">
@@ -55,12 +61,12 @@
     <p class="text-blue-600 font-bold text-lg mb-2">Cargando Dashboard Educativo</p>
     <p id="loader-message" class="text-slate-500 text-sm">Conectando con el servidor de datos...</p>
     <div id="loader-progress" class="mt-4 flex gap-2">
-        <span id="progress-vocacional" class="px-3 py-1 bg-slate-200 rounded text-xs">Vocacional: <span class="font-bold">⏳</span></span>
+        <span id="progress-vocacional" class="px-3 py-1 bg-slate-200 rounded text-xs">Vocacional: <span class="font-bold"></span></span>
         <span id="progress-aptitudinal" class="px-3 py-1 bg-slate-200 rounded text-xs">Aptitudinal: <span class="font-bold">⏳</span></span>
     </div>
 </div>
 
-<div class="max-w-7xl mx-auto bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+<div class="max-w-7xl mx-auto bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden my-8 mx-4">
     
     <!-- Navegación de Pestañas -->
     <div class="flex border-b border-slate-200 bg-slate-50">
@@ -293,7 +299,6 @@
         }
     };
 
-    // Variables globales
     let chartInstances = {
         vocacional: { radar: null },
         aptitudinal: { bar: null, radar: null }
@@ -313,13 +318,11 @@
         aptitudinal: ['sede_nomb_depto', 'sede_nomb_mun', 'sede_nombre', 'sede_codigo', 'NIE', 'LUGAR1', 'sede_sector', 'sede_zona']
     };
 
-    // Estado de carga
     const loadStatus = {
         vocacional: false,
         aptitudinal: false
     };
 
-    // Utilidades
     function showToast(message, type = 'success') {
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
@@ -342,7 +345,6 @@
         }
     }
 
-    // Lógica de interfaz
     function switchTab(target) {
         const tabs = ['vocacional', 'aptitudinal'];
         tabs.forEach(tab => {
@@ -360,7 +362,6 @@
         });
     }
 
-    // Estado global
     const appState = {
         vocacional: {
             rows: [], cols: {}, path: [],
@@ -385,7 +386,6 @@
         }
     };
 
-    // Cargar desde GitHub - SIN CACHÉ LOCAL
     async function loadFromGitHub(tipo) {
         const fileName = tipo === 'vocacional' ? CONFIG.FILES.VOCACIONAL : CONFIG.FILES.APTITUDINAL;
         const url = `${CONFIG.GITHUB_BASE_URL}/${fileName}`;
@@ -399,14 +399,11 @@
             }
             
             const csvText = await response.text();
-            
-            // Procesar inmediatamente sin guardar en caché
             procesarCSV(csvText, tipo);
             
             updateProgress(tipo, 'success');
             loadStatus[tipo] = true;
             
-            // Verificar si ambos cargaron
             if (loadStatus.vocacional && loadStatus.aptitudinal) {
                 document.getElementById('global-loader').classList.add('hidden');
                 showToast('Dashboard cargado correctamente', 'success');
@@ -416,7 +413,6 @@
             console.error(`Error cargando ${tipo}:`, error);
             updateProgress(tipo, 'error');
             
-            // Mostrar mensaje de error más amigable
             document.getElementById('loader-message').innerHTML = `
                 <span class="text-red-600 font-bold">Error al cargar datos</span><br>
                 <span class="text-sm">${error.message}</span><br>
@@ -427,7 +423,6 @@
         }
     }
 
-    // Procesar CSV
     function procesarCSV(csvText, tipo) {
         try {
             const parsed = Papa.parse(csvText, {
@@ -440,7 +435,6 @@
                 console.error('Errores en el CSV:', parsed.errors);
             }
 
-            // Validar columnas
             const headers = parsed.meta.fields;
             const required = REQUIRED_COLUMNS[tipo];
             const missing = required.filter(col => !headers.includes(col));
@@ -459,7 +453,6 @@
 
             populateTransversalFilters(tipo);
 
-            // Ocultar loader de pestaña y mostrar dashboard
             document.getElementById(`loading-${tipo}`).classList.add('hidden');
             document.getElementById(`dashboard-${tipo}`).classList.remove('hidden');
             
@@ -471,7 +464,6 @@
         }
     }
 
-    // Filtros transversales
     function populateTransversalFilters(tipo) {
         const state = appState[tipo];
         const sectorSet = new Set();
@@ -498,7 +490,6 @@
         });
     }
 
-    // Cálculos
     function getAverages(rows, metricsKeys) {
         let sums = {};
         metricsKeys.forEach(k => sums[k] = 0);
@@ -524,7 +515,6 @@
         return averages;
     }
 
-    // Renderizado
     function updateVisuals(tipo, filteredRows) {
         const state = appState[tipo];
         
@@ -583,7 +573,7 @@
                         }]
                     },
                     options: { 
-                        scales: { r: { beginAtZero: true, suggestedMax: 30, ticks: { display: false } } }, 
+                        scales: { r: { beginAtZero: true, max: 20, ticks: { display: false } } }, 
                         plugins: { legend: { display: false } },
                         responsive: true,
                         maintainAspectRatio: false
@@ -649,13 +639,12 @@
                             borderWidth: 2
                         }]
                     },
-                    options: { scales: { r: { beginAtZero: true, suggestedMax: 40 } }, plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false }
+                    options: { scales: { r: { beginAtZero: true, max: 15 } }, plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false }
                 });
             }
         }
     }
 
-    // Motor drill-down
     function renderDashboard(tipo) {
         const state = appState[tipo];
         const currentLevelIndex = state.path.length;
@@ -789,7 +778,6 @@
         ol.innerHTML = html;
     }
 
-    // Exportación
     function exportToExcel(tipo) {
         const table = document.querySelector(`#dashboard-${tipo} table`);
         let csv = '\uFEFF'; 
@@ -837,9 +825,7 @@
         showToast('Archivo exportado correctamente', 'success');
     }
 
-    // Inicialización - CARGA AUTOMÁTICA DESDE GITHUB
     window.addEventListener('DOMContentLoaded', () => {
-        // Cargar ambos datasets automáticamente SIN caché
         loadFromGitHub('vocacional');
         loadFromGitHub('aptitudinal');
     });
