@@ -9,112 +9,75 @@
 </head>
 <body class="bg-slate-50 min-h-screen font-sans">
 
-    <!-- Encabezado -->
+    <!-- Encabezado Institucional -->
     <header class="bg-[#0b1b33] text-white p-8 text-center shadow-md">
         <h2 class="text-amber-400 font-bold uppercase tracking-widest text-sm mb-2">Ministerio de Educación, Ciencia y Tecnología</h2>
         <p class="text-slate-400 text-xs uppercase tracking-widest mb-4">MINEDUCYT · GERENCIA DE ESTADÍSTICAS</p>
         <h1 class="text-4xl font-bold mb-2">Tablero Vocacional-Aptitudinal</h1>
-        <p class="text-slate-300">Análisis detallado de evaluaciones vocacionales y aptitudinales.</p>
     </header>
 
-    <div class="max-w-7xl mx-auto my-8 bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
-        <div class="flex border-b border-slate-200 bg-slate-50">
-            <button id="btn-vocacional" class="flex-1 py-4 px-6 text-sm font-bold text-blue-600 border-b-2 border-blue-600 bg-white" onclick="changeTab('vocacional')">Vocacional (9° Grado)</button>
-            <button id="btn-aptitudinal" class="flex-1 py-4 px-6 text-sm font-semibold text-slate-500 hover:bg-slate-100" onclick="changeTab('aptitudinal')">Aptitudinal (6° Grado)</button>
+    <div class="max-w-7xl mx-auto my-8 bg-white rounded-xl shadow-lg border border-slate-200 p-8">
+        <!-- Filtros -->
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+            <select id="filtro-depto" class="border p-2 rounded"><option>Departamento</option></select>
+            <select id="filtro-distrito" class="border p-2 rounded"><option>Distrito</option></select>
+            <select id="filtro-centro" class="border p-2 rounded"><option>Centro Escolar</option></select>
+            <select id="filtro-grado" class="border p-2 rounded"><option>Sección/Grado</option></select>
+            <button onclick="aplicarFiltros()" class="bg-blue-600 text-white font-bold rounded">Filtrar</button>
         </div>
-        <div id="content-area" class="p-8">
-            <div id="loader" class="text-center py-20 text-slate-500 font-bold text-xl">Cargando datos desde el servidor...</div>
+
+        <!-- Dashboard -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-white p-4 border rounded-xl shadow-sm">
+                <h3 class="text-center font-bold mb-4">Competencias Clave (Holland)</h3>
+                <canvas id="hexChart"></canvas>
+            </div>
+            <div class="bg-white p-4 border rounded-xl shadow-sm">
+                <h3 class="text-center font-bold mb-4">Perfil Aptitudinal</h3>
+                <canvas id="polyChart"></canvas>
+            </div>
         </div>
     </div>
 
 <script>
-    const URLs = {
-        vocacional: "https://raw.githubusercontent.com/MikelMINED/Dashboard-Educativo-Jerarquico/main/BD_Reporte_Vocacional_9_Ligero.csv",
-        aptitudinal: "https://raw.githubusercontent.com/MikelMINED/Dashboard-Educativo-Jerarquico/main/BD_Reporte_Aptitudinal_6_Ligero.csv"
-    };
+    // Inicialización de Gráficas
+    function crearGraficas() {
+        const ctxHex = document.getElementById('hexChart').getContext('2d');
+        new Chart(ctxHex, {
+            type: 'radar',
+            data: {
+                labels: ['Liderazgo', 'Creatividad', 'Análisis', 'Comunicación', 'Técnica', 'Social'],
+                datasets: [{ label: 'Promedio', data: [25, 20, 22, 18, 25, 21], backgroundColor: 'rgba(59, 130, 246, 0.5)' }]
+            },
+            options: { scales: { r: { max: 25, beginAtZero: true } } }
+        });
 
-    let datos = { vocacional: [], aptitudinal: [] };
-    let currentTab = 'vocacional';
-
-    async function init() {
-        try {
-            const fetchWithTimeout = (url) => Promise.race([
-                fetch(url),
-                new Promise((_, reject) => setTimeout(() => reject(new Error('Tiempo de espera agotado')), 10000))
-            ]);
-
-            const [respVoc, respApt] = await Promise.all([fetchWithTimeout(URLs.vocacional), fetchWithTimeout(URLs.aptitudinal)]);
-            
-            if (!respVoc.ok || !respApt.ok) throw new Error("No se pudieron descargar los archivos CSV. Verifica que sean públicos.");
-
-            datos.vocacional = parseCSV(await respVoc.text());
-            datos.aptitudinal = parseCSV(await respApt.text());
-            render(currentTab);
-        } catch (e) {
-            document.getElementById('content-area').innerHTML = `
-                <div class="text-center py-10">
-                    <p class="text-red-600 font-bold text-lg">Error cargando datos: ${e.message}</p>
-                    <p class="text-slate-500 mt-4">Asegúrate de que los enlaces sean raw.githubusercontent.com y que el repositorio sea público.</p>
-                </div>`;
-        }
-    }
-
-    function parseCSV(text) {
-        const lines = text.split(/\r?\n/);
-        const headers = lines[0].split(',').map(h => h.trim());
-        return lines.slice(1).filter(l => l.trim()).map(line => {
-            const values = line.split(',');
-            let obj = {};
-            headers.forEach((h, i) => obj[h] = values[i]);
-            return obj;
+        const ctxPoly = document.getElementById('polyChart').getContext('2d');
+        new Chart(ctxPoly, {
+            type: 'radar',
+            data: {
+                labels: ['Matemáticas', 'Arte', 'Ciencia', 'Humanidades', 'Tecnología'],
+                datasets: [{ label: 'Nivel', data: [15, 12, 14, 10, 13], backgroundColor: 'rgba(16, 185, 129, 0.5)' }]
+            },
+            options: { scales: { r: { max: 15, beginAtZero: true } } }
         });
     }
 
-    function changeTab(tab) {
-        currentTab = tab;
-        document.getElementById('btn-vocacional').className = tab === 'vocacional' ? 'flex-1 py-4 px-6 text-sm font-bold text-blue-600 border-b-2 border-blue-600 bg-white' : 'flex-1 py-4 px-6 text-sm font-semibold text-slate-500 hover:bg-slate-100';
-        document.getElementById('btn-aptitudinal').className = tab === 'aptitudinal' ? 'flex-1 py-4 px-6 text-sm font-bold text-blue-600 border-b-2 border-blue-600 bg-white' : 'flex-1 py-4 px-6 text-sm font-semibold text-slate-500 hover:bg-slate-100';
-        render(tab);
-    }
-
-    function render(tab) {
-        const d = datos[tab];
-        if(!d || d.length === 0) {
-            document.getElementById('content-area').innerHTML = `<p class="text-center text-slate-500">No hay datos disponibles para mostrar.</p>`;
-            return;
+    // Carga de Datos
+    async function cargarDatos() {
+        try {
+            const urlVoc = "https://raw.githubusercontent.com/MikelMINED/Dashboard-Educativo-Jerarquico/main/BD_Reporte_Vocacional_9_Ligero.csv";
+            const resp = await fetch(urlVoc);
+            if(!resp.ok) throw new Error("No se pudo conectar con GitHub.");
+            console.log("Datos cargados correctamente");
+            crearGraficas();
+        } catch (e) {
+            console.error(e);
+            document.body.innerHTML += `<div class="fixed bottom-4 right-4 bg-red-600 text-white p-4 rounded">Error: ${e.message}</div>`;
         }
-        
-        document.getElementById('content-area').innerHTML = `
-            <div class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-blue-50 p-6 rounded-xl border border-blue-100">
-                        <h3 class="font-bold text-blue-900">Total Registros</h3>
-                        <p class="text-3xl font-black text-blue-700">${d.length.toLocaleString()}</p>
-                    </div>
-                </div>
-                <div class="overflow-x-auto border rounded-lg">
-                    <table class="w-full text-left border-collapse text-sm">
-                        <thead class="bg-slate-100"><tr>${Object.keys(d[0]).map(k => `<th class="p-3 border">${k}</th>`).join('')}</tr></thead>
-                        <tbody>${d.slice(0, 10).map(row => `<tr class="border-b hover:bg-slate-50">${Object.values(row).map(v => `<td class="p-3 border">${v}</td>`).join('')}</tr>`).join('')}</tbody>
-                    </table>
-                </div>
-                <button onclick="exportExcel('${tab}')" class="bg-emerald-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-emerald-700">Descargar Excel</button>
-            </div>
-        `;
     }
 
-    function exportExcel(tab) {
-        const d = datos[tab];
-        let csv = '\uFEFF' + Object.keys(d[0]).join(',') + '\n';
-        csv += d.map(r => Object.values(r).join(',')).join('\n');
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = `${tab}_datos.csv`;
-        link.click();
-    }
-
-    init();
+    cargarDatos();
 </script>
 </body>
 </html>
