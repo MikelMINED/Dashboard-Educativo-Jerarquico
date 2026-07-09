@@ -29,8 +29,8 @@
 
 <script>
     const URLs = {
-        vocacional: "https://github.com/MikelMINED/Dashboard-Educativo-Jerarquico/raw/refs/heads/main/BD_Reporte_Vocacional_9_Ligero.csv",
-        aptitudinal: "https://github.com/MikelMINED/Dashboard-Educativo-Jerarquico/raw/refs/heads/main/BD_Reporte_Aptitudinal_6_Ligero.csv"
+        vocacional: "https://raw.githubusercontent.com/MikelMINED/Dashboard-Educativo-Jerarquico/main/BD_Reporte_Vocacional_9_Ligero.csv",
+        aptitudinal: "https://raw.githubusercontent.com/MikelMINED/Dashboard-Educativo-Jerarquico/main/BD_Reporte_Aptitudinal_6_Ligero.csv"
     };
 
     let datos = { vocacional: [], aptitudinal: [] };
@@ -38,17 +38,29 @@
 
     async function init() {
         try {
-            const [respVoc, respApt] = await Promise.all([fetch(URLs.vocacional), fetch(URLs.aptitudinal)]);
+            const fetchWithTimeout = (url) => Promise.race([
+                fetch(url),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Tiempo de espera agotado')), 10000))
+            ]);
+
+            const [respVoc, respApt] = await Promise.all([fetchWithTimeout(URLs.vocacional), fetchWithTimeout(URLs.aptitudinal)]);
+            
+            if (!respVoc.ok || !respApt.ok) throw new Error("No se pudieron descargar los archivos CSV. Verifica que sean públicos.");
+
             datos.vocacional = parseCSV(await respVoc.text());
             datos.aptitudinal = parseCSV(await respApt.text());
             render(currentTab);
         } catch (e) {
-            document.getElementById('content-area').innerHTML = `<p class="text-red-500 text-center font-bold">Error cargando datos: ${e.message}</p>`;
+            document.getElementById('content-area').innerHTML = `
+                <div class="text-center py-10">
+                    <p class="text-red-600 font-bold text-lg">Error cargando datos: ${e.message}</p>
+                    <p class="text-slate-500 mt-4">Asegúrate de que los enlaces sean raw.githubusercontent.com y que el repositorio sea público.</p>
+                </div>`;
         }
     }
 
     function parseCSV(text) {
-        const lines = text.split('\n');
+        const lines = text.split(/\r?\n/);
         const headers = lines[0].split(',').map(h => h.trim());
         return lines.slice(1).filter(l => l.trim()).map(line => {
             const values = line.split(',');
@@ -67,6 +79,11 @@
 
     function render(tab) {
         const d = datos[tab];
+        if(!d || d.length === 0) {
+            document.getElementById('content-area').innerHTML = `<p class="text-center text-slate-500">No hay datos disponibles para mostrar.</p>`;
+            return;
+        }
+        
         document.getElementById('content-area').innerHTML = `
             <div class="space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -75,10 +92,10 @@
                         <p class="text-3xl font-black text-blue-700">${d.length.toLocaleString()}</p>
                     </div>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead><tr class="bg-slate-100">${Object.keys(d[0]).map(k => `<th class="p-3 border">${k}</th>`).join('')}</tr></thead>
-                        <tbody>${d.slice(0, 10).map(row => `<tr class="border-b hover:bg-slate-50">${Object.values(row).map(v => `<td class="p-3">${v}</td>`).join('')}</tr>`).join('')}</tbody>
+                <div class="overflow-x-auto border rounded-lg">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead class="bg-slate-100"><tr>${Object.keys(d[0]).map(k => `<th class="p-3 border">${k}</th>`).join('')}</tr></thead>
+                        <tbody>${d.slice(0, 10).map(row => `<tr class="border-b hover:bg-slate-50">${Object.values(row).map(v => `<td class="p-3 border">${v}</td>`).join('')}</tr>`).join('')}</tbody>
                     </table>
                 </div>
                 <button onclick="exportExcel('${tab}')" class="bg-emerald-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-emerald-700">Descargar Excel</button>
