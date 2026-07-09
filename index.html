@@ -6,69 +6,123 @@
     <title>Tablero Vocacional-Aptitudinal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        .fade-in { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .no-scrollbar::-scrollbar { display: none; }
+        .holland-table th, .holland-table td { border: 1px solid #e2e8f0; padding: 0.5rem; text-align: center; }
+        .holland-table th { background-color: #f8fafc; font-weight: 600; color: #475569; font-size: 0.875rem; }
+    </style>
 </head>
-<body class="bg-gray-50 min-h-screen p-4 md:p-8">
+<body class="bg-slate-50 min-h-screen">
 
-    <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-        <!-- Encabezado -->
-        <header class="mb-8 border-b pb-6 text-center">
-            <h1 class="text-3xl font-bold text-gray-800">Tablero Vocacional-Aptitudinal</h1>
-            <p class="text-gray-500 mt-2">Análisis de competencias y áreas de interés</p>
-        </header>
+    <!-- Encabezado Institucional -->
+    <header class="bg-[#0b1b33] text-white p-8 text-center shadow-md">
+        <h2 class="text-amber-400 font-bold uppercase tracking-widest text-sm mb-2">Ministerio de Educación, Ciencia y Tecnología</h2>
+        <p class="text-slate-400 text-xs uppercase tracking-widest mb-4">MINEDUCYT · GERENCIA DE ESTADÍSTICAS</p>
+        <h1 class="text-4xl font-bold mb-2">Portal de Tableros Estadísticos</h1>
+        <p class="text-slate-300">Acceso centralizado a la información educativa del país. Seleccione el reporte de interés.</p>
+    </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <!-- Gráfico Hexagonal -->
-            <div class="flex flex-col items-center">
-                <h2 class="text-lg font-semibold mb-4 text-gray-700">Competencias Clave</h2>
-                <canvas id="hexChart" width="300" height="300"></canvas>
+    <div class="max-w-7xl mx-auto my-8 bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+        <!-- Navegación de Pestañas -->
+        <div class="flex border-b border-slate-200 bg-slate-50">
+            <button id="btn-tab-vocacional" class="flex-1 py-4 px-6 text-sm font-bold text-blue-600 border-b-2 border-blue-600 bg-white" onclick="switchTab('vocacional')">Vocacional (9° Grado)</button>
+            <button id="btn-tab-aptitudinal" class="flex-1 py-4 px-6 text-sm font-semibold text-slate-500 hover:text-slate-700 hover:bg-slate-100" onclick="switchTab('aptitudinal')">Aptitudinal (6° Grado)</button>
+        </div>
+
+        <!-- Pestaña Vocacional -->
+        <div id="tab-vocacional" class="p-8 block fade-in">
+            <div id="upload-vocacional" class="border-2 border-dashed border-blue-200 p-12 text-center rounded-xl bg-blue-50/30">
+                <input type="file" id="file-vocacional" accept=".csv" class="hidden" onchange="handleFile(event, 'vocacional')">
+                <button onclick="document.getElementById('file-vocacional').click()" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold">Cargar CSV Vocacional 9°</button>
             </div>
+            <div id="dash-vocacional" class="hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="flex flex-col items-center">
+                        <h3 class="text-lg font-bold mb-4">Hexágono de Holland</h3>
+                        <canvas id="hexChart" width="300" height="300"></canvas>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <h3 class="text-lg font-bold mb-4">Tabla de Intereses</h3>
+                        <div id="table-container-voc"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-            <!-- Gráfico de Polígono -->
-            <div class="flex flex-col items-center">
-                <h2 class="text-lg font-semibold mb-4 text-gray-700">Perfil Aptitudinal</h2>
-                <canvas id="polyChart" width="300" height="300"></canvas>
+        <!-- Pestaña Aptitudinal -->
+        <div id="tab-aptitudinal" class="p-8 hidden fade-in">
+             <div id="upload-aptitudinal" class="border-2 border-dashed border-emerald-200 p-12 text-center rounded-xl bg-emerald-50/30">
+                <input type="file" id="file-aptitudinal" accept=".csv" class="hidden" onchange="handleFile(event, 'aptitudinal')">
+                <button onclick="document.getElementById('file-aptitudinal').click()" class="bg-emerald-600 text-white px-6 py-3 rounded-lg font-bold">Cargar CSV Aptitudinal 6°</button>
+            </div>
+            <div id="dash-aptitudinal" class="hidden">
+                <div class="flex justify-center">
+                     <canvas id="polyChart" width="400" height="400"></canvas>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Configuración común de colores
-        const primaryColor = 'rgba(59, 130, 246, 0.5)';
-        const borderColor = 'rgba(59, 130, 246, 1)';
+        function switchTab(tipo) {
+            document.getElementById('tab-vocacional').className = tipo === 'vocacional' ? 'p-8 block fade-in' : 'p-8 hidden';
+            document.getElementById('tab-aptitudinal').className = tipo === 'aptitudinal' ? 'p-8 block fade-in' : 'p-8 hidden';
+        }
 
-        // Gráfico Hexagonal (Escala ajustada a 25)
-        const ctxHex = document.getElementById('hexChart').getContext('2d');
-        new Chart(ctxHex, {
-            type: 'radar',
-            data: {
-                labels: ['Liderazgo', 'Creatividad', 'Análisis', 'Comunicación', 'Técnica', 'Social'],
-                datasets: [{
-                    label: 'Puntaje',
-                    data: [25, 20, 22, 18, 25, 21],
-                    backgroundColor: primaryColor,
-                    borderColor: borderColor,
-                    borderWidth: 2
-                }]
-            },
-            options: { scales: { r: { beginAtZero: true, max: 30 } } }
-        });
+        function handleFile(e, tipo) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const text = event.target.result;
+                const rows = text.split('\n').map(l => l.split(','));
+                const headers = rows[0];
+                const data = rows.slice(1);
+                
+                document.getElementById('upload-' + tipo).classList.add('hidden');
+                document.getElementById('dash-' + tipo).classList.remove('hidden');
+                
+                if(tipo === 'vocacional') renderVocacional(headers, data);
+                else renderAptitudinal(headers, data);
+            };
+            reader.readAsText(file);
+        }
 
-        // Gráfico de Polígono (Escala ajustada a 15)
-        const ctxPoly = document.getElementById('polyChart').getContext('2d');
-        new Chart(ctxPoly, {
-            type: 'radar',
-            data: {
-                labels: ['Matemáticas', 'Arte', 'Ciencia', 'Humanidades', 'Tecnología'],
-                datasets: [{
-                    label: 'Nivel',
-                    data: [15, 12, 14, 10, 13],
-                    backgroundColor: 'rgba(16, 185, 129, 0.5)',
-                    borderColor: 'rgba(16, 185, 129, 1)',
-                    borderWidth: 2
-                }]
-            },
-            options: { scales: { r: { beginAtZero: true, max: 15 } } }
-        });
+        function renderVocacional(headers, data) {
+            // Ejemplo de promedios para el Hexágono (Usando escala max 25)
+            const ctx = document.getElementById('hexChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Realista', 'Científico', 'Artístico', 'Social', 'Emprendedor', 'Oficina'],
+                    datasets: [{
+                        label: 'Puntaje',
+                        data: [15, 22, 18, 20, 14, 12],
+                        backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                        borderColor: 'blue'
+                    }]
+                },
+                options: { scales: { r: { beginAtZero: true, max: 25 } } }
+            });
+        }
+
+        function renderAptitudinal(headers, data) {
+            const ctx = document.getElementById('polyChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Matemáticas', 'Arte', 'Ciencia', 'Humanidades', 'Tecnología'],
+                    datasets: [{
+                        label: 'Nivel',
+                        data: [12, 10, 14, 11, 13],
+                        backgroundColor: 'rgba(16, 185, 129, 0.5)',
+                        borderColor: 'green'
+                    }]
+                },
+                options: { scales: { r: { beginAtZero: true, max: 15 } } }
+            });
+        }
     </script>
 </body>
 </html>
