@@ -61,7 +61,7 @@
     <p class="text-blue-600 font-bold text-lg mb-2">Cargando Dashboard Educativo</p>
     <p id="loader-message" class="text-slate-500 text-sm">Conectando con el servidor de datos...</p>
     <div id="loader-progress" class="mt-4 flex gap-2">
-        <span id="progress-vocacional" class="px-3 py-1 bg-slate-200 rounded text-xs">Vocacional: <span class="font-bold"></span></span>
+        <span id="progress-vocacional" class="px-3 py-1 bg-slate-200 rounded text-xs">Vocacional: <span class="font-bold">⏳</span></span>
         <span id="progress-aptitudinal" class="px-3 py-1 bg-slate-200 rounded text-xs">Aptitudinal: <span class="font-bold">⏳</span></span>
     </div>
 </div>
@@ -87,9 +87,8 @@
             <p class="text-blue-600 font-bold">Cargando datos vocacionales...</p>
         </div>
 
-        <!-- Dashboard Interactivo (oculto inicialmente) -->
+        <!-- Dashboard Interactivo -->
         <div id="dashboard-vocacional" class="hidden fade-in">
-            <!-- Encabezado y Migas de Pan -->
             <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h2 class="text-2xl font-bold text-slate-800">Panel Vocacional y Características Personales</h2>
@@ -315,7 +314,7 @@
 
     const REQUIRED_COLUMNS = {
         vocacional: ['sede_nomb_depto', 'distrito', 'sede_nombre', 'sede_codigo', 'secc_codigo', 'NIE', 'LUGAR1', 'GRUPO OCUPACIONAL', 'sede_sector', 'sede_zona', 'social', 'realista', 'cientifico', 'artistico', 'emprendedor', 'oficina'],
-        aptitudinal: ['sede_nomb_depto', 'sede_nomb_mun', 'sede_nombre', 'sede_codigo', 'NIE', 'LUGAR1', 'sede_sector', 'sede_zona']
+        aptitudinal: ['sede_nomb_depto', 'sede_nomb_mun', 'sede_nombre', 'sede_codigo', 'NIE', 'LUGAR1', 'sede_sector', 'sede_zona', 'SUMA_COMPRENSIÓN VERBAL', 'SUMA_FLUIDEZ VERBAL', 'SUMA_APTITUD NUMÉRICA', 'SUMA_RAZONAMIENTO LÓGICO', 'SUMA_APTITUD ESPACIAL', 'SUMA_APTITUD MECÁNICA', 'SUMA_APTITUD ARTÍSTICA', 'SUMA_MEMORIA', 'SUMA_PERCEPCIÓN', 'SUMA_APTITUD FÍSICA']
     };
 
     const loadStatus = {
@@ -382,7 +381,32 @@
                 { key: 'sede_nombre', label: 'Centro Escolar', prependCode: 'sede_codigo' },
                 { key: 'NIE', label: 'Estudiante (NIE)' }
             ],
-            metrics: ['COMPRENSIÓN VERBAL', 'FLUIDEZ VERBAL', 'APTITUD NUMÉRICA', 'PERCEPCIÓN', 'APTITUD FÍSICA', 'RAZONAMIENTO LÓGICO', 'APTITUD ESPACIAL', 'APTITUD MECÁNICA', 'APTITUD ARTÍSTICA', 'MEMORIA']
+            // ✅ Columnas SUMA_* con puntajes reales (0-40)
+            metrics: [
+                'SUMA_COMPRENSIÓN VERBAL',
+                'SUMA_FLUIDEZ VERBAL',
+                'SUMA_APTITUD NUMÉRICA',
+                'SUMA_RAZONAMIENTO LÓGICO',
+                'SUMA_APTITUD ESPACIAL',
+                'SUMA_APTITUD MECÁNICA',
+                'SUMA_APTITUD ARTÍSTICA',
+                'SUMA_MEMORIA',
+                'SUMA_PERCEPCIÓN',
+                'SUMA_APTITUD FÍSICA'
+            ],
+            // Etiquetas bonitas para mostrar
+            metricLabels: {
+                'SUMA_COMPRENSIÓN VERBAL': 'COMPRENSIÓN VERBAL',
+                'SUMA_FLUIDEZ VERBAL': 'FLUIDEZ VERBAL',
+                'SUMA_APTITUD NUMÉRICA': 'APTITUD NUMÉRICA',
+                'SUMA_RAZONAMIENTO LÓGICO': 'RAZONAMIENTO LÓGICO',
+                'SUMA_APTITUD ESPACIAL': 'APTITUD ESPACIAL',
+                'SUMA_APTITUD MECÁNICA': 'APTITUD MECÁNICA',
+                'SUMA_APTITUD ARTÍSTICA': 'APTITUD ARTÍSTICA',
+                'SUMA_MEMORIA': 'MEMORIA',
+                'SUMA_PERCEPCIÓN': 'PERCEPCIÓN',
+                'SUMA_APTITUD FÍSICA': 'APTITUD FÍSICA'
+            }
         }
     };
 
@@ -592,23 +616,40 @@
             const labels = state.metrics;
             const data = labels.map(l => avgs[l] || 0);
 
-            let topApt = 'N/A'; let maxApt = 0;
-            for(let a in avgs) { if(avgs[a] > maxApt) { maxApt = avgs[a]; topApt = a; } }
+            // ✅ Encontrar la aptitud con mayor puntaje usando metricLabels
+            let topApt = 'N/A'; 
+            let maxApt = 0;
+            for(let a in avgs) { 
+                if(avgs[a] > maxApt) { 
+                    maxApt = avgs[a]; 
+                    topApt = state.metricLabels[a] || a; 
+                } 
+            }
             document.getElementById('kpi-apt-alta').textContent = topApt;
 
-            const radarMetrics = ['COMPRENSIÓN VERBAL', 'FLUIDEZ VERBAL', 'APTITUD NUMÉRICA', 'PERCEPCIÓN', 'APTITUD FÍSICA'];
+            // ✅ 5 aptitudes para el radar
+            const radarMetrics = [
+                'SUMA_COMPRENSIÓN VERBAL', 
+                'SUMA_FLUIDEZ VERBAL', 
+                'SUMA_APTITUD NUMÉRICA', 
+                'SUMA_PERCEPCIÓN', 
+                'SUMA_APTITUD FÍSICA'
+            ];
             const radarData = radarMetrics.map(l => avgs[l] || 0);
+            const radarLabels = radarMetrics.map(l => state.metricLabels[l]);
 
+            // Gráfico de barras (todas las aptitudes)
             if(chartInstances.aptitudinal.bar) {
                 chartInstances.aptitudinal.bar.data.datasets[0].data = data;
                 chartInstances.aptitudinal.bar.data.datasets[0].label = filteredRows.length === 1 ? 'Puntaje Individual' : 'Promedio';
+                chartInstances.aptitudinal.bar.data.labels = labels.map(l => state.metricLabels[l]);
                 chartInstances.aptitudinal.bar.update();
             } else {
                 const ctxBar = document.getElementById('chart-apt-bar').getContext('2d');
                 chartInstances.aptitudinal.bar = new Chart(ctxBar, {
                     type: 'bar',
                     data: {
-                        labels: labels,
+                        labels: labels.map(l => state.metricLabels[l]),
                         datasets: [{
                             label: filteredRows.length === 1 ? 'Puntaje Individual' : 'Promedio',
                             data: data,
@@ -616,20 +657,30 @@
                             borderRadius: 4
                         }]
                     },
-                    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                    options: { 
+                        indexAxis: 'y', 
+                        responsive: true, 
+                        maintainAspectRatio: false, 
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { beginAtZero: true, max: 40 }
+                        }
+                    }
                 });
             }
 
+            // Gráfico radar (5 aptitudes clave) - MÁXIMO 40
             if(chartInstances.aptitudinal.radar) {
                 chartInstances.aptitudinal.radar.data.datasets[0].data = radarData;
                 chartInstances.aptitudinal.radar.data.datasets[0].label = filteredRows.length === 1 ? 'Desempeño Individual' : 'Desempeño Promedio';
+                chartInstances.aptitudinal.radar.data.labels = radarLabels;
                 chartInstances.aptitudinal.radar.update();
             } else {
                 const ctxRadar = document.getElementById('chart-apt-radar').getContext('2d');
                 chartInstances.aptitudinal.radar = new Chart(ctxRadar, {
                     type: 'radar',
                     data: {
-                        labels: radarMetrics,
+                        labels: radarLabels,
                         datasets: [{
                             label: filteredRows.length === 1 ? 'Desempeño Individual' : 'Desempeño Promedio',
                             data: radarData,
@@ -639,7 +690,18 @@
                             borderWidth: 2
                         }]
                     },
-                    options: { scales: { r: { beginAtZero: true, max: 15 } }, plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false }
+                    options: { 
+                        scales: { 
+                            r: { 
+                                beginAtZero: true, 
+                                max: 40,  // ✅ Máximo 40 (puntajes reales)
+                                ticks: { stepSize: 10 }
+                            } 
+                        }, 
+                        plugins: { legend: { display: false } }, 
+                        responsive: true, 
+                        maintainAspectRatio: false 
+                    }
                 });
             }
         }
