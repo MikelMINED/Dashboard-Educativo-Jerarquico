@@ -3,81 +3,802 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tablero Vocacional-Aptitudinal</title>
+    <title>Dashboard Educativo - Navegación Jerárquica</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js para gráficos interactivos -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .fade-in { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .holland-table th, .holland-table td { border: 1px solid #e2e8f0; padding: 0.5rem; text-align: center; }
+        .holland-table th { background-color: #f8fafc; font-weight: 600; color: #475569; font-size: 0.875rem; }
+        /* Animación de carga */
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
 </head>
-<body class="bg-slate-50 min-h-screen font-sans">
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen p-4 md:p-8">
 
-    <!-- Encabezado Institucional -->
-    <header class="bg-[#0b1b33] text-white p-8 text-center shadow-md">
-        <h2 class="text-amber-400 font-bold uppercase tracking-widest text-sm mb-2">Ministerio de Educación, Ciencia y Tecnología</h2>
-        <p class="text-slate-400 text-xs uppercase tracking-widest mb-4">MINEDUCYT · GERENCIA DE ESTADÍSTICAS</p>
-        <h1 class="text-4xl font-bold mb-2">Tablero Vocacional-Aptitudinal</h1>
-    </header>
+<div class="max-w-7xl mx-auto bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+    
+    <!-- Navegación de Pestañas -->
+    <div class="flex border-b border-slate-200 bg-slate-50">
+        <button id="btn-tab-vocacional" class="flex-1 py-4 px-6 text-sm font-bold text-blue-600 border-b-2 border-blue-600 bg-white transition-colors" onclick="switchTab('vocacional')">
+            Vocacional (9° Grado)
+        </button>
+        <button id="btn-tab-aptitudinal" class="flex-1 py-4 px-6 text-sm font-semibold text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors" onclick="switchTab('aptitudinal')">
+            Aptitudinal (6° Grado)
+        </button>
+    </div>
 
-    <div class="max-w-7xl mx-auto my-8 bg-white rounded-xl shadow-lg border border-slate-200 p-8">
-        <!-- Filtros -->
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-            <select id="filtro-depto" class="border p-2 rounded"><option>Departamento</option></select>
-            <select id="filtro-distrito" class="border p-2 rounded"><option>Distrito</option></select>
-            <select id="filtro-centro" class="border p-2 rounded"><option>Centro Escolar</option></select>
-            <select id="filtro-grado" class="border p-2 rounded"><option>Sección/Grado</option></select>
-            <button onclick="aplicarFiltros()" class="bg-blue-600 text-white font-bold rounded">Filtrar</button>
+    <!-- PESTAÑA: VOCACIONAL 9° -->
+    <div id="tab-vocacional" class="p-6 md:p-8 block fade-in">
+        
+        <!-- Zona de carga -->
+        <div id="upload-zone-vocacional" class="border-2 border-dashed border-blue-300 rounded-xl p-12 text-center bg-blue-50/50 hover:bg-blue-50 transition-colors cursor-pointer" onclick="document.getElementById('file-vocacional').click()">
+            <div id="loader-vocacional" class="hidden flex-col items-center justify-center">
+                <div class="loader mb-4"></div>
+                <p class="text-blue-600 font-bold">Descargando datos desde el servidor público...</p>
+            </div>
+            <div id="manual-upload-vocacional">
+                <svg class="mx-auto h-12 w-12 text-blue-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                <h3 class="text-lg font-bold text-slate-800">Modo Pruebas: Cargar Base de Datos Vocacional</h3>
+                <p class="mt-1 text-sm text-slate-500">Selecciona el archivo "BD_Reporte_Vocacional_9_Ligero.csv"</p>
+                <input type="file" id="file-vocacional" class="hidden" accept=".csv" onchange="handleFile(event, 'vocacional')">
+            </div>
         </div>
 
-        <!-- Dashboard -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="bg-white p-4 border rounded-xl shadow-sm">
-                <h3 class="text-center font-bold mb-4">Competencias Clave (Holland)</h3>
-                <canvas id="hexChart"></canvas>
+        <!-- Dashboard Interactivo -->
+        <div id="dashboard-vocacional" class="hidden fade-in">
+            <!-- Encabezado y Migas de Pan -->
+            <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800">Panel Vocacional y Características Personales</h2>
+                    <nav class="flex mt-2 text-sm text-slate-500 bg-slate-100 px-3 py-1.5 rounded-md inline-flex" aria-label="Breadcrumb">
+                        <ol id="breadcrumb-vocacional" class="inline-flex items-center space-x-1 md:space-x-2"></ol>
+                    </nav>
+                </div>
+                <!-- Bloque de Filtros Transversales y Exportación -->
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="flex bg-slate-50 p-1.5 rounded-lg border border-slate-200">
+                        <select id="filter-sector-vocacional" onchange="renderDashboard('vocacional')" class="text-sm bg-transparent font-medium text-slate-600 focus:outline-none pr-2 border-r border-slate-300">
+                            <option value="TODOS">Todos los Sectores</option>
+                        </select>
+                        <select id="filter-zona-vocacional" onchange="renderDashboard('vocacional')" class="text-sm bg-transparent font-medium text-slate-600 focus:outline-none pl-2">
+                            <option value="TODOS">Todas las Zonas</option>
+                        </select>
+                    </div>
+                    <button onclick="exportToExcel('vocacional')" class="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-sm font-bold rounded-lg transition-colors flex items-center gap-2 border border-emerald-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> Exportar Excel
+                    </button>
+                </div>
             </div>
-            <div class="bg-white p-4 border rounded-xl shadow-sm">
-                <h3 class="text-center font-bold mb-4">Perfil Aptitudinal</h3>
-                <canvas id="polyChart"></canvas>
+
+            <!-- KPIs -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex items-center">
+                    <div class="p-3 bg-blue-100 text-blue-600 rounded-lg mr-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-slate-500">Registros Analizados</p>
+                        <p class="text-2xl font-bold text-slate-800" id="kpi-voc-total">0</p>
+                    </div>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex items-center">
+                    <div class="p-3 bg-purple-100 text-purple-600 rounded-lg mr-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-slate-500">Perfil Predominante</p>
+                        <p class="text-xl font-bold text-slate-800" id="kpi-voc-perfil">-</p>
+                    </div>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex items-center">
+                    <div class="p-3 bg-amber-100 text-amber-600 rounded-lg mr-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-slate-500">Grupos Ocupacionales</p>
+                        <p class="text-2xl font-bold text-slate-800" id="kpi-voc-grupos">0</p>
+                    </div>
+                </div>
             </div>
+
+            <!-- Gráficos Visuales 9° -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- Hexágono de Holland -->
+                <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col items-center justify-center">
+                    <h3 class="text-lg font-bold text-slate-700 mb-2">Hexágono de Holland</h3>
+                    <div class="relative w-full max-w-sm aspect-square">
+                        <canvas id="chart-voc-radar"></canvas>
+                    </div>
+                </div>
+                <!-- Tabla de Intereses -->
+                <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+                    <h3 class="text-lg font-bold text-slate-700 mb-4 text-center">Intereses Profesionales y Características</h3>
+                    <table class="w-full holland-table mb-4">
+                        <thead>
+                            <tr>
+                                <th>INTERÉS</th>
+                                <th>PUNTAJE</th>
+                                <th>INTERÉS</th>
+                                <th>PUNTAJE</th>
+                            </tr>
+                        </thead>
+                        <tbody id="voc-table-scores">
+                            <!-- Inyectado por JS -->
+                        </tbody>
+                    </table>
+                    <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 text-center">
+                        <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Código Ocupacional Predominante</span>
+                        <span class="text-lg font-bold text-blue-700" id="voc-codigo-ocupacional">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de Navegación Drill-Down -->
+            <h3 class="text-lg font-bold text-slate-700 mb-3">Desglose Geográfico / Institucional / Individual</h3>
+            <div class="bg-white border border-slate-200 rounded-lg overflow-x-auto no-scrollbar shadow-sm">
+                <table class="min-w-full divide-y divide-slate-200 text-sm">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th scope="col" id="th-name-vocacional" class="px-6 py-3 text-left font-semibold text-slate-600 uppercase tracking-wider">Estructura</th>
+                            <th scope="col" class="px-6 py-3 text-center font-semibold text-slate-600 uppercase tracking-wider">Registros</th>
+                            <th scope="col" class="px-6 py-3 text-left font-semibold text-slate-600 uppercase tracking-wider">Perfil Predominante</th>
+                            <th scope="col" class="px-6 py-3 text-right font-semibold text-slate-600 uppercase tracking-wider">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-vocacional" class="bg-white divide-y divide-slate-200"></tbody>
+                </table>
+            </div>
+            <p id="table-footer-vocacional" class="text-xs text-slate-400 mt-2 text-right">Haz clic en una fila para profundizar en los datos hasta llegar al estudiante (NIE).</p>
         </div>
     </div>
 
-<script>
-    // Inicialización de Gráficas
-    function crearGraficas() {
-        const ctxHex = document.getElementById('hexChart').getContext('2d');
-        new Chart(ctxHex, {
-            type: 'radar',
-            data: {
-                labels: ['Liderazgo', 'Creatividad', 'Análisis', 'Comunicación', 'Técnica', 'Social'],
-                datasets: [{ label: 'Promedio', data: [25, 20, 22, 18, 25, 21], backgroundColor: 'rgba(59, 130, 246, 0.5)' }]
-            },
-            options: { scales: { r: { max: 25, beginAtZero: true } } }
-        });
+    <!-- PESTAÑA: APTITUDINAL 6° -->
+    <div id="tab-aptitudinal" class="p-6 md:p-8 hidden fade-in">
+        
+        <!-- Zona de carga -->
+        <div id="upload-zone-aptitudinal" class="border-2 border-dashed border-purple-300 rounded-xl p-12 text-center bg-purple-50/50 hover:bg-purple-50 transition-colors cursor-pointer" onclick="document.getElementById('file-aptitudinal').click()">
+            <div id="loader-aptitudinal" class="hidden flex-col items-center justify-center">
+                <div class="loader mb-4"></div>
+                <p class="text-purple-600 font-bold">Descargando datos desde el servidor público...</p>
+            </div>
+            <div id="manual-upload-aptitudinal">
+                <svg class="mx-auto h-12 w-12 text-purple-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                <h3 class="text-lg font-bold text-slate-800">Modo Pruebas: Cargar Base de Datos Aptitudinal</h3>
+                <p class="mt-1 text-sm text-slate-500">Selecciona el archivo "BD_Reporte_Aptitudinal_6_Ligero.csv"</p>
+                <input type="file" id="file-aptitudinal" class="hidden" accept=".csv" onchange="handleFile(event, 'aptitudinal')">
+            </div>
+        </div>
 
-        const ctxPoly = document.getElementById('polyChart').getContext('2d');
-        new Chart(ctxPoly, {
-            type: 'radar',
-            data: {
-                labels: ['Matemáticas', 'Arte', 'Ciencia', 'Humanidades', 'Tecnología'],
-                datasets: [{ label: 'Nivel', data: [15, 12, 14, 10, 13], backgroundColor: 'rgba(16, 185, 129, 0.5)' }]
-            },
-            options: { scales: { r: { max: 15, beginAtZero: true } } }
+        <div id="dashboard-aptitudinal" class="hidden fade-in">
+            <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800">Panel de Resultados Aptitudinales</h2>
+                    <nav class="flex mt-2 text-sm text-slate-500 bg-slate-100 px-3 py-1.5 rounded-md inline-flex" aria-label="Breadcrumb">
+                        <ol id="breadcrumb-aptitudinal" class="inline-flex items-center space-x-1 md:space-x-2"></ol>
+                    </nav>
+                </div>
+                 <!-- Bloque de Filtros Transversales y Exportación -->
+                 <div class="flex flex-wrap items-center gap-3">
+                    <div class="flex bg-slate-50 p-1.5 rounded-lg border border-slate-200">
+                        <select id="filter-sector-aptitudinal" onchange="renderDashboard('aptitudinal')" class="text-sm bg-transparent font-medium text-slate-600 focus:outline-none pr-2 border-r border-slate-300">
+                            <option value="TODOS">Todos los Sectores</option>
+                        </select>
+                        <select id="filter-zona-aptitudinal" onchange="renderDashboard('aptitudinal')" class="text-sm bg-transparent font-medium text-slate-600 focus:outline-none pl-2">
+                            <option value="TODOS">Todas las Zonas</option>
+                        </select>
+                    </div>
+                    <button onclick="exportToExcel('aptitudinal')" class="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-sm font-bold rounded-lg transition-colors flex items-center gap-2 border border-emerald-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> Exportar Excel
+                    </button>
+                </div>
+            </div>
+
+            <!-- KPIs -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex items-center">
+                    <div class="p-3 bg-purple-100 text-purple-600 rounded-lg mr-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-slate-500">Registros Analizados</p>
+                        <p class="text-2xl font-bold text-slate-800" id="kpi-apt-total">0</p>
+                    </div>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex items-center">
+                    <div class="p-3 bg-indigo-100 text-indigo-600 rounded-lg mr-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-slate-500">Aptitud Predominante</p>
+                        <p class="text-xl font-bold text-slate-800" id="kpi-apt-alta">-</p>
+                    </div>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex items-center">
+                    <div class="p-3 bg-teal-100 text-teal-600 rounded-lg mr-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-slate-500">Centros Seleccionados</p>
+                        <p class="text-2xl font-bold text-slate-800" id="kpi-apt-centros">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráficos Visuales 6° -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+                    <h3 class="text-lg font-bold text-slate-700 mb-2">Desempeño Promedio por Aptitud</h3>
+                    <div class="relative w-full" style="height: 300px;">
+                        <canvas id="chart-apt-bar"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col items-center justify-center">
+                    <h3 class="text-lg font-bold text-slate-700 mb-2">Polígono de Aptitudes</h3>
+                    <div class="relative w-full max-w-sm aspect-square">
+                        <canvas id="chart-apt-radar"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de Navegación Drill-Down -->
+            <h3 class="text-lg font-bold text-slate-700 mb-3">Desglose Geográfico / Institucional / Individual</h3>
+            <div class="bg-white border border-slate-200 rounded-lg overflow-x-auto no-scrollbar shadow-sm">
+                <table class="min-w-full divide-y divide-slate-200 text-sm">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th scope="col" id="th-name-aptitudinal" class="px-6 py-3 text-left font-semibold text-slate-600 uppercase tracking-wider">Estructura</th>
+                            <th scope="col" class="px-6 py-3 text-center font-semibold text-slate-600 uppercase tracking-wider">Registros</th>
+                            <th scope="col" class="px-6 py-3 text-left font-semibold text-slate-600 uppercase tracking-wider">Aptitud Destacada</th>
+                            <th scope="col" class="px-6 py-3 text-right font-semibold text-slate-600 uppercase tracking-wider">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-aptitudinal" class="bg-white divide-y divide-slate-200"></tbody>
+                </table>
+            </div>
+            <p id="table-footer-aptitudinal" class="text-xs text-slate-400 mt-2 text-right">Haz clic en una fila para profundizar en los datos hasta llegar al estudiante (NIE).</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // === CONFIGURACIÓN DE CARGA AUTOMÁTICA EN PRODUCCIÓN ===
+    const URL_PRODUCCION_VOCACIONAL = ""; 
+    const URL_PRODUCCION_APTITUDINAL = "";
+
+    // --- VARIABLES GLOBALES PARA GRÁFICOS ---
+    let chartInstances = {
+        vocacional: { radar: null },
+        aptitudinal: { bar: null, radar: null }
+    };
+
+    // Diccionario para mostrar nombres elegantes aunque leamos las minúsculas del CSV
+    const labelMapVocacional = {
+        'social': 'SOCIAL',
+        'realista': 'REALISTA',
+        'cientifico': 'CIENTÍFICO',
+        'artistico': 'ARTÍSTICO',
+        'emprendedor': 'EMPRENDEDOR',
+        'oficina': 'OFICINA'
+    };
+
+    // --- LÓGICA DE INTERFAZ Y PESTAÑAS ---
+    function switchTab(target) {
+        const tabs = ['vocacional', 'aptitudinal'];
+        tabs.forEach(tab => {
+            const btn = document.getElementById(`btn-tab-${tab}`);
+            const content = document.getElementById(`tab-${tab}`);
+            if (tab === target) {
+                btn.className = "flex-1 py-4 px-6 text-sm font-bold text-blue-600 border-b-2 border-blue-600 bg-white transition-colors";
+                content.classList.remove('hidden');
+                content.classList.add('block');
+            } else {
+                btn.className = "flex-1 py-4 px-6 text-sm font-semibold text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors border-b-2 border-transparent";
+                content.classList.remove('block');
+                content.classList.add('hidden');
+            }
         });
     }
 
-    // Carga de Datos
-    async function cargarDatos() {
-        try {
-            const urlVoc = "https://raw.githubusercontent.com/MikelMINED/Dashboard-Educativo-Jerarquico/main/BD_Reporte_Vocacional_9_Ligero.csv";
-            const resp = await fetch(urlVoc);
-            if(!resp.ok) throw new Error("No se pudo conectar con GitHub.");
-            console.log("Datos cargados correctamente");
-            crearGraficas();
-        } catch (e) {
-            console.error(e);
-            document.body.innerHTML += `<div class="fixed bottom-4 right-4 bg-red-600 text-white p-4 rounded">Error: ${e.message}</div>`;
+    // --- ESTADO GLOBAL Y JERARQUÍA MICRO (HASTA EL NIE) ---
+    const appState = {
+        vocacional: {
+            rows: [], cols: {}, path: [],
+            hierarchy: [
+                { key: 'sede_nomb_depto', label: 'Departamento' },
+                { key: 'distrito', label: 'Distrito' },
+                { key: 'sede_nombre', label: 'Centro Escolar', prependCode: 'sede_codigo' },
+                { key: 'secc_codigo', label: 'Sección' },
+                { key: 'NIE', label: 'Estudiante (NIE)' }
+            ],
+            // AHORA LEEMOS LAS COLUMNAS EN MINÚSCULA (Las de los puntajes reales)
+            metrics: ['social', 'realista', 'cientifico', 'artistico', 'emprendedor', 'oficina']
+        },
+        aptitudinal: {
+            rows: [], cols: {}, path: [],
+            hierarchy: [
+                { key: 'sede_nomb_depto', label: 'Departamento' },
+                { key: 'sede_nomb_mun', label: 'Municipio' },
+                { key: 'sede_nombre', label: 'Centro Escolar', prependCode: 'sede_codigo' },
+                { key: 'NIE', label: 'Estudiante (NIE)' }
+            ],
+            metrics: ['COMPRENSIÓN VERBAL', 'FLUIDEZ VERBAL', 'APTITUD NUMÉRICA', 'PERCEPCIÓN', 'APTITUD FÍSICA', 'RAZONAMIENTO LÓGICO', 'APTITUD ESPACIAL', 'APTITUD MECÁNICA', 'APTITUD ARTÍSTICA', 'MEMORIA']
+        }
+    };
+
+    // --- CARGA DE DATOS Y PARSEO CSV ---
+    function handleFile(event, tipo) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.readAsText(file, 'UTF-8');
+        reader.onload = function(e) {
+            procesarCSV(e.target.result, tipo);
+        };
+    }
+
+    function procesarCSV(csvText, tipo) {
+        const lines = csvText.split(/\r?\n/);
+        if(lines.length < 2) return alert("Archivo inválido o vacío.");
+        
+        const headers = processCSVRow(lines[0]);
+        appState[tipo].cols = {};
+        headers.forEach((h, idx) => { appState[tipo].cols[h.trim()] = idx; });
+        
+        appState[tipo].rows = [];
+        for (let i = 1; i < lines.length; i++) {
+            if (lines[i].trim() === "") continue;
+            const row = processCSVRow(lines[i]);
+            if (row.length === headers.length) appState[tipo].rows.push(row);
+        }
+
+        // Llenar dinámicamente los selectores transversales
+        populateTransversalFilters(tipo);
+
+        document.getElementById(`upload-zone-${tipo}`).classList.add('hidden');
+        document.getElementById(`dashboard-${tipo}`).classList.remove('hidden');
+        
+        renderDashboard(tipo);
+    }
+
+    function processCSVRow(line) {
+        const result = [];
+        let cell = '', inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+            if (line[i] === '"') inQuotes = !inQuotes;
+            else if (line[i] === ',' && !inQuotes) { result.push(cell.trim()); cell = ''; }
+            else cell += line[i];
+        }
+        result.push(cell.trim());
+        return result;
+    }
+
+    function getAverages(rows, metricsKeys, colMap) {
+        let sums = {};
+        metricsKeys.forEach(k => sums[k] = 0);
+        let validRows = 0;
+
+        rows.forEach(r => {
+            let hasValidData = false;
+            metricsKeys.forEach(k => {
+                let val = parseFloat(r[colMap[k]]);
+                if (!isNaN(val)) {
+                    sums[k] += val;
+                    hasValidData = true;
+                }
+            });
+            if (hasValidData) validRows++;
+        });
+
+        let averages = {};
+        let count = validRows || 1;
+        metricsKeys.forEach(k => {
+            averages[k] = parseFloat((sums[k] / count).toFixed(1));
+        });
+        return averages;
+    }
+
+    // --- LLENADO DE FILTROS TRANSVERSALES ---
+    function populateTransversalFilters(tipo) {
+        const state = appState[tipo];
+        const sectorSet = new Set();
+        const zonaSet = new Set();
+        
+        const colSector = state.cols['sede_sector'];
+        const colZona = state.cols['sede_zona'];
+
+        if(colSector !== undefined && colZona !== undefined) {
+            state.rows.forEach(r => {
+                if(r[colSector]) sectorSet.add(r[colSector]);
+                if(r[colZona]) zonaSet.add(r[colZona]);
+            });
+
+            const selSector = document.getElementById(`filter-sector-${tipo}`);
+            const selZona = document.getElementById(`filter-zona-${tipo}`);
+            
+            // Mantener solo la opción "TODOS"
+            selSector.innerHTML = '<option value="TODOS">Todos los Sectores</option>';
+            selZona.innerHTML = '<option value="TODOS">Todas las Zonas</option>';
+
+            // Inyectar opciones dinámicas ordenadas
+            Array.from(sectorSet).sort().forEach(s => selSector.innerHTML += `<option value="${s}">${s}</option>`);
+            Array.from(zonaSet).sort().forEach(z => selZona.innerHTML += `<option value="${z}">${z}</option>`);
         }
     }
 
-    cargarDatos();
+    // --- RENDERIZADO DE GRÁFICOS Y KPIS ---
+    function updateVisuals(tipo, filteredRows) {
+        const state = appState[tipo];
+        
+        if(tipo === 'vocacional') {
+            document.getElementById('kpi-voc-total').textContent = filteredRows.length.toLocaleString('es-SV');
+            
+            let modes = {};
+            let ocupaciones = new Set();
+            filteredRows.forEach(r => {
+                let p = r[state.cols['LUGAR1']];
+                if(p) modes[p] = (modes[p] || 0) + 1;
+                
+                let o = r[state.cols['GRUPO OCUPACIONAL']];
+                if(o) ocupaciones.add(o);
+            });
+            
+            let topMode = 'N/A'; let max = 0;
+            for(let m in modes) { if(modes[m] > max) { max = modes[m]; topMode = m; } }
+            
+            document.getElementById('kpi-voc-perfil').textContent = topMode;
+            document.getElementById('kpi-voc-grupos').textContent = ocupaciones.size;
+
+            const avgs = getAverages(filteredRows, state.metrics, state.cols);
+            const labels = state.metrics;
+            const data = labels.map(l => avgs[l]);
+
+            // Lógica basada en PUNTAJES REALES (Mayor puntaje = mejor interés)
+            let sortedAves = [...labels].sort((a,b) => avgs[b] - avgs[a]); 
+            
+            document.getElementById('voc-table-scores').innerHTML = `
+                <tr>
+                    <td>CIENTÍFICO</td><td class="font-bold text-blue-600">${avgs['cientifico'] || '-'}</td>
+                    <td>SOCIAL</td><td class="font-bold text-blue-600">${avgs['social'] || '-'}</td>
+                </tr>
+                <tr>
+                    <td>ARTÍSTICO</td><td class="font-bold text-blue-600">${avgs['artistico'] || '-'}</td>
+                    <td>EMPRENDEDOR</td><td class="font-bold text-blue-600">${avgs['emprendedor'] || '-'}</td>
+                </tr>
+                <tr>
+                    <td>REALISTA</td><td class="font-bold text-blue-600">${avgs['realista'] || '-'}</td>
+                    <td>OFICINA</td><td class="font-bold text-blue-600">${avgs['oficina'] || '-'}</td>
+                </tr>
+            `;
+            
+            document.getElementById('voc-codigo-ocupacional').textContent = sortedAves.slice(0,2).map(k => labelMapVocacional[k]).join(' - ');
+
+            if(chartInstances.vocacional.radar) chartInstances.vocacional.radar.destroy();
+            const ctx = document.getElementById('chart-voc-radar').getContext('2d');
+            
+            chartInstances.vocacional.radar = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    // Mapeamos los keys en minúsculas a sus nombres estéticos con tildes
+                    labels: labels.map(l => labelMapVocacional[l]),
+                    datasets: [{
+                        label: filteredRows.length === 1 ? 'Puntaje Individual' : 'Puntaje Promedio',
+                        data: data,
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: { 
+                    scales: { 
+                        r: { 
+                            beginAtZero: true, 
+                            suggestedMax: 30,
+                            ticks: { display: false } 
+                        } 
+                    }, 
+                    plugins: { legend: { display: false } } 
+                }
+            });
+
+        } else if (tipo === 'aptitudinal') {
+            document.getElementById('kpi-apt-total').textContent = filteredRows.length.toLocaleString('es-SV');
+            
+            let centros = new Set();
+            filteredRows.forEach(r => centros.add(r[state.cols['sede_codigo']]));
+            document.getElementById('kpi-apt-centros').textContent = centros.size;
+
+            const avgs = getAverages(filteredRows, state.metrics, state.cols);
+            const labels = state.metrics;
+            const data = labels.map(l => avgs[l]);
+
+            let topApt = 'N/A'; let maxApt = 0;
+            for(let a in avgs) { if(avgs[a] > maxApt) { maxApt = avgs[a]; topApt = a; } }
+            document.getElementById('kpi-apt-alta').textContent = topApt;
+
+            const radarMetrics = ['COMPRENSIÓN VERBAL', 'FLUIDEZ VERBAL', 'APTITUD NUMÉRICA', 'PERCEPCIÓN', 'APTITUD FÍSICA'];
+            const radarData = radarMetrics.map(l => avgs[l] || 0);
+
+            if(chartInstances.aptitudinal.bar) chartInstances.aptitudinal.bar.destroy();
+            const ctxBar = document.getElementById('chart-apt-bar').getContext('2d');
+            chartInstances.aptitudinal.bar = new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: filteredRows.length === 1 ? 'Puntaje Individual' : 'Promedio',
+                        data: data,
+                        backgroundColor: 'rgba(139, 92, 246, 0.7)',
+                        borderRadius: 4
+                    }]
+                },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+
+            if(chartInstances.aptitudinal.radar) chartInstances.aptitudinal.radar.destroy();
+            const ctxRadar = document.getElementById('chart-apt-radar').getContext('2d');
+            chartInstances.aptitudinal.radar = new Chart(ctxRadar, {
+                type: 'radar',
+                data: {
+                    labels: radarMetrics,
+                    datasets: [{
+                        label: filteredRows.length === 1 ? 'Desempeño Individual' : 'Desempeño Promedio',
+                        data: radarData,
+                        backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                        borderColor: 'rgba(16, 185, 129, 1)',
+                        pointBackgroundColor: 'rgba(16, 185, 129, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: { scales: { r: { beginAtZero: true, suggestedMax: 40 } }, plugins: { legend: { display: false } } }
+            });
+        }
+    }
+
+    // --- MOTOR DRILL-DOWN (NAVEGACIÓN HASTA EL NIE) ---
+    function renderDashboard(tipo) {
+        const state = appState[tipo];
+        const currentLevelIndex = state.path.length;
+        const isMaxLevel = currentLevelIndex >= state.hierarchy.length;
+        
+        renderBreadcrumbs(tipo);
+
+        // 1. Filtrar datos globales por RUTA GEOGRÁFICA (Drill-down)
+        let filteredRows = state.rows;
+        state.path.forEach((step, idx) => {
+            const hDef = state.hierarchy[idx];
+            const colIndex = state.cols[hDef.key];
+            filteredRows = filteredRows.filter(row => {
+                let val = row[colIndex];
+                if (hDef.prependCode) val = row[state.cols[hDef.prependCode]] + " - " + val;
+                return val === step.value;
+            });
+        });
+
+        // 1.1 Filtrar datos adicionales por SECTOR Y ZONA (Filtros transversales)
+        const selSector = document.getElementById(`filter-sector-${tipo}`).value;
+        const selZona = document.getElementById(`filter-zona-${tipo}`).value;
+        
+        if(selSector !== 'TODOS') {
+            const idxSector = state.cols['sede_sector'];
+            filteredRows = filteredRows.filter(r => r[idxSector] === selSector);
+        }
+        if(selZona !== 'TODOS') {
+            const idxZona = state.cols['sede_zona'];
+            filteredRows = filteredRows.filter(r => r[idxZona] === selZona);
+        }
+
+        updateVisuals(tipo, filteredRows);
+
+        if (isMaxLevel) {
+            document.getElementById(`tbody-${tipo}`).innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-slate-500 bg-slate-50">Has llegado al perfil individual de este estudiante.<br>Observa sus resultados exactos en los gráficos superiores.</td></tr>`;
+            document.getElementById(`table-footer-${tipo}`).classList.add('hidden');
+            return;
+        }
+
+        document.getElementById(`table-footer-${tipo}`).classList.remove('hidden');
+
+        const currentHierachyDef = state.hierarchy[currentLevelIndex];
+        document.getElementById(`th-name-${tipo}`).textContent = currentHierachyDef.label;
+        
+        const groupColKey = currentHierachyDef.key;
+        const groupColIdx = state.cols[groupColKey];
+        const groups = {};
+
+        filteredRows.forEach(row => {
+            let groupName = row[groupColIdx] || 'Sin Especificar';
+            if (currentHierachyDef.prependCode) {
+                const code = row[state.cols[currentHierachyDef.prependCode]];
+                groupName = code + " - " + groupName;
+            }
+            
+            if (!groups[groupName]) {
+                groups[groupName] = { count: 0, modes: {} };
+            }
+            groups[groupName].count++;
+            
+            const diagnosticoCol = tipo === 'vocacional' ? 'LUGAR1' : 'LUGAR1'; 
+            if (state.cols[diagnosticoCol] !== undefined) {
+                const diag = row[state.cols[diagnosticoCol]];
+                groups[groupName].modes[diag] = (groups[groupName].modes[diag] || 0) + 1;
+            }
+        });
+
+        const tbody = document.getElementById(`tbody-${tipo}`);
+        tbody.innerHTML = '';
+        const sortedGroups = Object.keys(groups).sort();
+        
+        sortedGroups.forEach(name => {
+            const g = groups[name];
+            let topMode = 'N/A';
+            let maxCount = 0;
+            for (const [modeName, count] of Object.entries(g.modes)) {
+                if (count > maxCount && modeName !== "" && modeName !== "Sin Especificar") {
+                    maxCount = count;
+                    topMode = modeName;
+                }
+            }
+
+            const tr = document.createElement('tr');
+            tr.className = "hover:bg-blue-50 cursor-pointer transition-colors group";
+            tr.onclick = () => drillDown(tipo, name, currentHierachyDef.label);
+            
+            tr.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-slate-800 font-medium group-hover:text-blue-700">${name}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-center text-slate-600">${g.count.toLocaleString('es-SV')}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-slate-500 text-sm">
+                    <span class="bg-slate-100 border border-slate-200 text-slate-600 py-1 px-2 rounded-md font-medium">${topMode}</span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-blue-600">
+                    <svg class="w-5 h-5 inline-block group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function drillDown(tipo, value, levelLabel) {
+        appState[tipo].path.push({ value: value, label: levelLabel });
+        renderDashboard(tipo);
+    }
+
+    function jumpToBreadcrumb(tipo, index) {
+        if (index === -1) { appState[tipo].path = []; } 
+        else { appState[tipo].path = appState[tipo].path.slice(0, index + 1); }
+        renderDashboard(tipo);
+    }
+
+    function renderBreadcrumbs(tipo) {
+        const ol = document.getElementById(`breadcrumb-${tipo}`);
+        const path = appState[tipo].path;
+        
+        let html = `
+            <li class="inline-flex items-center">
+                <a href="#" onclick="jumpToBreadcrumb('${tipo}', -1); return false;" class="inline-flex items-center hover:text-blue-600 transition-colors font-bold text-slate-700">
+                    <svg class="w-4 h-4 mr-1.5 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path></svg>
+                    Nacional
+                </a>
+            </li>
+        `;
+
+        path.forEach((step, index) => {
+            const isLast = index === path.length - 1;
+            html += `
+                <li>
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 text-slate-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
+                        <a href="#" onclick="jumpToBreadcrumb('${tipo}', ${index}); return false;" class="ml-1 md:ml-2 font-medium hover:text-blue-600 transition-colors ${isLast ? 'text-blue-600 font-bold' : 'text-slate-500'}">
+                            <span class="hidden sm:inline font-normal text-slate-400">${step.label}: </span>${step.value}
+                        </a>
+                    </div>
+                </li>
+            `;
+        });
+
+        ol.innerHTML = html;
+    }
+
+    // --- FUNCIÓN DE EXPORTACIÓN A EXCEL (CSV con formato UTF-8 / BOM) ---
+    function exportToExcel(tipo) {
+        const table = document.querySelector(`#dashboard-${tipo} table`);
+        // Agregar el BOM para que Excel detecte correctamente el UTF-8 (tildes y ñ)
+        let csv = '\uFEFF'; 
+        
+        // Extraer Cabeceras
+        const headers = [];
+        table.querySelectorAll('thead th').forEach((th, index, array) => {
+            // Excluir la última columna ("ACCIÓN")
+            if (index < array.length - 1) {
+                headers.push('"' + th.innerText.replace(/"/g, '""') + '"');
+            }
+        });
+        csv += headers.join(',') + '\n';
+        
+        // Extraer Filas
+        table.querySelectorAll('tbody tr').forEach(tr => {
+            const row = [];
+            const cells = tr.querySelectorAll('td');
+            
+            // Si la fila solo tiene 1 celda (mensaje de advertencia en el nivel máximo), ignorarla
+            if (cells.length <= 1) return; 
+            
+            cells.forEach((td, index) => {
+                // Excluir la última columna (icono de flecha)
+                if (index < cells.length - 1) {
+                    row.push('"' + td.innerText.replace(/"/g, '""') + '"');
+                }
+            });
+            csv += row.join(',') + '\n';
+        });
+        
+        // Crear el enlace de descarga dinámica
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        
+        // Nombre del archivo basado en la ruta actual
+        const pathState = appState[tipo].path;
+        let filename = `Reporte_${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`;
+        if (pathState.length > 0) {
+            filename += `_${pathState[pathState.length-1].value.replace(/\s+/g, '_')}`;
+        } else {
+            filename += `_Nacional`;
+        }
+        filename += '.csv';
+        
+        link.setAttribute("href", url);
+        link.setAttribute("download", filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // --- FUNCIÓN DE AUTOCARGA AL ABRIR LA PÁGINA ---
+    window.addEventListener('DOMContentLoaded', () => {
+        if (URL_PRODUCCION_VOCACIONAL) {
+            document.getElementById('manual-upload-vocacional').classList.add('hidden');
+            document.getElementById('loader-vocacional').classList.remove('hidden');
+            document.getElementById('loader-vocacional').classList.add('flex');
+            
+            fetch(URL_PRODUCCION_VOCACIONAL)
+                .then(res => res.text())
+                .then(text => procesarCSV(text, 'vocacional'))
+                .catch(err => {
+                    console.error("Error cargando Vocacional:", err);
+                    document.getElementById('loader-vocacional').classList.add('hidden');
+                    document.getElementById('manual-upload-vocacional').classList.remove('hidden');
+                });
+        }
+        if (URL_PRODUCCION_APTITUDINAL) {
+            document.getElementById('manual-upload-aptitudinal').classList.add('hidden');
+            document.getElementById('loader-aptitudinal').classList.remove('hidden');
+            document.getElementById('loader-aptitudinal').classList.add('flex');
+
+            fetch(URL_PRODUCCION_APTITUDINAL)
+                .then(res => res.text())
+                .then(text => procesarCSV(text, 'aptitudinal'))
+                .catch(err => {
+                    console.error("Error cargando Aptitudinal:", err);
+                    document.getElementById('loader-aptitudinal').classList.add('hidden');
+                    document.getElementById('manual-upload-aptitudinal').classList.remove('hidden');
+                });
+        }
+    });
+
 </script>
+
 </body>
 </html>
