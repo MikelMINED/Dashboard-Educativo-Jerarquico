@@ -42,11 +42,33 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             min-height: 400px;
         }
+
+        .level-legend {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        .level-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: #475569;
+        }
+        .level-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .level-low { background-color: rgba(239, 68, 68, 0.3); border: 2px solid rgba(239, 68, 68, 0.6); }
+        .level-mid { background-color: rgba(245, 158, 11, 0.3); border: 2px solid rgba(245, 158, 11, 0.6); }
+        .level-high { background-color: rgba(16, 185, 129, 0.3); border: 2px solid rgba(16, 185, 129, 0.6); }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans min-h-screen">
 
-<!-- ENCABEZADO INSTITUCIONAL -->
 <header class="bg-[#0f172a] text-white py-8 px-4 shadow-lg">
     <div class="max-w-7xl mx-auto text-center">
         <h2 class="text-amber-400 font-bold text-lg md:text-xl mb-1">Ministerio de Educación, Ciencia y Tecnología</h2>
@@ -55,7 +77,6 @@
     </div>
 </header>
 
-<!-- Loader de pantalla completa inicial -->
 <div id="global-loader" class="full-screen-loader">
     <div class="loader mb-4" style="width: 48px; height: 48px; border-width: 4px;"></div>
     <p class="text-blue-600 font-bold text-lg mb-2">Cargando Dashboard Educativo</p>
@@ -68,7 +89,6 @@
 
 <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden my-8 mx-4">
     
-    <!-- Navegación de Pestañas -->
     <div class="flex border-b border-slate-200 bg-slate-50">
         <button id="btn-tab-vocacional" class="flex-1 py-4 px-6 text-sm font-bold text-blue-600 border-b-2 border-blue-600 bg-white transition-colors" onclick="switchTab('vocacional')">
             Vocacional (9° Grado)
@@ -81,13 +101,11 @@
     <!-- PESTAÑA: VOCACIONAL 9° -->
     <div id="tab-vocacional" class="p-6 md:p-8 block fade-in">
         
-        <!-- Loader específico de esta pestaña -->
         <div id="loading-vocacional" class="tab-loading">
             <div class="loader mb-4"></div>
             <p class="text-blue-600 font-bold">Cargando datos vocacionales...</p>
         </div>
 
-        <!-- Dashboard Interactivo -->
         <div id="dashboard-vocacional" class="hidden fade-in">
             <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
@@ -104,6 +122,9 @@
                         <select id="filter-zona-vocacional" onchange="renderDashboard('vocacional')" class="text-sm bg-transparent font-medium text-slate-600 focus:outline-none pl-2">
                             <option value="TODOS">Todas las Zonas</option>
                         </select>
+                        <select id="filter-sexo-vocacional" onchange="renderDashboard('vocacional')" class="text-sm bg-transparent font-medium text-slate-600 focus:outline-none pl-2 border-l border-slate-300">
+                            <option value="TODOS">Todos los Sexos</option>
+                        </select>
                     </div>
                     <button onclick="exportToExcel('vocacional')" class="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-sm font-bold rounded-lg transition-colors flex items-center gap-2 border border-emerald-200">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> Exportar Excel
@@ -111,7 +132,6 @@
                 </div>
             </div>
 
-            <!-- KPIs -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                 <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex items-center">
                     <div class="p-3 bg-blue-100 text-blue-600 rounded-lg mr-4">
@@ -142,7 +162,6 @@
                 </div>
             </div>
 
-            <!-- Gráficos Visuales 9° -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                 <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col items-center justify-center">
                     <h3 class="text-lg font-bold text-slate-700 mb-2">Hexágono de Holland</h3>
@@ -170,7 +189,6 @@
                 </div>
             </div>
 
-            <!-- Tabla de Navegación Drill-Down -->
             <h3 class="text-lg font-bold text-slate-700 mb-3">Desglose Geográfico / Institucional / Individual</h3>
             <div class="bg-white border border-slate-200 rounded-lg overflow-x-auto no-scrollbar shadow-sm">
                 <table class="min-w-full divide-y divide-slate-200 text-sm">
@@ -192,7 +210,6 @@
     <!-- PESTAÑA: APTITUDINAL 6° -->
     <div id="tab-aptitudinal" class="p-6 md:p-8 hidden fade-in">
         
-        <!-- Loader específico de esta pestaña -->
         <div id="loading-aptitudinal" class="tab-loading">
             <div class="loader mb-4"></div>
             <p class="text-purple-600 font-bold">Cargando datos aptitudinales...</p>
@@ -214,6 +231,9 @@
                         <select id="filter-zona-aptitudinal" onchange="renderDashboard('aptitudinal')" class="text-sm bg-transparent font-medium text-slate-600 focus:outline-none pl-2">
                             <option value="TODOS">Todas las Zonas</option>
                         </select>
+                        <select id="filter-sexo-aptitudinal" onchange="renderDashboard('aptitudinal')" class="text-sm bg-transparent font-medium text-slate-600 focus:outline-none pl-2 border-l border-slate-300">
+                            <option value="TODOS">Todos los Sexos</option>
+                        </select>
                     </div>
                     <button onclick="exportToExcel('aptitudinal')" class="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-sm font-bold rounded-lg transition-colors flex items-center gap-2 border border-emerald-200">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> Exportar Excel
@@ -221,7 +241,6 @@
                 </div>
             </div>
 
-            <!-- KPIs -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                 <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex items-center">
                     <div class="p-3 bg-purple-100 text-purple-600 rounded-lg mr-4">
@@ -252,7 +271,6 @@
                 </div>
             </div>
 
-            <!-- Gráficos Visuales 6° -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                 <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
                     <h3 class="text-lg font-bold text-slate-700 mb-2">Desempeño Promedio por Aptitud</h3>
@@ -261,14 +279,28 @@
                     </div>
                 </div>
                 <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col items-center justify-center">
-                    <h3 class="text-lg font-bold text-slate-700 mb-2">Polígono de Aptitudes</h3>
-                    <div class="relative w-full max-w-sm aspect-square">
+                    <h3 class="text-lg font-bold text-slate-700 mb-2">Perfil Aptitudinal Integral</h3>
+                    <p class="text-xs text-slate-500 mb-2 text-center">Zonas: Bajo (0-13) · Medio (14-26) · Alto (27-40)</p>
+                    <div class="relative w-full" style="height: 450px;">
                         <canvas id="chart-apt-radar"></canvas>
+                    </div>
+                    <div class="level-legend">
+                        <div class="level-legend-item">
+                            <div class="level-dot level-low"></div>
+                            <span>Nivel Bajo (0-13)</span>
+                        </div>
+                        <div class="level-legend-item">
+                            <div class="level-dot level-mid"></div>
+                            <span>Nivel Medio (14-26)</span>
+                        </div>
+                        <div class="level-legend-item">
+                            <div class="level-dot level-high"></div>
+                            <span>Nivel Alto (27-40)</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Tabla de Navegación Drill-Down -->
             <h3 class="text-lg font-bold text-slate-700 mb-3">Desglose Geográfico / Institucional / Individual</h3>
             <div class="bg-white border border-slate-200 rounded-lg overflow-x-auto no-scrollbar shadow-sm">
                 <table class="min-w-full divide-y divide-slate-200 text-sm">
@@ -289,13 +321,13 @@
 </div>
 
 <script>
-    // === CONFIGURACIÓN DE PRODUCCIÓN ===
     const CONFIG = {
         GITHUB_BASE_URL: 'https://raw.githubusercontent.com/MikelMINED/Dashboard-Educativo-Jerarquico/main',
         FILES: {
             VOCACIONAL: 'BD_Reporte_Vocacional_9_Ligero.csv',
             APTITUDINAL: 'BD_Reporte_Aptitudinal_6_Ligero.csv'
-        }
+        },
+        VERSION: 'v2.1'
     };
 
     let chartInstances = {
@@ -381,7 +413,6 @@
                 { key: 'sede_nombre', label: 'Centro Escolar', prependCode: 'sede_codigo' },
                 { key: 'NIE', label: 'Estudiante (NIE)' }
             ],
-            // ✅ Columnas SUMA_* con puntajes reales (0-40)
             metrics: [
                 'SUMA_COMPRENSIÓN VERBAL',
                 'SUMA_FLUIDEZ VERBAL',
@@ -394,7 +425,6 @@
                 'SUMA_PERCEPCIÓN',
                 'SUMA_APTITUD FÍSICA'
             ],
-            // Etiquetas bonitas para mostrar
             metricLabels: {
                 'SUMA_COMPRENSIÓN VERBAL': 'COMPRENSIÓN VERBAL',
                 'SUMA_FLUIDEZ VERBAL': 'FLUIDEZ VERBAL',
@@ -412,7 +442,7 @@
 
     async function loadFromGitHub(tipo) {
         const fileName = tipo === 'vocacional' ? CONFIG.FILES.VOCACIONAL : CONFIG.FILES.APTITUDINAL;
-        const url = `${CONFIG.GITHUB_BASE_URL}/${fileName}`;
+        const url = `${CONFIG.GITHUB_BASE_URL}/${fileName}?v=${CONFIG.VERSION}&t=${Date.now()}`;
         
         updateProgress(tipo, 'loading');
         
@@ -492,25 +522,34 @@
         const state = appState[tipo];
         const sectorSet = new Set();
         const zonaSet = new Set();
+        const sexoSet = new Set();
         
         state.rows.forEach(r => {
             const sector = r['sede_sector'];
             const zona = r['sede_zona'];
+            const sexo = r['est_nomb_sexo'];
+            
             if(sector && sector.trim() !== '') sectorSet.add(sector.trim());
             if(zona && zona.trim() !== '') zonaSet.add(zona.trim());
+            if(sexo && sexo.trim() !== '') sexoSet.add(sexo.trim());
         });
 
         const selSector = document.getElementById(`filter-sector-${tipo}`);
         const selZona = document.getElementById(`filter-zona-${tipo}`);
+        const selSexo = document.getElementById(`filter-sexo-${tipo}`);
         
         selSector.innerHTML = '<option value="TODOS">Todos los Sectores</option>';
         selZona.innerHTML = '<option value="TODOS">Todas las Zonas</option>';
+        selSexo.innerHTML = '<option value="TODOS">Todos los Sexos</option>';
 
         Array.from(sectorSet).sort().forEach(s => {
             selSector.innerHTML += `<option value="${s}">${s}</option>`;
         });
         Array.from(zonaSet).sort().forEach(z => {
             selZona.innerHTML += `<option value="${z}">${z}</option>`;
+        });
+        Array.from(sexoSet).sort().forEach(s => {
+            selSexo.innerHTML += `<option value="${s}">${s}</option>`;
         });
     }
 
@@ -616,7 +655,6 @@
             const labels = state.metrics;
             const data = labels.map(l => avgs[l] || 0);
 
-            // ✅ Encontrar la aptitud con mayor puntaje usando metricLabels
             let topApt = 'N/A'; 
             let maxApt = 0;
             for(let a in avgs) { 
@@ -627,29 +665,19 @@
             }
             document.getElementById('kpi-apt-alta').textContent = topApt;
 
-            // ✅ 5 aptitudes para el radar
-            const radarMetrics = [
-                'SUMA_COMPRENSIÓN VERBAL', 
-                'SUMA_FLUIDEZ VERBAL', 
-                'SUMA_APTITUD NUMÉRICA', 
-                'SUMA_PERCEPCIÓN', 
-                'SUMA_APTITUD FÍSICA'
-            ];
-            const radarData = radarMetrics.map(l => avgs[l] || 0);
-            const radarLabels = radarMetrics.map(l => state.metricLabels[l]);
+            const prettyLabels = labels.map(l => state.metricLabels[l]);
 
-            // Gráfico de barras (todas las aptitudes)
             if(chartInstances.aptitudinal.bar) {
                 chartInstances.aptitudinal.bar.data.datasets[0].data = data;
                 chartInstances.aptitudinal.bar.data.datasets[0].label = filteredRows.length === 1 ? 'Puntaje Individual' : 'Promedio';
-                chartInstances.aptitudinal.bar.data.labels = labels.map(l => state.metricLabels[l]);
+                chartInstances.aptitudinal.bar.data.labels = prettyLabels;
                 chartInstances.aptitudinal.bar.update();
             } else {
                 const ctxBar = document.getElementById('chart-apt-bar').getContext('2d');
                 chartInstances.aptitudinal.bar = new Chart(ctxBar, {
                     type: 'bar',
                     data: {
-                        labels: labels.map(l => state.metricLabels[l]),
+                        labels: prettyLabels,
                         datasets: [{
                             label: filteredRows.length === 1 ? 'Puntaje Individual' : 'Promedio',
                             data: data,
@@ -669,38 +697,106 @@
                 });
             }
 
-            // Gráfico radar (5 aptitudes clave) - MÁXIMO 40
+            const zonasData = [
+                { value: 13, color: 'rgba(239, 68, 68, 0.15)', borderColor: 'rgba(239, 68, 68, 0.4)', label: 'Nivel Bajo' },
+                { value: 26, color: 'rgba(245, 158, 11, 0.15)', borderColor: 'rgba(245, 158, 11, 0.4)', label: 'Nivel Medio' },
+                { value: 40, color: 'rgba(16, 185, 129, 0.15)', borderColor: 'rgba(16, 185, 129, 0.4)', label: 'Nivel Alto' }
+            ];
+
             if(chartInstances.aptitudinal.radar) {
-                chartInstances.aptitudinal.radar.data.datasets[0].data = radarData;
-                chartInstances.aptitudinal.radar.data.datasets[0].label = filteredRows.length === 1 ? 'Desempeño Individual' : 'Desempeño Promedio';
-                chartInstances.aptitudinal.radar.data.labels = radarLabels;
+                const datasets = chartInstances.aptitudinal.radar.data.datasets;
+                datasets[datasets.length - 1].data = data;
+                datasets[datasets.length - 1].label = filteredRows.length === 1 ? 'Perfil Actual' : 'Perfil Promedio';
+                chartInstances.aptitudinal.radar.data.labels = prettyLabels;
                 chartInstances.aptitudinal.radar.update();
             } else {
                 const ctxRadar = document.getElementById('chart-apt-radar').getContext('2d');
+                
+                const zoneDatasets = zonasData.map(zona => ({
+                    label: zona.label,
+                    data: Array(labels.length).fill(zona.value),
+                    backgroundColor: zona.color,
+                    borderColor: zona.borderColor,
+                    borderWidth: 1,
+                    pointRadius: 0,
+                    fill: true,
+                    order: 2
+                }));
+
+                const mainDataset = {
+                    label: filteredRows.length === 1 ? 'Perfil Actual' : 'Perfil Promedio',
+                    data: data,
+                    backgroundColor: 'rgba(16, 185, 129, 0.3)',
+                    borderColor: 'rgba(16, 185, 129, 1)',
+                    pointBackgroundColor: 'rgba(16, 185, 129, 1)',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    borderWidth: 3,
+                    fill: true,
+                    order: 1
+                };
+
                 chartInstances.aptitudinal.radar = new Chart(ctxRadar, {
                     type: 'radar',
                     data: {
-                        labels: radarLabels,
-                        datasets: [{
-                            label: filteredRows.length === 1 ? 'Desempeño Individual' : 'Desempeño Promedio',
-                            data: radarData,
-                            backgroundColor: 'rgba(16, 185, 129, 0.2)',
-                            borderColor: 'rgba(16, 185, 129, 1)',
-                            pointBackgroundColor: 'rgba(16, 185, 129, 1)',
-                            borderWidth: 2
-                        }]
+                        labels: prettyLabels,
+                        datasets: [...zoneDatasets, mainDataset]
                     },
                     options: { 
                         scales: { 
                             r: { 
                                 beginAtZero: true, 
-                                max: 40,  // ✅ Máximo 40 (puntajes reales)
-                                ticks: { stepSize: 10 }
+                                max: 40,
+                                ticks: { 
+                                    stepSize: 10,
+                                    font: { size: 10 },
+                                    backdropColor: 'transparent',
+                                    color: '#64748b'
+                                },
+                                pointLabels: {
+                                    font: { size: 11, weight: 'bold' },
+                                    color: '#334155'
+                                },
+                                grid: {
+                                    color: 'rgba(148, 163, 184, 0.2)',
+                                    circular: true
+                                },
+                                angleLines: {
+                                    color: 'rgba(148, 163, 184, 0.3)'
+                                }
                             } 
                         }, 
-                        plugins: { legend: { display: false } }, 
+                        plugins: { 
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                                titleFont: { size: 13, weight: 'bold' },
+                                bodyFont: { size: 12 },
+                                padding: 10,
+                                cornerRadius: 8,
+                                callbacks: {
+                                    label: function(context) {
+                                        if (context.datasetIndex === zoneDatasets.length) {
+                                            const valor = context.parsed.r;
+                                            let nivel = '';
+                                            if (valor <= 13) nivel = '🔴 Bajo';
+                                            else if (valor <= 26) nivel = '🟡 Medio';
+                                            else nivel = '🟢 Alto';
+                                            return `${context.label}: ${valor} pts (${nivel})`;
+                                        }
+                                        return null;
+                                    }
+                                }
+                            }
+                        }, 
                         responsive: true, 
-                        maintainAspectRatio: false 
+                        maintainAspectRatio: false,
+                        animation: {
+                            duration: 800,
+                            easing: 'easeOutQuart'
+                        }
                     }
                 });
             }
@@ -726,12 +822,16 @@
 
         const selSector = document.getElementById(`filter-sector-${tipo}`).value;
         const selZona = document.getElementById(`filter-zona-${tipo}`).value;
+        const selSexo = document.getElementById(`filter-sexo-${tipo}`).value;
         
         if(selSector !== 'TODOS') {
             filteredRows = filteredRows.filter(r => r['sede_sector'] === selSector);
         }
         if(selZona !== 'TODOS') {
             filteredRows = filteredRows.filter(r => r['sede_zona'] === selZona);
+        }
+        if(selSexo !== 'TODOS') {
+            filteredRows = filteredRows.filter(r => r['est_nomb_sexo'] === selSexo);
         }
 
         updateVisuals(tipo, filteredRows);
