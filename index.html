@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tablero Vocacional-Aptitudinal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+        <!-- Encabezado -->
+        <header class="mb-8 border-b pb-6 text-center">
+            <h1 class="text-3xl font-bold text-gray-800">Tablero Vocacional-Aptitudinal</h1>
+            <p class="text-gray-500 mt-2">Análisis de competencias y áreas de interés</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Gráfico Hexagonal -->
+            <div class="flex flex-col items-center">
+                <h2 class="text-lg font-semibold mb-4 text-gray-700">Competencias Clave</h2>
+                <canvas id="hexChart" width="300" height="300"></canvas>
+            </div>
+
+            <!-- Gráfico de Polígono -->
+            <div class="flex flex-col items-center">
+                <h2 class="text-lg font-semibold mb-4 text-gray-700">Perfil Aptitudinal</h2>
+                <canvas id="polyChart" width="300" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuración común de colores
+        const primaryColor = 'rgba(59, 130, 246, 0.5)';
+        const borderColor = 'rgba(59, 130, 246, 1)';
+
+        // Gráfico Hexagonal (Escala ajustada a 25)
+        const ctxHex = document.getElementById('hexChart').getContext('2d');
+        new Chart(ctxHex, {
+            type: 'radar',
+            data: {
+                labels: ['Liderazgo', 'Creatividad', 'Análisis', 'Comunicación', 'Técnica', 'Social'],
+                datasets: [{
+                    label: 'Puntaje',
+                    data: [25, 20, 22, 18, 25, 21],
+                    backgroundColor: primaryColor,
+                    borderColor: borderColor,
+                    borderWidth: 2
+                }]
+            },
+            options: { scales: { r: { beginAtZero: true, max: 30 } } }
+        });
+
+        // Gráfico de Polígono (Escala ajustada a 15)
+        const ctxPoly = document.getElementById('polyChart').getContext('2d');
+        new Chart(ctxPoly, {
+            type: 'radar',
+            data: {
+                labels: ['Matemáticas', 'Arte', 'Ciencia', 'Humanidades', 'Tecnología'],
+                datasets: [{
+                    label: 'Nivel',
+                    data: [15, 12, 14, 10, 13],
+                    backgroundColor: 'rgba(16, 185, 129, 0.5)',
+                    borderColor: 'rgba(16, 185, 129, 1)',
+                    borderWidth: 2
+                }]
+            },
+            options: { scales: { r: { beginAtZero: true, max: 15 } } }
+        });
+    </script>
+</body>
+</html>
