@@ -2,18 +2,14 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tablero Vocacional-Aptitudinal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        .fade-in { animation: fadeIn 0.4s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .holland-table th, .holland-table td { border: 1px solid #e2e8f0; padding: 0.5rem; text-align: center; }
-        .holland-table th { background-color: #f8fafc; font-weight: 600; color: #475569; font-size: 0.875rem; }
-    </style>
 </head>
 <body class="bg-slate-50 min-h-screen font-sans">
 
+    <!-- Encabezado -->
     <header class="bg-[#0b1b33] text-white p-8 text-center shadow-md">
         <h2 class="text-amber-400 font-bold uppercase tracking-widest text-sm mb-2">Ministerio de Educación, Ciencia y Tecnología</h2>
         <p class="text-slate-400 text-xs uppercase tracking-widest mb-4">MINEDUCYT · GERENCIA DE ESTADÍSTICAS</p>
@@ -23,58 +19,85 @@
 
     <div class="max-w-7xl mx-auto my-8 bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
         <div class="flex border-b border-slate-200 bg-slate-50">
-            <button id="btn-tab-vocacional" class="flex-1 py-4 px-6 text-sm font-bold text-blue-600 border-b-2 border-blue-600 bg-white transition-colors" onclick="switchTab('vocacional')">Vocacional (9° Grado)</button>
-            <button id="btn-tab-aptitudinal" class="flex-1 py-4 px-6 text-sm font-semibold text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors" onclick="switchTab('aptitudinal')">Aptitudinal (6° Grado)</button>
+            <button id="btn-vocacional" class="flex-1 py-4 px-6 text-sm font-bold text-blue-600 border-b-2 border-blue-600 bg-white" onclick="changeTab('vocacional')">Vocacional (9° Grado)</button>
+            <button id="btn-aptitudinal" class="flex-1 py-4 px-6 text-sm font-semibold text-slate-500 hover:bg-slate-100" onclick="changeTab('aptitudinal')">Aptitudinal (6° Grado)</button>
         </div>
-
-        <div id="tab-vocacional" class="p-8 block fade-in">
-             <div id="dashboard-vocacional" class="text-center py-20 text-slate-500">Cargando datos vocacionales...</div>
-        </div>
-
-        <div id="tab-aptitudinal" class="p-8 hidden fade-in">
-             <div id="dashboard-aptitudinal" class="text-center py-20 text-slate-500">Cargando datos aptitudinales...</div>
+        <div id="content-area" class="p-8">
+            <div id="loader" class="text-center py-20 text-slate-500 font-bold text-xl">Cargando datos desde el servidor...</div>
         </div>
     </div>
 
 <script>
-    const URL_VOCACIONAL = "https://github.com/MikelMINED/Dashboard-Educativo-Jerarquico/raw/refs/heads/main/BD_Reporte_Vocacional_9_Ligero.csv"; 
-    const URL_APTITUDINAL = "https://github.com/MikelMINED/Dashboard-Educativo-Jerarquico/raw/refs/heads/main/BD_Reporte_Aptitudinal_6_Ligero.csv";
+    const URLs = {
+        vocacional: "https://github.com/MikelMINED/Dashboard-Educativo-Jerarquico/raw/refs/heads/main/BD_Reporte_Vocacional_9_Ligero.csv",
+        aptitudinal: "https://github.com/MikelMINED/Dashboard-Educativo-Jerarquico/raw/refs/heads/main/BD_Reporte_Aptitudinal_6_Ligero.csv"
+    };
 
-    function switchTab(tipo) {
-        document.getElementById('tab-vocacional').style.display = (tipo === 'vocacional') ? 'block' : 'none';
-        document.getElementById('tab-aptitudinal').style.display = (tipo === 'aptitudinal') ? 'block' : 'none';
-        document.getElementById('btn-tab-vocacional').className = (tipo === 'vocacional') ? 'flex-1 py-4 px-6 text-sm font-bold text-blue-600 border-b-2 border-blue-600 bg-white' : 'flex-1 py-4 px-6 text-sm font-semibold text-slate-500 hover:bg-slate-100';
-        document.getElementById('btn-tab-aptitudinal').className = (tipo === 'aptitudinal') ? 'flex-1 py-4 px-6 text-sm font-bold text-blue-600 border-b-2 border-blue-600 bg-white' : 'flex-1 py-4 px-6 text-sm font-semibold text-slate-500 hover:bg-slate-100';
+    let datos = { vocacional: [], aptitudinal: [] };
+    let currentTab = 'vocacional';
+
+    async function init() {
+        try {
+            const [respVoc, respApt] = await Promise.all([fetch(URLs.vocacional), fetch(URLs.aptitudinal)]);
+            datos.vocacional = parseCSV(await respVoc.text());
+            datos.aptitudinal = parseCSV(await respApt.text());
+            render(currentTab);
+        } catch (e) {
+            document.getElementById('content-area').innerHTML = `<p class="text-red-500 text-center font-bold">Error cargando datos: ${e.message}</p>`;
+        }
     }
 
-    function procesarCSV(text, tipo) {
+    function parseCSV(text) {
         const lines = text.split('\n');
         const headers = lines[0].split(',').map(h => h.trim());
-        const rows = lines.slice(1).map(line => line.split(','));
-        
-        document.getElementById(`dashboard-${tipo}`).innerHTML = `
-            <div class="space-y-4">
-                <h3 class="text-lg font-bold">Resumen de datos cargados: ${rows.length.toLocaleString()} registros.</h3>
-                <p>El sistema está listo para navegar por los niveles geográficos desde lo nacional a lo individual (NIE).</p>
-            </div>
-        `;
-        // Aquí se conectaría la lógica de renderDashboard y Drill-down que ya validamos
-        console.log(`Datos ${tipo} cargados correctamente.`);
+        return lines.slice(1).filter(l => l.trim()).map(line => {
+            const values = line.split(',');
+            let obj = {};
+            headers.forEach((h, i) => obj[h] = values[i]);
+            return obj;
+        });
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
-        fetch(URL_VOCACIONAL).then(r => r.text()).then(t => procesarCSV(t, 'vocacional'));
-        fetch(URL_APTITUDINAL).then(r => r.text()).then(t => procesarCSV(t, 'aptitudinal'));
-    });
+    function changeTab(tab) {
+        currentTab = tab;
+        document.getElementById('btn-vocacional').className = tab === 'vocacional' ? 'flex-1 py-4 px-6 text-sm font-bold text-blue-600 border-b-2 border-blue-600 bg-white' : 'flex-1 py-4 px-6 text-sm font-semibold text-slate-500 hover:bg-slate-100';
+        document.getElementById('btn-aptitudinal').className = tab === 'aptitudinal' ? 'flex-1 py-4 px-6 text-sm font-bold text-blue-600 border-b-2 border-blue-600 bg-white' : 'flex-1 py-4 px-6 text-sm font-semibold text-slate-500 hover:bg-slate-100';
+        render(tab);
+    }
+
+    function render(tab) {
+        const d = datos[tab];
+        document.getElementById('content-area').innerHTML = `
+            <div class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-blue-50 p-6 rounded-xl border border-blue-100">
+                        <h3 class="font-bold text-blue-900">Total Registros</h3>
+                        <p class="text-3xl font-black text-blue-700">${d.length.toLocaleString()}</p>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead><tr class="bg-slate-100">${Object.keys(d[0]).map(k => `<th class="p-3 border">${k}</th>`).join('')}</tr></thead>
+                        <tbody>${d.slice(0, 10).map(row => `<tr class="border-b hover:bg-slate-50">${Object.values(row).map(v => `<td class="p-3">${v}</td>`).join('')}</tr>`).join('')}</tbody>
+                    </table>
+                </div>
+                <button onclick="exportExcel('${tab}')" class="bg-emerald-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-emerald-700">Descargar Excel</button>
+            </div>
+        `;
+    }
+
+    function exportExcel(tab) {
+        const d = datos[tab];
+        let csv = '\uFEFF' + Object.keys(d[0]).join(',') + '\n';
+        csv += d.map(r => Object.values(r).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `${tab}_datos.csv`;
+        link.click();
+    }
+
+    init();
 </script>
 </body>
 </html>
-```
-
-### ¿Por qué ahora sí funcionará?
-1. **Un solo bloque:** He consolidado todo el código aquí.
-2. **Encabezado Institucional:** He puesto el título y la estructura de encabezado tal cual lo solicitaste.
-3. **Estabilidad:** La carga automática está integrada con los enlaces `raw` de GitHub que me diste.
-
-**¿Qué sigue?**
-Ya tenemos la "carcasa" funcionando y cargando datos. Si al abrir el sitio ves el texto "Resumen de datos cargados: 57,981 registros", **¡estamos en el lugar correcto!**. A partir de aquí, solo es cuestión de aplicar el motor de navegación que ya probamos anteriormente. ¿Confirmamos que carga los datos antes de pasar a integrar el resto?
