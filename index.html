@@ -100,7 +100,6 @@
 
     <!-- PESTAÑA: VOCACIONAL 9° -->
     <div id="tab-vocacional" class="p-6 md:p-8 block fade-in">
-        
         <div id="loading-vocacional" class="tab-loading">
             <div class="loader mb-4"></div>
             <p class="text-blue-600 font-bold">Cargando datos vocacionales...</p>
@@ -209,7 +208,6 @@
 
     <!-- PESTAÑA: APTITUDINAL 6° -->
     <div id="tab-aptitudinal" class="p-6 md:p-8 hidden fade-in">
-        
         <div id="loading-aptitudinal" class="tab-loading">
             <div class="loader mb-4"></div>
             <p class="text-purple-600 font-bold">Cargando datos aptitudinales...</p>
@@ -327,7 +325,7 @@
             VOCACIONAL: 'BD_Reporte_Vocacional_9_Ligero.csv',
             APTITUDINAL: 'BD_Reporte_Aptitudinal_6_Ligero.csv'
         },
-        VERSION: 'v2.1'
+        VERSION: 'v2.2'
     };
 
     let chartInstances = {
@@ -348,6 +346,9 @@
         vocacional: ['sede_nomb_depto', 'distrito', 'sede_nombre', 'sede_codigo', 'secc_codigo', 'NIE', 'LUGAR1', 'GRUPO OCUPACIONAL', 'sede_sector', 'sede_zona', 'social', 'realista', 'cientifico', 'artistico', 'emprendedor', 'oficina'],
         aptitudinal: ['sede_nomb_depto', 'sede_nomb_mun', 'sede_nombre', 'sede_codigo', 'NIE', 'LUGAR1', 'sede_sector', 'sede_zona', 'SUMA_COMPRENSIÓN VERBAL', 'SUMA_FLUIDEZ VERBAL', 'SUMA_APTITUD NUMÉRICA', 'SUMA_RAZONAMIENTO LÓGICO', 'SUMA_APTITUD ESPACIAL', 'SUMA_APTITUD MECÁNICA', 'SUMA_APTITUD ARTÍSTICA', 'SUMA_MEMORIA', 'SUMA_PERCEPCIÓN', 'SUMA_APTITUD FÍSICA']
     };
+
+    // ✅ Nombres posibles de la columna de sexo (prioridad de búsqueda)
+    const SEXO_COLUMN_CANDIDATES = ['est_nomb_sexo', 'sexo', 'genero', 'Sexo', 'GENERO', 'est_genero'];
 
     const loadStatus = {
         vocacional: false,
@@ -395,7 +396,7 @@
 
     const appState = {
         vocacional: {
-            rows: [], cols: {}, path: [],
+            rows: [], cols: {}, path: [], sexoColumn: null,
             hierarchy: [
                 { key: 'sede_nomb_depto', label: 'Departamento' },
                 { key: 'distrito', label: 'Distrito' },
@@ -406,7 +407,7 @@
             metrics: ['social', 'realista', 'cientifico', 'artistico', 'emprendedor', 'oficina']
         },
         aptitudinal: {
-            rows: [], cols: {}, path: [],
+            rows: [], cols: {}, path: [], sexoColumn: null,
             hierarchy: [
                 { key: 'sede_nomb_depto', label: 'Departamento' },
                 { key: 'sede_nomb_mun', label: 'Municipio' },
@@ -439,6 +440,16 @@
             }
         }
     };
+
+    // ✅ Función para detectar la columna de sexo
+    function detectarColumnaSexo(headers) {
+        for (const candidato of SEXO_COLUMN_CANDIDATES) {
+            if (headers.includes(candidato)) {
+                return candidato;
+            }
+        }
+        return null;
+    }
 
     async function loadFromGitHub(tipo) {
         const fileName = tipo === 'vocacional' ? CONFIG.FILES.VOCACIONAL : CONFIG.FILES.APTITUDINAL;
@@ -499,6 +510,15 @@
                 return;
             }
 
+            // ✅ Detectar columna de sexo
+            const sexoCol = detectarColumnaSexo(headers);
+            appState[tipo].sexoColumn = sexoCol;
+            if (sexoCol) {
+                console.log(`✅ ${tipo}: Columna de sexo detectada → "${sexoCol}"`);
+            } else {
+                console.warn(`⚠️ ${tipo}: No se encontró columna de sexo`);
+            }
+
             appState[tipo].rows = parsed.data;
             appState[tipo].cols = {};
             headers.forEach((h, idx) => {
@@ -527,7 +547,9 @@
         state.rows.forEach(r => {
             const sector = r['sede_sector'];
             const zona = r['sede_zona'];
-            const sexo = r['est_nomb_sexo'];
+            
+            // ✅ Usar la columna detectada
+            const sexo = state.sexoColumn ? r[state.sexoColumn] : null;
             
             if(sector && sector.trim() !== '') sectorSet.add(sector.trim());
             if(zona && zona.trim() !== '') zonaSet.add(zona.trim());
@@ -551,6 +573,13 @@
         Array.from(sexoSet).sort().forEach(s => {
             selSexo.innerHTML += `<option value="${s}">${s}</option>`;
         });
+
+        // Ocultar filtro de sexo si no hay datos
+        if (sexoSet.size === 0) {
+            selSexo.style.display = 'none';
+        } else {
+            console.log(`✅ ${tipo}: Filtro de sexo poblado con ${sexoSet.size} valores: ${Array.from(sexoSet).join(', ')}`);
+        }
     }
 
     function getAverages(rows, metricsKeys) {
@@ -830,8 +859,9 @@
         if(selZona !== 'TODOS') {
             filteredRows = filteredRows.filter(r => r['sede_zona'] === selZona);
         }
-        if(selSexo !== 'TODOS') {
-            filteredRows = filteredRows.filter(r => r['est_nomb_sexo'] === selSexo);
+        // ✅ Filtrar por sexo usando la columna detectada
+        if(selSexo !== 'TODOS' && state.sexoColumn) {
+            filteredRows = filteredRows.filter(r => r[state.sexoColumn] === selSexo);
         }
 
         updateVisuals(tipo, filteredRows);
