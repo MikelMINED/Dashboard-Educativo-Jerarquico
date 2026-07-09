@@ -12,8 +12,8 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .holland-table th, .holland-table td { border: 1px solid #e2e8f0; padding: 0.5rem; text-align: center; }
-        .holland-table th { background-color: #f8fafc; font-weight: 600; color: #475569; font-size: 0.875rem; }
+        .holland-table th, .holland-table td { border: 1px solid #e2e8f0; padding: 0.4rem; text-align: center; font-size: 0.875rem; }
+        .holland-table th { background-color: #f8fafc; font-weight: 600; color: #475569; }
         .loader { border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
@@ -44,25 +44,24 @@
         }
 
         .level-legend {
-            display: flex; justify-content: center; gap: 1.5rem;
-            margin-top: 1rem; flex-wrap: wrap;
+            display: flex; justify-content: center; gap: 1rem;
+            margin-top: 0.5rem; flex-wrap: wrap;
         }
         .level-legend-item {
-            display: flex; align-items: center; gap: 0.5rem;
-            font-size: 0.75rem; color: #475569;
+            display: flex; align-items: center; gap: 0.4rem;
+            font-size: 0.7rem; color: #475569;
         }
-        .level-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .level-dot { width: 10px; height: 10px; border-radius: 50%; }
         .level-low { background-color: rgba(239, 68, 68, 0.3); border: 2px solid rgba(239, 68, 68, 0.6); }
         .level-mid { background-color: rgba(245, 158, 11, 0.3); border: 2px solid rgba(245, 158, 11, 0.6); }
         .level-high { background-color: rgba(16, 185, 129, 0.3); border: 2px solid rgba(16, 185, 129, 0.6); }
 
-        /* ✅ STICKY CORREGIDO: Sin overflow en padre */
         .sticky-charts {
             position: sticky;
             top: 0;
             z-index: 50;
             background: white;
-            padding: 1rem 0;
+            padding: 0.75rem 0;
             border-bottom: 2px solid #e2e8f0;
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
         }
@@ -74,14 +73,15 @@
         .top-centros-table th {
             background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
             color: white;
-            padding: 0.75rem;
+            padding: 0.6rem;
             text-align: left;
-            font-size: 0.875rem;
+            font-size: 0.8rem;
             font-weight: 600;
         }
         .top-centros-table td {
-            padding: 0.75rem;
+            padding: 0.6rem;
             border-bottom: 1px solid #e2e8f0;
+            font-size: 0.85rem;
         }
         .top-centros-table tr:hover {
             background-color: #f1f5f9;
@@ -90,11 +90,11 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 28px;
-            height: 28px;
+            width: 26px;
+            height: 26px;
             border-radius: 50%;
             font-weight: bold;
-            font-size: 0.875rem;
+            font-size: 0.8rem;
         }
         .rank-1 { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: white; }
         .rank-2 { background: linear-gradient(135deg, #cbd5e1, #94a3b8); color: white; }
@@ -117,12 +117,11 @@
     <p class="text-blue-600 font-bold text-lg mb-2">Cargando Dashboard Educativo</p>
     <p id="loader-message" class="text-slate-500 text-sm">Conectando con el servidor de datos...</p>
     <div id="loader-progress" class="mt-4 flex gap-2">
-        <span id="progress-vocacional" class="px-3 py-1 bg-slate-200 rounded text-xs">Vocacional: <span class="font-bold">⏳</span></span>
+        <span id="progress-vocacional" class="px-3 py-1 bg-slate-200 rounded text-xs">Vocacional: <span class="font-bold"></span></span>
         <span id="progress-aptitudinal" class="px-3 py-1 bg-slate-200 rounded text-xs">Aptitudinal: <span class="font-bold">⏳</span></span>
     </div>
 </div>
 
-<!-- ✅ CORREGIDO: Sin overflow-hidden para permitir sticky -->
 <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-lg border border-slate-200 my-8 mx-4">
     
     <div class="flex border-b border-slate-200 bg-slate-50 rounded-t-xl overflow-hidden">
@@ -148,7 +147,6 @@
                 </nav>
             </div>
 
-            <!-- ✅ STICKY: Filtros + KPIs + Gráficas siempre visibles -->
             <div class="sticky-charts">
                 <div class="flex flex-wrap items-center gap-3 mb-4">
                     <div class="flex bg-slate-50 p-1.5 rounded-lg border border-slate-200 flex-wrap gap-1">
@@ -207,28 +205,28 @@
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col items-center justify-center">
-                        <h3 class="text-base font-bold text-slate-700 mb-2">Hexágono de Holland</h3>
-                        <div class="relative w-full max-w-sm aspect-square">
+                    <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                        <h3 class="text-sm font-bold text-slate-700 mb-2 text-center">Hexágono de Holland</h3>
+                        <div class="relative w-full" style="height: 280px;">
                             <canvas id="chart-voc-radar"></canvas>
                         </div>
                     </div>
-                    <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-                        <h3 class="text-base font-bold text-slate-700 mb-2 text-center">Intereses Profesionales</h3>
+                    <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col justify-center">
+                        <h3 class="text-sm font-bold text-slate-700 mb-3 text-center">Intereses Profesionales</h3>
                         <table class="w-full holland-table mb-3">
                             <thead>
                                 <tr>
-                                    <th>INTERÉS</th>
-                                    <th>PUNTAJE</th>
-                                    <th>INTERÉS</th>
-                                    <th>PUNTAJE</th>
+                                    <th class="text-xs">INTERÉS</th>
+                                    <th class="text-xs">PUNTAJE</th>
+                                    <th class="text-xs">INTERÉS</th>
+                                    <th class="text-xs">PUNTAJE</th>
                                 </tr>
                             </thead>
                             <tbody id="voc-table-scores"></tbody>
                         </table>
-                        <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 text-center">
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg p-2 text-center mt-2">
                             <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Código Ocupacional Predominante</span>
-                            <span class="text-base font-bold text-blue-700" id="voc-codigo-ocupacional">-</span>
+                            <span class="text-sm font-bold text-blue-700" id="voc-codigo-ocupacional">-</span>
                         </div>
                     </div>
                 </div>
@@ -237,7 +235,7 @@
             <div id="top-centros-vocacional-container" class="mt-6 hidden">
                 <div class="flex items-center justify-between mb-3">
                     <h3 class="text-lg font-bold text-slate-700">
-                         Top Centros Escolares con interés en 
+                        🏆 Top Centros Escolares con interés en 
                         <span id="interes-seleccionado-voc" class="text-amber-600"></span>
                     </h3>
                     <span class="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">
@@ -248,7 +246,7 @@
                     <table class="top-centros-table">
                         <thead>
                             <tr>
-                                <th style="width: 60px;">#</th>
+                                <th style="width: 50px;">#</th>
                                 <th>Centro Escolar</th>
                                 <th>Departamento</th>
                                 <th>Distrito</th>
@@ -306,7 +304,7 @@
                             <option value="TODOS">Todos los Sexos</option>
                         </select>
                         <select id="filter-aptitud-aptitudinal" onchange="renderDashboard('aptitudinal')" class="text-sm bg-purple-50 font-semibold text-purple-700 focus:outline-none px-2 border-l-2 border-purple-400">
-                            <option value="TODOS"> Todas las Aptitudes</option>
+                            <option value="TODOS">🎯 Todas las Aptitudes</option>
                             <option value="SUMA_COMPRENSIÓN VERBAL">COMPRENSIÓN VERBAL</option>
                             <option value="SUMA_FLUIDEZ VERBAL">FLUIDEZ VERBAL</option>
                             <option value="SUMA_APTITUD NUMÉRICA">APTITUD NUMÉRICA</option>
@@ -356,21 +354,21 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-                        <h3 class="text-base font-bold text-slate-700 mb-2">Desempeño Promedio por Aptitud</h3>
-                        <div class="relative w-full" style="height: 280px;">
+                        <h3 class="text-sm font-bold text-slate-700 mb-2">Desempeño por Aptitud</h3>
+                        <div class="relative w-full" style="height: 260px;">
                             <canvas id="chart-apt-bar"></canvas>
                         </div>
                     </div>
-                    <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col items-center justify-center">
-                        <h3 class="text-base font-bold text-slate-700 mb-2">Perfil Aptitudinal Integral</h3>
-                        <p class="text-xs text-slate-500 mb-1 text-center">Zonas: Bajo (0-13) · Medio (14-26) · Alto (27-40)</p>
-                        <div class="relative w-full" style="height: 380px;">
+                    <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                        <h3 class="text-xs font-bold text-slate-700 mb-1 text-center">Perfil Aptitudinal</h3>
+                        <p class="text-xs text-slate-400 text-center mb-2">Bajo (0-13) · Medio (14-26) · Alto (27-40)</p>
+                        <div class="relative w-full" style="height: 300px;">
                             <canvas id="chart-apt-radar"></canvas>
                         </div>
                         <div class="level-legend">
-                            <div class="level-legend-item"><div class="level-dot level-low"></div><span>Bajo</span></div>
-                            <div class="level-legend-item"><div class="level-dot level-mid"></div><span>Medio</span></div>
-                            <div class="level-legend-item"><div class="level-dot level-high"></div><span>Alto</span></div>
+                            <div class="level-legend-item"><div class="level-dot level-low"></div><span class="text-xs">Bajo</span></div>
+                            <div class="level-legend-item"><div class="level-dot level-mid"></div><span class="text-xs">Medio</span></div>
+                            <div class="level-legend-item"><div class="level-dot level-high"></div><span class="text-xs">Alto</span></div>
                         </div>
                     </div>
                 </div>
@@ -379,7 +377,7 @@
             <div id="top-centros-aptitudinal-container" class="mt-6 hidden">
                 <div class="flex items-center justify-between mb-3">
                     <h3 class="text-lg font-bold text-slate-700">
-                         Top Centros Escolares con mayor desempeño en 
+                        🏆 Top Centros Escolares con mayor desempeño en 
                         <span id="aptitud-seleccionada-apt" class="text-purple-600"></span>
                     </h3>
                     <span class="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">
@@ -390,7 +388,7 @@
                     <table class="top-centros-table">
                         <thead>
                             <tr>
-                                <th style="width: 60px;">#</th>
+                                <th style="width: 50px;">#</th>
                                 <th>Centro Escolar</th>
                                 <th>Departamento</th>
                                 <th>Distrito / Municipio</th>
@@ -429,7 +427,7 @@
             VOCACIONAL: 'BD_Reporte_Vocacional_9_Ligero.csv',
             APTITUDINAL: 'BD_Reporte_Aptitudinal_6_Ligero.csv'
         },
-        VERSION: 'v3.1'
+        VERSION: 'v3.2'
     };
 
     let chartInstances = {
@@ -449,8 +447,6 @@
 
     const SEXO_COLUMN_CANDIDATES = ['est_nomb_sexo', 'sexo', 'genero', 'Sexo', 'GENERO'];
     const loadStatus = { vocacional: false, aptitudinal: false };
-
-    // ✅ Variable para guardar valores únicos de LUGAR1 (debug)
     let lugar1ValoresUnicos = new Set();
 
     function showToast(message, type = 'success') {
@@ -575,7 +571,6 @@
             appState[tipo].cols = {};
             headers.forEach((h, idx) => { appState[tipo].cols[h.trim()] = idx; });
             
-            // ✅ Debug: Recopilar valores únicos de LUGAR1 para vocacional
             if (tipo === 'vocacional') {
                 lugar1ValoresUnicos.clear();
                 parsed.data.forEach(r => {
@@ -616,14 +611,13 @@
         if (sexoSet.size === 0) selSexo.style.display = 'none';
     }
 
-    // ✅ NUEVA FUNCIÓN: Normalizar texto para comparación
     function normalizarTexto(texto) {
         if (!texto) return '';
         return texto.toString()
             .trim()
             .toUpperCase()
             .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, ""); // Quitar tildes
+            .replace(/[\u0300-\u036f]/g, "");
     }
 
     function getAverages(rows, metricsKeys) {
@@ -644,7 +638,6 @@
         return averages;
     }
 
-    // ✅ CORREGIDO: Comparación case-insensitive y sin tildes
     function renderTopCentrosVocacional(filteredRows, interesSeleccionado) {
         const container = document.getElementById('top-centros-vocacional-container');
         const tbody = document.getElementById('tbody-top-centros-vocacional');
@@ -658,14 +651,11 @@
         container.classList.remove('hidden');
         label.textContent = interesSeleccionado;
         
-        // ✅ Normalizar el interés seleccionado para comparación
         const interesNormalizado = normalizarTexto(interesSeleccionado);
         
-        // Debug: mostrar qué valores hay en LUGAR1
         console.log(`🔍 Buscando interés: "${interesSeleccionado}" (normalizado: "${interesNormalizado}")`);
-        console.log(`🔍 Valores únicos en LUGAR1:`, Array.from(lugar1ValoresUnicos));
+        console.log(` Valores únicos en LUGAR1:`, Array.from(lugar1ValoresUnicos));
         
-        // Agrupar por centro escolar
         const centros = {};
         let totalConInteres = 0;
         
@@ -673,7 +663,6 @@
             const lugar1 = r['LUGAR1'];
             if (!lugar1) return;
             
-            // ✅ Comparación normalizada (case-insensitive y sin tildes)
             const lugar1Normalizado = normalizarTexto(lugar1);
             
             if (lugar1Normalizado !== interesNormalizado) return;
@@ -849,6 +838,11 @@
                 chartInstances.vocacional.radar.data.datasets[0].data = data;
                 chartInstances.vocacional.radar.data.datasets[0].label = filteredRows.length === 1 ? 'Puntaje Individual' : 'Puntaje Promedio';
                 chartInstances.vocacional.radar.options.scales.r.max = maxScale;
+                chartInstances.vocacional.radar.options.scales.r.ticks.stepSize = Math.ceil(maxScale / 5);
+                chartInstances.vocacional.radar.options.scales.r.pointLabels.font.size = 10;
+                chartInstances.vocacional.radar.options.layout = {
+                    padding: { top: 10, bottom: 10, left: 10, right: 10 }
+                };
                 chartInstances.vocacional.radar.update();
             } else {
                 const ctx = document.getElementById('chart-voc-radar').getContext('2d');
@@ -862,13 +856,40 @@
                             backgroundColor: 'rgba(59, 130, 246, 0.2)',
                             borderColor: 'rgba(59, 130, 246, 1)',
                             pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                            pointRadius: 3,
                             borderWidth: 2
                         }]
                     },
                     options: { 
-                        scales: { r: { beginAtZero: true, max: maxScale, ticks: { display: true, stepSize: Math.ceil(maxScale / 5), font: { size: 10 } } } }, 
-                        plugins: { legend: { display: false } },
-                        responsive: true, maintainAspectRatio: false
+                        scales: { 
+                            r: { 
+                                beginAtZero: true, 
+                                max: maxScale,
+                                ticks: { 
+                                    display: true, 
+                                    stepSize: Math.ceil(maxScale / 5),
+                                    font: { size: 9 }
+                                },
+                                pointLabels: {
+                                    font: { size: 10, weight: '600' },
+                                    color: '#475569'
+                                },
+                                grid: { color: 'rgba(148, 163, 184, 0.15)' },
+                                angleLines: { color: 'rgba(148, 163, 184, 0.1)' }
+                            } 
+                        }, 
+                        plugins: { 
+                            legend: { display: false },
+                            tooltip: {
+                                titleFont: { size: 11 },
+                                bodyFont: { size: 11 }
+                            }
+                        },
+                        layout: {
+                            padding: { top: 5, bottom: 5, left: 5, right: 5 }
+                        },
+                        responsive: true, 
+                        maintainAspectRatio: false
                     }
                 });
             }
@@ -912,7 +933,8 @@
                     options: { 
                         indexAxis: 'y', responsive: true, maintainAspectRatio: false, 
                         plugins: { legend: { display: false } },
-                        scales: { x: { beginAtZero: true, max: 40 } }
+                        scales: { x: { beginAtZero: true, max: 40 } },
+                        layout: { padding: { top: 5, bottom: 5, left: 5, right: 5 } }
                     }
                 });
             }
@@ -928,14 +950,22 @@
                 datasets[datasets.length - 1].data = data;
                 datasets[datasets.length - 1].label = filteredRows.length === 1 ? 'Perfil Actual' : 'Perfil Promedio';
                 chartInstances.aptitudinal.radar.data.labels = prettyLabels;
+                chartInstances.aptitudinal.radar.options.scales.r.pointLabels.font.size = 9;
+                chartInstances.aptitudinal.radar.options.layout = {
+                    padding: { top: 10, bottom: 10, left: 10, right: 10 }
+                };
                 chartInstances.aptitudinal.radar.update();
             } else {
                 const ctxRadar = document.getElementById('chart-apt-radar').getContext('2d');
                 const zoneDatasets = zonasData.map(zona => ({
                     label: zona.label,
                     data: Array(labels.length).fill(zona.value),
-                    backgroundColor: zona.color, borderColor: zona.borderColor,
-                    borderWidth: 1, pointRadius: 0, fill: true, order: 2
+                    backgroundColor: zona.color, 
+                    borderColor: zona.borderColor,
+                    borderWidth: 1, 
+                    pointRadius: 0, 
+                    fill: true, 
+                    order: 2
                 }));
                 const mainDataset = {
                     label: filteredRows.length === 1 ? 'Perfil Actual' : 'Perfil Promedio',
@@ -943,9 +973,13 @@
                     backgroundColor: 'rgba(16, 185, 129, 0.3)',
                     borderColor: 'rgba(16, 185, 129, 1)',
                     pointBackgroundColor: 'rgba(16, 185, 129, 1)',
-                    pointBorderColor: '#ffffff', pointBorderWidth: 2,
-                    pointRadius: 5, pointHoverRadius: 7,
-                    borderWidth: 3, fill: true, order: 1
+                    pointBorderColor: '#ffffff', 
+                    pointBorderWidth: 2,
+                    pointRadius: 3, 
+                    pointHoverRadius: 5,
+                    borderWidth: 2, 
+                    fill: true, 
+                    order: 1
                 };
                 chartInstances.aptitudinal.radar = new Chart(ctxRadar, {
                     type: 'radar',
@@ -953,26 +987,37 @@
                     options: { 
                         scales: { 
                             r: { 
-                                beginAtZero: true, max: 40,
-                                ticks: { stepSize: 10, font: { size: 10 }, backdropColor: 'transparent', color: '#64748b' },
-                                pointLabels: { font: { size: 11, weight: 'bold' }, color: '#334155' },
-                                grid: { color: 'rgba(148, 163, 184, 0.2)', circular: true },
-                                angleLines: { color: 'rgba(148, 163, 184, 0.3)' }
+                                beginAtZero: true, 
+                                max: 40,
+                                ticks: { 
+                                    stepSize: 10, 
+                                    font: { size: 9 }, 
+                                    backdropColor: 'transparent', 
+                                    color: '#64748b' 
+                                },
+                                pointLabels: { 
+                                    font: { size: 9, weight: '600' }, 
+                                    color: '#475569' 
+                                },
+                                grid: { color: 'rgba(148, 163, 184, 0.15)' },
+                                angleLines: { color: 'rgba(148, 163, 184, 0.1)' }
                             } 
                         }, 
                         plugins: { 
                             legend: { display: false },
                             tooltip: {
                                 backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                                titleFont: { size: 13, weight: 'bold' },
-                                bodyFont: { size: 12 }, padding: 10, cornerRadius: 8,
+                                titleFont: { size: 11, weight: 'bold' },
+                                bodyFont: { size: 11 }, 
+                                padding: 8, 
+                                cornerRadius: 6,
                                 callbacks: {
                                     label: function(context) {
                                         if (context.datasetIndex === zoneDatasets.length) {
                                             const valor = context.parsed.r;
                                             let nivel = '';
                                             if (valor <= 13) nivel = '🔴 Bajo';
-                                            else if (valor <= 26) nivel = '🟡 Medio';
+                                            else if (valor <= 26) nivel = ' Medio';
                                             else nivel = ' Alto';
                                             return `${context.label}: ${valor} pts (${nivel})`;
                                         }
@@ -981,8 +1026,12 @@
                                 }
                             }
                         }, 
-                        responsive: true, maintainAspectRatio: false,
-                        animation: { duration: 800, easing: 'easeOutQuart' }
+                        layout: {
+                            padding: { top: 5, bottom: 5, left: 5, right: 5 }
+                        },
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        animation: { duration: 600, easing: 'easeOutQuart' }
                     }
                 });
             }
