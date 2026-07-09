@@ -8,6 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js para gráficos interactivos -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- PapaParse para parsing robusto de CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
         .fade-in { animation: fadeIn 0.4s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -18,9 +20,37 @@
         /* Animación de carga */
         .loader { border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* Loader de pantalla completa */
+        .full-screen-loader {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.9); z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        /* Notificación toast */
+        .toast {
+            position: fixed; bottom: 20px; right: 20px;
+            padding: 1rem 1.5rem; border-radius: 0.5rem;
+            color: white; font-weight: 500; z-index: 10000;
+            animation: slideIn 0.3s ease-out;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .toast.error { background-color: #ef4444; }
+        .toast.success { background-color: #10b981; }
+        .toast.warning { background-color: #f59e0b; }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans min-h-screen p-4 md:p-8">
+
+<!-- Loader de pantalla completa -->
+<div id="global-loader" class="full-screen-loader hidden">
+    <div class="loader mb-4" style="width: 48px; height: 48px; border-width: 4px;"></div>
+    <p class="text-blue-600 font-bold text-lg">Cargando datos...</p>
+    <p id="loader-message" class="text-slate-500 text-sm mt-2">Conectando con el servidor</p>
+</div>
 
 <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
     
@@ -41,7 +71,7 @@
         <div id="upload-zone-vocacional" class="border-2 border-dashed border-blue-300 rounded-xl p-12 text-center bg-blue-50/50 hover:bg-blue-50 transition-colors cursor-pointer" onclick="document.getElementById('file-vocacional').click()">
             <div id="loader-vocacional" class="hidden flex-col items-center justify-center">
                 <div class="loader mb-4"></div>
-                <p class="text-blue-600 font-bold">Descargando datos desde el servidor público...</p>
+                <p class="text-blue-600 font-bold">Cargando datos desde GitHub...</p>
             </div>
             <div id="manual-upload-vocacional">
                 <svg class="mx-auto h-12 w-12 text-blue-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -49,6 +79,7 @@
                 </svg>
                 <h3 class="text-lg font-bold text-slate-800">Modo Pruebas: Cargar Base de Datos Vocacional</h3>
                 <p class="mt-1 text-sm text-slate-500">Selecciona el archivo "BD_Reporte_Vocacional_9_Ligero.csv"</p>
+                <p class="mt-2 text-xs text-slate-400">O espera a que cargue automáticamente desde GitHub</p>
                 <input type="file" id="file-vocacional" class="hidden" accept=".csv" onchange="handleFile(event, 'vocacional')">
             </div>
         </div>
@@ -168,7 +199,7 @@
         <div id="upload-zone-aptitudinal" class="border-2 border-dashed border-purple-300 rounded-xl p-12 text-center bg-purple-50/50 hover:bg-purple-50 transition-colors cursor-pointer" onclick="document.getElementById('file-aptitudinal').click()">
             <div id="loader-aptitudinal" class="hidden flex-col items-center justify-center">
                 <div class="loader mb-4"></div>
-                <p class="text-purple-600 font-bold">Descargando datos desde el servidor público...</p>
+                <p class="text-purple-600 font-bold">Cargando datos desde GitHub...</p>
             </div>
             <div id="manual-upload-aptitudinal">
                 <svg class="mx-auto h-12 w-12 text-purple-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -176,6 +207,7 @@
                 </svg>
                 <h3 class="text-lg font-bold text-slate-800">Modo Pruebas: Cargar Base de Datos Aptitudinal</h3>
                 <p class="mt-1 text-sm text-slate-500">Selecciona el archivo "BD_Reporte_Aptitudinal_6_Ligero.csv"</p>
+                <p class="mt-2 text-xs text-slate-400">O espera a que cargue automáticamente desde GitHub</p>
                 <input type="file" id="file-aptitudinal" class="hidden" accept=".csv" onchange="handleFile(event, 'aptitudinal')">
             </div>
         </div>
@@ -272,9 +304,16 @@
 </div>
 
 <script>
-    // === CONFIGURACIÓN DE CARGA AUTOMÁTICA EN PRODUCCIÓN ===
-    const URL_PRODUCCION_VOCACIONAL = ""; 
-    const URL_PRODUCCION_APTITUDINAL = "";
+    // === CONFIGURACIÓN DE PRODUCCIÓN ===
+    const CONFIG = {
+        GITHUB_BASE_URL: 'https://raw.githubusercontent.com/MikelMINED/Dashboard-Educativo-Jerarquico/main',
+        FILES: {
+            VOCACIONAL: 'BD_Reporte_Vocacional_9_Ligero.csv',
+            APTITUDINAL: 'BD_Reporte_Aptitudinal_6_Ligero.csv'
+        },
+        CACHE_DURATION: 3600000, // 1 hora en milisegundos
+        AUTO_LOAD: true // Cambiar a false para deshabilitar carga automática
+    };
 
     // --- VARIABLES GLOBALES PARA GRÁFICOS ---
     let chartInstances = {
@@ -282,7 +321,7 @@
         aptitudinal: { bar: null, radar: null }
     };
 
-    // Diccionario para mostrar nombres elegantes aunque leamos las minúsculas del CSV
+    // Diccionario para mostrar nombres elegantes
     const labelMapVocacional = {
         'social': 'SOCIAL',
         'realista': 'REALISTA',
@@ -291,6 +330,34 @@
         'emprendedor': 'EMPRENDEDOR',
         'oficina': 'OFICINA'
     };
+
+    // Columnas requeridas para validación
+    const REQUIRED_COLUMNS = {
+        vocacional: ['sede_nomb_depto', 'distrito', 'sede_nombre', 'sede_codigo', 'secc_codigo', 'NIE', 'LUGAR1', 'GRUPO OCUPACIONAL', 'sede_sector', 'sede_zona', 'social', 'realista', 'cientifico', 'artistico', 'emprendedor', 'oficina'],
+        aptitudinal: ['sede_nomb_depto', 'sede_nomb_mun', 'sede_nombre', 'sede_codigo', 'NIE', 'LUGAR1', 'sede_sector', 'sede_zona']
+    };
+
+    // --- UTILIDADES ---
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+
+    function showGlobalLoader(show = true, message = '') {
+        const loader = document.getElementById('global-loader');
+        const msgEl = document.getElementById('loader-message');
+        if (show) {
+            msgEl.textContent = message;
+            loader.classList.remove('hidden');
+        } else {
+            loader.classList.add('hidden');
+        }
+    }
 
     // --- LÓGICA DE INTERFAZ Y PESTAÑAS ---
     function switchTab(target) {
@@ -321,7 +388,6 @@
                 { key: 'secc_codigo', label: 'Sección' },
                 { key: 'NIE', label: 'Estudiante (NIE)' }
             ],
-            // AHORA LEEMOS LAS COLUMNAS EN MINÚSCULA (Las de los puntajes reales)
             metrics: ['social', 'realista', 'cientifico', 'artistico', 'emprendedor', 'oficina']
         },
         aptitudinal: {
@@ -336,7 +402,67 @@
         }
     };
 
-    // --- CARGA DE DATOS Y PARSEO CSV ---
+    // --- CARGA DE DATOS ---
+    
+    // Cargar desde GitHub
+    async function loadFromGitHub(tipo) {
+        const fileName = tipo === 'vocacional' ? CONFIG.FILES.VOCACIONAL : CONFIG.FILES.APTITUDINAL;
+        const url = `${CONFIG.GITHUB_BASE_URL}/${fileName}`;
+        
+        // Verificar caché
+        const cachedData = getCachedData(fileName);
+        if (cachedData) {
+            console.log(`Usando datos en caché para ${fileName}`);
+            procesarCSV(cachedData, tipo);
+            return;
+        }
+
+        try {
+            showGlobalLoader(true, `Descargando ${fileName}...`);
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            const csvText = await response.text();
+            
+            // Guardar en caché
+            setCachedData(fileName, csvText);
+            
+            showGlobalLoader(false);
+            procesarCSV(csvText, tipo);
+            showToast(`Datos cargados correctamente desde GitHub`, 'success');
+        } catch (error) {
+            console.error(`Error cargando ${tipo}:`, error);
+            showGlobalLoader(false);
+            showToast(`Error al cargar datos: ${error.message}. Usando modo manual.`, 'error');
+            
+            // Mostrar zona de carga manual
+            document.getElementById(`loader-${tipo}`).classList.add('hidden');
+            document.getElementById(`manual-upload-${tipo}`).classList.remove('hidden');
+            document.getElementById(`upload-zone-${tipo}`).classList.remove('hidden');
+        }
+    }
+
+    // Caché con localStorage
+    function getCachedData(fileName) {
+        const cached = localStorage.getItem(`dashboard_${fileName}`);
+        const timestamp = localStorage.getItem(`dashboard_${fileName}_timestamp`);
+        
+        if (cached && timestamp) {
+            const age = Date.now() - parseInt(timestamp);
+            if (age < CONFIG.CACHE_DURATION) {
+                return cached;
+            }
+        }
+        return null;
+    }
+
+    function setCachedData(fileName, data) {
+        localStorage.setItem(`dashboard_${fileName}`, data);
+        localStorage.setItem(`dashboard_${fileName}_timestamp`, Date.now().toString());
+    }
+
+    // Carga manual desde archivo
     function handleFile(event, tipo) {
         const file = event.target.files[0];
         if (!file) return;
@@ -345,45 +471,96 @@
         reader.readAsText(file, 'UTF-8');
         reader.onload = function(e) {
             procesarCSV(e.target.result, tipo);
+            showToast('Archivo cargado correctamente', 'success');
+        };
+        reader.onerror = function() {
+            showToast('Error al leer el archivo', 'error');
         };
     }
 
+    // Procesar CSV con validación
     function procesarCSV(csvText, tipo) {
-        const lines = csvText.split(/\r?\n/);
-        if(lines.length < 2) return alert("Archivo inválido o vacío.");
-        
-        const headers = processCSVRow(lines[0]);
-        appState[tipo].cols = {};
-        headers.forEach((h, idx) => { appState[tipo].cols[h.trim()] = idx; });
-        
-        appState[tipo].rows = [];
-        for (let i = 1; i < lines.length; i++) {
-            if (lines[i].trim() === "") continue;
-            const row = processCSVRow(lines[i]);
-            if (row.length === headers.length) appState[tipo].rows.push(row);
+        try {
+            // Usar PapaParse para parsing robusto
+            const parsed = Papa.parse(csvText, {
+                header: true,
+                skipEmptyLines: true,
+                dynamicTyping: false
+            });
+
+            if (parsed.errors.length > 0) {
+                console.error('Errores en el CSV:', parsed.errors);
+                showToast('Advertencia: El CSV tiene algunos errores de formato', 'warning');
+            }
+
+            // Validar columnas requeridas
+            const headers = parsed.meta.fields;
+            const required = REQUIRED_COLUMNS[tipo];
+            const missing = required.filter(col => !headers.includes(col));
+            
+            if (missing.length > 0) {
+                console.error('Columnas faltantes:', missing);
+                showToast(`Error: Faltan columnas en el CSV: ${missing.join(', ')}`, 'error');
+                return;
+            }
+
+            // Convertir a formato de filas
+            appState[tipo].rows = parsed.data;
+            
+            // Crear mapeo de columnas (índices)
+            appState[tipo].cols = {};
+            headers.forEach((h, idx) => {
+                appState[tipo].cols[h.trim()] = idx;
+            });
+
+            // Llenar filtros transversales
+            populateTransversalFilters(tipo);
+
+            // Mostrar dashboard
+            document.getElementById(`upload-zone-${tipo}`).classList.add('hidden');
+            document.getElementById(`dashboard-${tipo}`).classList.remove('hidden');
+            
+            renderDashboard(tipo);
+            
+        } catch (error) {
+            console.error('Error procesando CSV:', error);
+            showToast(`Error al procesar datos: ${error.message}`, 'error');
         }
-
-        // Llenar dinámicamente los selectores transversales
-        populateTransversalFilters(tipo);
-
-        document.getElementById(`upload-zone-${tipo}`).classList.add('hidden');
-        document.getElementById(`dashboard-${tipo}`).classList.remove('hidden');
-        
-        renderDashboard(tipo);
     }
 
-    function processCSVRow(line) {
-        const result = [];
-        let cell = '', inQuotes = false;
-        for (let i = 0; i < line.length; i++) {
-            if (line[i] === '"') inQuotes = !inQuotes;
-            else if (line[i] === ',' && !inQuotes) { result.push(cell.trim()); cell = ''; }
-            else cell += line[i];
+    // --- FILTROS TRANSVERSALES ---
+    function populateTransversalFilters(tipo) {
+        const state = appState[tipo];
+        const sectorSet = new Set();
+        const zonaSet = new Set();
+        
+        const colSector = state.cols['sede_sector'];
+        const colZona = state.cols['sede_zona'];
+
+        if(colSector !== undefined && colZona !== undefined) {
+            state.rows.forEach(r => {
+                const sector = r['sede_sector'];
+                const zona = r['sede_zona'];
+                if(sector && sector.trim() !== '') sectorSet.add(sector.trim());
+                if(zona && zona.trim() !== '') zonaSet.add(zona.trim());
+            });
+
+            const selSector = document.getElementById(`filter-sector-${tipo}`);
+            const selZona = document.getElementById(`filter-zona-${tipo}`);
+            
+            selSector.innerHTML = '<option value="TODOS">Todos los Sectores</option>';
+            selZona.innerHTML = '<option value="TODOS">Todas las Zonas</option>';
+
+            Array.from(sectorSet).sort().forEach(s => {
+                selSector.innerHTML += `<option value="${s}">${s}</option>`;
+            });
+            Array.from(zonaSet).sort().forEach(z => {
+                selZona.innerHTML += `<option value="${z}">${z}</option>`;
+            });
         }
-        result.push(cell.trim());
-        return result;
     }
 
+    // --- CÁLCULOS Y PROMEDIOS ---
     function getAverages(rows, metricsKeys, colMap) {
         let sums = {};
         metricsKeys.forEach(k => sums[k] = 0);
@@ -392,7 +569,7 @@
         rows.forEach(r => {
             let hasValidData = false;
             metricsKeys.forEach(k => {
-                let val = parseFloat(r[colMap[k]]);
+                let val = parseFloat(r[k]);
                 if (!isNaN(val)) {
                     sums[k] += val;
                     hasValidData = true;
@@ -409,35 +586,7 @@
         return averages;
     }
 
-    // --- LLENADO DE FILTROS TRANSVERSALES ---
-    function populateTransversalFilters(tipo) {
-        const state = appState[tipo];
-        const sectorSet = new Set();
-        const zonaSet = new Set();
-        
-        const colSector = state.cols['sede_sector'];
-        const colZona = state.cols['sede_zona'];
-
-        if(colSector !== undefined && colZona !== undefined) {
-            state.rows.forEach(r => {
-                if(r[colSector]) sectorSet.add(r[colSector]);
-                if(r[colZona]) zonaSet.add(r[colZona]);
-            });
-
-            const selSector = document.getElementById(`filter-sector-${tipo}`);
-            const selZona = document.getElementById(`filter-zona-${tipo}`);
-            
-            // Mantener solo la opción "TODOS"
-            selSector.innerHTML = '<option value="TODOS">Todos los Sectores</option>';
-            selZona.innerHTML = '<option value="TODOS">Todas las Zonas</option>';
-
-            // Inyectar opciones dinámicas ordenadas
-            Array.from(sectorSet).sort().forEach(s => selSector.innerHTML += `<option value="${s}">${s}</option>`);
-            Array.from(zonaSet).sort().forEach(z => selZona.innerHTML += `<option value="${z}">${z}</option>`);
-        }
-    }
-
-    // --- RENDERIZADO DE GRÁFICOS Y KPIS ---
+    // --- RENDERIZADO OPTIMIZADO ---
     function updateVisuals(tipo, filteredRows) {
         const state = appState[tipo];
         
@@ -447,10 +596,10 @@
             let modes = {};
             let ocupaciones = new Set();
             filteredRows.forEach(r => {
-                let p = r[state.cols['LUGAR1']];
+                let p = r['LUGAR1'];
                 if(p) modes[p] = (modes[p] || 0) + 1;
                 
-                let o = r[state.cols['GRUPO OCUPACIONAL']];
+                let o = r['GRUPO OCUPACIONAL'];
                 if(o) ocupaciones.add(o);
             });
             
@@ -464,7 +613,6 @@
             const labels = state.metrics;
             const data = labels.map(l => avgs[l]);
 
-            // Lógica basada en PUNTAJES REALES (Mayor puntaje = mejor interés)
             let sortedAves = [...labels].sort((a,b) => avgs[b] - avgs[a]); 
             
             document.getElementById('voc-table-scores').innerHTML = `
@@ -484,45 +632,51 @@
             
             document.getElementById('voc-codigo-ocupacional').textContent = sortedAves.slice(0,2).map(k => labelMapVocacional[k]).join(' - ');
 
-            if(chartInstances.vocacional.radar) chartInstances.vocacional.radar.destroy();
-            const ctx = document.getElementById('chart-voc-radar').getContext('2d');
-            
-            chartInstances.vocacional.radar = new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    // Mapeamos los keys en minúsculas a sus nombres estéticos con tildes
-                    labels: labels.map(l => labelMapVocacional[l]),
-                    datasets: [{
-                        label: filteredRows.length === 1 ? 'Puntaje Individual' : 'Puntaje Promedio',
-                        data: data,
-                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                        borderColor: 'rgba(59, 130, 246, 1)',
-                        pointBackgroundColor: 'rgba(59, 130, 246, 1)',
-                        borderWidth: 2
-                    }]
-                },
-                options: { 
-                    scales: { 
-                        r: { 
-                            beginAtZero: true, 
-                            suggestedMax: 30,
-                            ticks: { display: false } 
-                        } 
-                    }, 
-                    plugins: { legend: { display: false } } 
-                }
-            });
+            // Actualizar gráfico existente en lugar de recrear
+            if(chartInstances.vocacional.radar) {
+                chartInstances.vocacional.radar.data.datasets[0].data = data;
+                chartInstances.vocacional.radar.data.datasets[0].label = filteredRows.length === 1 ? 'Puntaje Individual' : 'Puntaje Promedio';
+                chartInstances.vocacional.radar.update();
+            } else {
+                const ctx = document.getElementById('chart-voc-radar').getContext('2d');
+                chartInstances.vocacional.radar = new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: labels.map(l => labelMapVocacional[l]),
+                        datasets: [{
+                            label: filteredRows.length === 1 ? 'Puntaje Individual' : 'Puntaje Promedio',
+                            data: data,
+                            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: { 
+                        scales: { 
+                            r: { 
+                                beginAtZero: true, 
+                                suggestedMax: 30,
+                                ticks: { display: false } 
+                            } 
+                        }, 
+                        plugins: { legend: { display: false } },
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
 
         } else if (tipo === 'aptitudinal') {
             document.getElementById('kpi-apt-total').textContent = filteredRows.length.toLocaleString('es-SV');
             
             let centros = new Set();
-            filteredRows.forEach(r => centros.add(r[state.cols['sede_codigo']]));
+            filteredRows.forEach(r => centros.add(r['sede_codigo']));
             document.getElementById('kpi-apt-centros').textContent = centros.size;
 
             const avgs = getAverages(filteredRows, state.metrics, state.cols);
             const labels = state.metrics;
-            const data = labels.map(l => avgs[l]);
+            const data = labels.map(l => avgs[l] || 0);
 
             let topApt = 'N/A'; let maxApt = 0;
             for(let a in avgs) { if(avgs[a] > maxApt) { maxApt = avgs[a]; topApt = a; } }
@@ -531,43 +685,65 @@
             const radarMetrics = ['COMPRENSIÓN VERBAL', 'FLUIDEZ VERBAL', 'APTITUD NUMÉRICA', 'PERCEPCIÓN', 'APTITUD FÍSICA'];
             const radarData = radarMetrics.map(l => avgs[l] || 0);
 
-            if(chartInstances.aptitudinal.bar) chartInstances.aptitudinal.bar.destroy();
-            const ctxBar = document.getElementById('chart-apt-bar').getContext('2d');
-            chartInstances.aptitudinal.bar = new Chart(ctxBar, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: filteredRows.length === 1 ? 'Puntaje Individual' : 'Promedio',
-                        data: data,
-                        backgroundColor: 'rgba(139, 92, 246, 0.7)',
-                        borderRadius: 4
-                    }]
-                },
-                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-            });
+            // Actualizar gráfico de barras
+            if(chartInstances.aptitudinal.bar) {
+                chartInstances.aptitudinal.bar.data.datasets[0].data = data;
+                chartInstances.aptitudinal.bar.data.datasets[0].label = filteredRows.length === 1 ? 'Puntaje Individual' : 'Promedio';
+                chartInstances.aptitudinal.bar.update();
+            } else {
+                const ctxBar = document.getElementById('chart-apt-bar').getContext('2d');
+                chartInstances.aptitudinal.bar = new Chart(ctxBar, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: filteredRows.length === 1 ? 'Puntaje Individual' : 'Promedio',
+                            data: data,
+                            backgroundColor: 'rgba(139, 92, 246, 0.7)',
+                            borderRadius: 4
+                        }]
+                    },
+                    options: { 
+                        indexAxis: 'y', 
+                        responsive: true, 
+                        maintainAspectRatio: false, 
+                        plugins: { legend: { display: false } } 
+                    }
+                });
+            }
 
-            if(chartInstances.aptitudinal.radar) chartInstances.aptitudinal.radar.destroy();
-            const ctxRadar = document.getElementById('chart-apt-radar').getContext('2d');
-            chartInstances.aptitudinal.radar = new Chart(ctxRadar, {
-                type: 'radar',
-                data: {
-                    labels: radarMetrics,
-                    datasets: [{
-                        label: filteredRows.length === 1 ? 'Desempeño Individual' : 'Desempeño Promedio',
-                        data: radarData,
-                        backgroundColor: 'rgba(16, 185, 129, 0.2)',
-                        borderColor: 'rgba(16, 185, 129, 1)',
-                        pointBackgroundColor: 'rgba(16, 185, 129, 1)',
-                        borderWidth: 2
-                    }]
-                },
-                options: { scales: { r: { beginAtZero: true, suggestedMax: 40 } }, plugins: { legend: { display: false } } }
-            });
+            // Actualizar gráfico radar
+            if(chartInstances.aptitudinal.radar) {
+                chartInstances.aptitudinal.radar.data.datasets[0].data = radarData;
+                chartInstances.aptitudinal.radar.data.datasets[0].label = filteredRows.length === 1 ? 'Desempeño Individual' : 'Desempeño Promedio';
+                chartInstances.aptitudinal.radar.update();
+            } else {
+                const ctxRadar = document.getElementById('chart-apt-radar').getContext('2d');
+                chartInstances.aptitudinal.radar = new Chart(ctxRadar, {
+                    type: 'radar',
+                    data: {
+                        labels: radarMetrics,
+                        datasets: [{
+                            label: filteredRows.length === 1 ? 'Desempeño Individual' : 'Desempeño Promedio',
+                            data: radarData,
+                            backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                            borderColor: 'rgba(16, 185, 129, 1)',
+                            pointBackgroundColor: 'rgba(16, 185, 129, 1)',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: { 
+                        scales: { r: { beginAtZero: true, suggestedMax: 40 } }, 
+                        plugins: { legend: { display: false } },
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
         }
     }
 
-    // --- MOTOR DRILL-DOWN (NAVEGACIÓN HASTA EL NIE) ---
+    // --- MOTOR DRILL-DOWN ---
     function renderDashboard(tipo) {
         const state = appState[tipo];
         const currentLevelIndex = state.path.length;
@@ -575,29 +751,27 @@
         
         renderBreadcrumbs(tipo);
 
-        // 1. Filtrar datos globales por RUTA GEOGRÁFICA (Drill-down)
+        // Filtrar por ruta
         let filteredRows = state.rows;
         state.path.forEach((step, idx) => {
             const hDef = state.hierarchy[idx];
             const colIndex = state.cols[hDef.key];
             filteredRows = filteredRows.filter(row => {
-                let val = row[colIndex];
-                if (hDef.prependCode) val = row[state.cols[hDef.prependCode]] + " - " + val;
+                let val = row[hDef.key];
+                if (hDef.prependCode) val = row[hDef.prependCode] + " - " + val;
                 return val === step.value;
             });
         });
 
-        // 1.1 Filtrar datos adicionales por SECTOR Y ZONA (Filtros transversales)
+        // Filtrar por sector y zona
         const selSector = document.getElementById(`filter-sector-${tipo}`).value;
         const selZona = document.getElementById(`filter-zona-${tipo}`).value;
         
         if(selSector !== 'TODOS') {
-            const idxSector = state.cols['sede_sector'];
-            filteredRows = filteredRows.filter(r => r[idxSector] === selSector);
+            filteredRows = filteredRows.filter(r => r['sede_sector'] === selSector);
         }
         if(selZona !== 'TODOS') {
-            const idxZona = state.cols['sede_zona'];
-            filteredRows = filteredRows.filter(r => r[idxZona] === selZona);
+            filteredRows = filteredRows.filter(r => r['sede_zona'] === selZona);
         }
 
         updateVisuals(tipo, filteredRows);
@@ -614,13 +788,12 @@
         document.getElementById(`th-name-${tipo}`).textContent = currentHierachyDef.label;
         
         const groupColKey = currentHierachyDef.key;
-        const groupColIdx = state.cols[groupColKey];
         const groups = {};
 
         filteredRows.forEach(row => {
-            let groupName = row[groupColIdx] || 'Sin Especificar';
+            let groupName = row[groupColKey] || 'Sin Especificar';
             if (currentHierachyDef.prependCode) {
-                const code = row[state.cols[currentHierachyDef.prependCode]];
+                const code = row[currentHierachyDef.prependCode];
                 groupName = code + " - " + groupName;
             }
             
@@ -629,9 +802,9 @@
             }
             groups[groupName].count++;
             
-            const diagnosticoCol = tipo === 'vocacional' ? 'LUGAR1' : 'LUGAR1'; 
+            const diagnosticoCol = 'LUGAR1'; 
             if (state.cols[diagnosticoCol] !== undefined) {
-                const diag = row[state.cols[diagnosticoCol]];
+                const diag = row[diagnosticoCol];
                 groups[groupName].modes[diag] = (groups[groupName].modes[diag] || 0) + 1;
             }
         });
@@ -710,32 +883,26 @@
         ol.innerHTML = html;
     }
 
-    // --- FUNCIÓN DE EXPORTACIÓN A EXCEL (CSV con formato UTF-8 / BOM) ---
+    // --- EXPORTACIÓN A EXCEL ---
     function exportToExcel(tipo) {
         const table = document.querySelector(`#dashboard-${tipo} table`);
-        // Agregar el BOM para que Excel detecte correctamente el UTF-8 (tildes y ñ)
         let csv = '\uFEFF'; 
         
-        // Extraer Cabeceras
         const headers = [];
         table.querySelectorAll('thead th').forEach((th, index, array) => {
-            // Excluir la última columna ("ACCIÓN")
             if (index < array.length - 1) {
                 headers.push('"' + th.innerText.replace(/"/g, '""') + '"');
             }
         });
         csv += headers.join(',') + '\n';
         
-        // Extraer Filas
         table.querySelectorAll('tbody tr').forEach(tr => {
             const row = [];
             const cells = tr.querySelectorAll('td');
             
-            // Si la fila solo tiene 1 celda (mensaje de advertencia en el nivel máximo), ignorarla
             if (cells.length <= 1) return; 
             
             cells.forEach((td, index) => {
-                // Excluir la última columna (icono de flecha)
                 if (index < cells.length - 1) {
                     row.push('"' + td.innerText.replace(/"/g, '""') + '"');
                 }
@@ -743,12 +910,10 @@
             csv += row.join(',') + '\n';
         });
         
-        // Crear el enlace de descarga dinámica
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         const url = URL.createObjectURL(blob);
         
-        // Nombre del archivo basado en la ruta actual
         const pathState = appState[tipo].path;
         let filename = `Reporte_${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`;
         if (pathState.length > 0) {
@@ -764,37 +929,16 @@
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        
+        showToast('Archivo exportado correctamente', 'success');
     }
 
-    // --- FUNCIÓN DE AUTOCARGA AL ABRIR LA PÁGINA ---
+    // --- INICIALIZACIÓN ---
     window.addEventListener('DOMContentLoaded', () => {
-        if (URL_PRODUCCION_VOCACIONAL) {
-            document.getElementById('manual-upload-vocacional').classList.add('hidden');
-            document.getElementById('loader-vocacional').classList.remove('hidden');
-            document.getElementById('loader-vocacional').classList.add('flex');
-            
-            fetch(URL_PRODUCCION_VOCACIONAL)
-                .then(res => res.text())
-                .then(text => procesarCSV(text, 'vocacional'))
-                .catch(err => {
-                    console.error("Error cargando Vocacional:", err);
-                    document.getElementById('loader-vocacional').classList.add('hidden');
-                    document.getElementById('manual-upload-vocacional').classList.remove('hidden');
-                });
-        }
-        if (URL_PRODUCCION_APTITUDINAL) {
-            document.getElementById('manual-upload-aptitudinal').classList.add('hidden');
-            document.getElementById('loader-aptitudinal').classList.remove('hidden');
-            document.getElementById('loader-aptitudinal').classList.add('flex');
-
-            fetch(URL_PRODUCCION_APTITUDINAL)
-                .then(res => res.text())
-                .then(text => procesarCSV(text, 'aptitudinal'))
-                .catch(err => {
-                    console.error("Error cargando Aptitudinal:", err);
-                    document.getElementById('loader-aptitudinal').classList.add('hidden');
-                    document.getElementById('manual-upload-aptitudinal').classList.remove('hidden');
-                });
+        if (CONFIG.AUTO_LOAD) {
+            // Cargar ambos datasets automáticamente
+            loadFromGitHub('vocacional');
+            loadFromGitHub('aptitudinal');
         }
     });
 
