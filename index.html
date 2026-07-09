@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Educativo - Navegación Jerárquica</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js para gráficos interactivos -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- PapaParse para parsing robusto de CSV -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
         .fade-in { animation: fadeIn 0.4s ease-in-out; }
@@ -17,15 +14,16 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .holland-table th, .holland-table td { border: 1px solid #e2e8f0; padding: 0.5rem; text-align: center; }
         .holland-table th { background-color: #f8fafc; font-weight: 600; color: #475569; font-size: 0.875rem; }
-        /* Animación de carga */
         .loader { border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
         /* Loader de pantalla completa */
         .full-screen-loader {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(255,255,255,0.9); z-index: 9999;
+            background: rgba(255,255,255,0.95); z-index: 9999;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
+        
         /* Notificación toast */
         .toast {
             position: fixed; bottom: 20px; right: 20px;
@@ -41,15 +39,25 @@
         .toast.error { background-color: #ef4444; }
         .toast.success { background-color: #10b981; }
         .toast.warning { background-color: #f59e0b; }
+        
+        /* Estado de carga por pestaña */
+        .tab-loading {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 400px;
+        }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans min-h-screen p-4 md:p-8">
 
-<!-- Loader de pantalla completa -->
-<div id="global-loader" class="full-screen-loader hidden">
+<!-- Loader de pantalla completa inicial -->
+<div id="global-loader" class="full-screen-loader">
     <div class="loader mb-4" style="width: 48px; height: 48px; border-width: 4px;"></div>
-    <p class="text-blue-600 font-bold text-lg">Cargando datos...</p>
-    <p id="loader-message" class="text-slate-500 text-sm mt-2">Conectando con el servidor</p>
+    <p class="text-blue-600 font-bold text-lg mb-2">Cargando Dashboard Educativo</p>
+    <p id="loader-message" class="text-slate-500 text-sm">Conectando con el servidor de datos...</p>
+    <div id="loader-progress" class="mt-4 flex gap-2">
+        <span id="progress-vocacional" class="px-3 py-1 bg-slate-200 rounded text-xs">Vocacional: <span class="font-bold">⏳</span></span>
+        <span id="progress-aptitudinal" class="px-3 py-1 bg-slate-200 rounded text-xs">Aptitudinal: <span class="font-bold">⏳</span></span>
+    </div>
 </div>
 
 <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
@@ -67,24 +75,13 @@
     <!-- PESTAÑA: VOCACIONAL 9° -->
     <div id="tab-vocacional" class="p-6 md:p-8 block fade-in">
         
-        <!-- Zona de carga -->
-        <div id="upload-zone-vocacional" class="border-2 border-dashed border-blue-300 rounded-xl p-12 text-center bg-blue-50/50 hover:bg-blue-50 transition-colors cursor-pointer" onclick="document.getElementById('file-vocacional').click()">
-            <div id="loader-vocacional" class="hidden flex-col items-center justify-center">
-                <div class="loader mb-4"></div>
-                <p class="text-blue-600 font-bold">Cargando datos desde GitHub...</p>
-            </div>
-            <div id="manual-upload-vocacional">
-                <svg class="mx-auto h-12 w-12 text-blue-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
-                <h3 class="text-lg font-bold text-slate-800">Modo Pruebas: Cargar Base de Datos Vocacional</h3>
-                <p class="mt-1 text-sm text-slate-500">Selecciona el archivo "BD_Reporte_Vocacional_9_Ligero.csv"</p>
-                <p class="mt-2 text-xs text-slate-400">O espera a que cargue automáticamente desde GitHub</p>
-                <input type="file" id="file-vocacional" class="hidden" accept=".csv" onchange="handleFile(event, 'vocacional')">
-            </div>
+        <!-- Loader específico de esta pestaña -->
+        <div id="loading-vocacional" class="tab-loading">
+            <div class="loader mb-4"></div>
+            <p class="text-blue-600 font-bold">Cargando datos vocacionales...</p>
         </div>
 
-        <!-- Dashboard Interactivo -->
+        <!-- Dashboard Interactivo (oculto inicialmente) -->
         <div id="dashboard-vocacional" class="hidden fade-in">
             <!-- Encabezado y Migas de Pan -->
             <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -94,7 +91,6 @@
                         <ol id="breadcrumb-vocacional" class="inline-flex items-center space-x-1 md:space-x-2"></ol>
                     </nav>
                 </div>
-                <!-- Bloque de Filtros Transversales y Exportación -->
                 <div class="flex flex-wrap items-center gap-3">
                     <div class="flex bg-slate-50 p-1.5 rounded-lg border border-slate-200">
                         <select id="filter-sector-vocacional" onchange="renderDashboard('vocacional')" class="text-sm bg-transparent font-medium text-slate-600 focus:outline-none pr-2 border-r border-slate-300">
@@ -143,14 +139,12 @@
 
             <!-- Gráficos Visuales 9° -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <!-- Hexágono de Holland -->
                 <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col items-center justify-center">
                     <h3 class="text-lg font-bold text-slate-700 mb-2">Hexágono de Holland</h3>
                     <div class="relative w-full max-w-sm aspect-square">
                         <canvas id="chart-voc-radar"></canvas>
                     </div>
                 </div>
-                <!-- Tabla de Intereses -->
                 <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
                     <h3 class="text-lg font-bold text-slate-700 mb-4 text-center">Intereses Profesionales y Características</h3>
                     <table class="w-full holland-table mb-4">
@@ -162,9 +156,7 @@
                                 <th>PUNTAJE</th>
                             </tr>
                         </thead>
-                        <tbody id="voc-table-scores">
-                            <!-- Inyectado por JS -->
-                        </tbody>
+                        <tbody id="voc-table-scores"></tbody>
                     </table>
                     <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 text-center">
                         <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Código Ocupacional Predominante</span>
@@ -195,21 +187,10 @@
     <!-- PESTAÑA: APTITUDINAL 6° -->
     <div id="tab-aptitudinal" class="p-6 md:p-8 hidden fade-in">
         
-        <!-- Zona de carga -->
-        <div id="upload-zone-aptitudinal" class="border-2 border-dashed border-purple-300 rounded-xl p-12 text-center bg-purple-50/50 hover:bg-purple-50 transition-colors cursor-pointer" onclick="document.getElementById('file-aptitudinal').click()">
-            <div id="loader-aptitudinal" class="hidden flex-col items-center justify-center">
-                <div class="loader mb-4"></div>
-                <p class="text-purple-600 font-bold">Cargando datos desde GitHub...</p>
-            </div>
-            <div id="manual-upload-aptitudinal">
-                <svg class="mx-auto h-12 w-12 text-purple-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
-                <h3 class="text-lg font-bold text-slate-800">Modo Pruebas: Cargar Base de Datos Aptitudinal</h3>
-                <p class="mt-1 text-sm text-slate-500">Selecciona el archivo "BD_Reporte_Aptitudinal_6_Ligero.csv"</p>
-                <p class="mt-2 text-xs text-slate-400">O espera a que cargue automáticamente desde GitHub</p>
-                <input type="file" id="file-aptitudinal" class="hidden" accept=".csv" onchange="handleFile(event, 'aptitudinal')">
-            </div>
+        <!-- Loader específico de esta pestaña -->
+        <div id="loading-aptitudinal" class="tab-loading">
+            <div class="loader mb-4"></div>
+            <p class="text-purple-600 font-bold">Cargando datos aptitudinales...</p>
         </div>
 
         <div id="dashboard-aptitudinal" class="hidden fade-in">
@@ -220,8 +201,7 @@
                         <ol id="breadcrumb-aptitudinal" class="inline-flex items-center space-x-1 md:space-x-2"></ol>
                     </nav>
                 </div>
-                 <!-- Bloque de Filtros Transversales y Exportación -->
-                 <div class="flex flex-wrap items-center gap-3">
+                <div class="flex flex-wrap items-center gap-3">
                     <div class="flex bg-slate-50 p-1.5 rounded-lg border border-slate-200">
                         <select id="filter-sector-aptitudinal" onchange="renderDashboard('aptitudinal')" class="text-sm bg-transparent font-medium text-slate-600 focus:outline-none pr-2 border-r border-slate-300">
                             <option value="TODOS">Todos los Sectores</option>
@@ -310,18 +290,15 @@
         FILES: {
             VOCACIONAL: 'BD_Reporte_Vocacional_9_Ligero.csv',
             APTITUDINAL: 'BD_Reporte_Aptitudinal_6_Ligero.csv'
-        },
-        CACHE_DURATION: 3600000, // 1 hora en milisegundos
-        AUTO_LOAD: true // Cambiar a false para deshabilitar carga automática
+        }
     };
 
-    // --- VARIABLES GLOBALES PARA GRÁFICOS ---
+    // Variables globales
     let chartInstances = {
         vocacional: { radar: null },
         aptitudinal: { bar: null, radar: null }
     };
 
-    // Diccionario para mostrar nombres elegantes
     const labelMapVocacional = {
         'social': 'SOCIAL',
         'realista': 'REALISTA',
@@ -331,35 +308,41 @@
         'oficina': 'OFICINA'
     };
 
-    // Columnas requeridas para validación
     const REQUIRED_COLUMNS = {
         vocacional: ['sede_nomb_depto', 'distrito', 'sede_nombre', 'sede_codigo', 'secc_codigo', 'NIE', 'LUGAR1', 'GRUPO OCUPACIONAL', 'sede_sector', 'sede_zona', 'social', 'realista', 'cientifico', 'artistico', 'emprendedor', 'oficina'],
         aptitudinal: ['sede_nomb_depto', 'sede_nomb_mun', 'sede_nombre', 'sede_codigo', 'NIE', 'LUGAR1', 'sede_sector', 'sede_zona']
     };
 
-    // --- UTILIDADES ---
+    // Estado de carga
+    const loadStatus = {
+        vocacional: false,
+        aptitudinal: false
+    };
+
+    // Utilidades
     function showToast(message, type = 'success') {
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
         toast.textContent = message;
         document.body.appendChild(toast);
-        setTimeout(() => {
-            toast.remove();
-        }, 3000);
+        setTimeout(() => toast.remove(), 3000);
     }
 
-    function showGlobalLoader(show = true, message = '') {
-        const loader = document.getElementById('global-loader');
-        const msgEl = document.getElementById('loader-message');
-        if (show) {
-            msgEl.textContent = message;
-            loader.classList.remove('hidden');
-        } else {
-            loader.classList.add('hidden');
+    function updateProgress(tipo, status) {
+        const el = document.getElementById(`progress-${tipo}`);
+        if (status === 'loading') {
+            el.innerHTML = `${tipo === 'vocacional' ? 'Vocacional' : 'Aptitudinal'}: <span class="font-bold">⏳</span>`;
+            el.className = 'px-3 py-1 bg-blue-100 text-blue-700 rounded text-xs';
+        } else if (status === 'success') {
+            el.innerHTML = `${tipo === 'vocacional' ? 'Vocacional' : 'Aptitudinal'}: <span class="font-bold">✅</span>`;
+            el.className = 'px-3 py-1 bg-green-100 text-green-700 rounded text-xs';
+        } else if (status === 'error') {
+            el.innerHTML = `${tipo === 'vocacional' ? 'Vocacional' : 'Aptitudinal'}: <span class="font-bold">❌</span>`;
+            el.className = 'px-3 py-1 bg-red-100 text-red-700 rounded text-xs';
         }
     }
 
-    // --- LÓGICA DE INTERFAZ Y PESTAÑAS ---
+    // Lógica de interfaz
     function switchTab(target) {
         const tabs = ['vocacional', 'aptitudinal'];
         tabs.forEach(tab => {
@@ -377,7 +360,7 @@
         });
     }
 
-    // --- ESTADO GLOBAL Y JERARQUÍA MICRO (HASTA EL NIE) ---
+    // Estado global
     const appState = {
         vocacional: {
             rows: [], cols: {}, path: [],
@@ -402,86 +385,51 @@
         }
     };
 
-    // --- CARGA DE DATOS ---
-    
-    // Cargar desde GitHub
+    // Cargar desde GitHub - SIN CACHÉ LOCAL
     async function loadFromGitHub(tipo) {
         const fileName = tipo === 'vocacional' ? CONFIG.FILES.VOCACIONAL : CONFIG.FILES.APTITUDINAL;
         const url = `${CONFIG.GITHUB_BASE_URL}/${fileName}`;
         
-        // Verificar caché
-        const cachedData = getCachedData(fileName);
-        if (cachedData) {
-            console.log(`Usando datos en caché para ${fileName}`);
-            procesarCSV(cachedData, tipo);
-            return;
-        }
-
+        updateProgress(tipo, 'loading');
+        
         try {
-            showGlobalLoader(true, `Descargando ${fileName}...`);
             const response = await fetch(url);
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
+            
             const csvText = await response.text();
             
-            // Guardar en caché
-            setCachedData(fileName, csvText);
-            
-            showGlobalLoader(false);
+            // Procesar inmediatamente sin guardar en caché
             procesarCSV(csvText, tipo);
-            showToast(`Datos cargados correctamente desde GitHub`, 'success');
+            
+            updateProgress(tipo, 'success');
+            loadStatus[tipo] = true;
+            
+            // Verificar si ambos cargaron
+            if (loadStatus.vocacional && loadStatus.aptitudinal) {
+                document.getElementById('global-loader').classList.add('hidden');
+                showToast('Dashboard cargado correctamente', 'success');
+            }
+            
         } catch (error) {
             console.error(`Error cargando ${tipo}:`, error);
-            showGlobalLoader(false);
-            showToast(`Error al cargar datos: ${error.message}. Usando modo manual.`, 'error');
+            updateProgress(tipo, 'error');
             
-            // Mostrar zona de carga manual
-            document.getElementById(`loader-${tipo}`).classList.add('hidden');
-            document.getElementById(`manual-upload-${tipo}`).classList.remove('hidden');
-            document.getElementById(`upload-zone-${tipo}`).classList.remove('hidden');
+            // Mostrar mensaje de error más amigable
+            document.getElementById('loader-message').innerHTML = `
+                <span class="text-red-600 font-bold">Error al cargar datos</span><br>
+                <span class="text-sm">${error.message}</span><br>
+                <span class="text-xs">Recarga la página para intentar de nuevo</span>
+            `;
+            
+            showToast(`Error al cargar ${tipo}: ${error.message}`, 'error');
         }
     }
 
-    // Caché con localStorage
-    function getCachedData(fileName) {
-        const cached = localStorage.getItem(`dashboard_${fileName}`);
-        const timestamp = localStorage.getItem(`dashboard_${fileName}_timestamp`);
-        
-        if (cached && timestamp) {
-            const age = Date.now() - parseInt(timestamp);
-            if (age < CONFIG.CACHE_DURATION) {
-                return cached;
-            }
-        }
-        return null;
-    }
-
-    function setCachedData(fileName, data) {
-        localStorage.setItem(`dashboard_${fileName}`, data);
-        localStorage.setItem(`dashboard_${fileName}_timestamp`, Date.now().toString());
-    }
-
-    // Carga manual desde archivo
-    function handleFile(event, tipo) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.readAsText(file, 'UTF-8');
-        reader.onload = function(e) {
-            procesarCSV(e.target.result, tipo);
-            showToast('Archivo cargado correctamente', 'success');
-        };
-        reader.onerror = function() {
-            showToast('Error al leer el archivo', 'error');
-        };
-    }
-
-    // Procesar CSV con validación
+    // Procesar CSV
     function procesarCSV(csvText, tipo) {
         try {
-            // Usar PapaParse para parsing robusto
             const parsed = Papa.parse(csvText, {
                 header: true,
                 skipEmptyLines: true,
@@ -490,34 +438,29 @@
 
             if (parsed.errors.length > 0) {
                 console.error('Errores en el CSV:', parsed.errors);
-                showToast('Advertencia: El CSV tiene algunos errores de formato', 'warning');
             }
 
-            // Validar columnas requeridas
+            // Validar columnas
             const headers = parsed.meta.fields;
             const required = REQUIRED_COLUMNS[tipo];
             const missing = required.filter(col => !headers.includes(col));
             
             if (missing.length > 0) {
                 console.error('Columnas faltantes:', missing);
-                showToast(`Error: Faltan columnas en el CSV: ${missing.join(', ')}`, 'error');
+                showToast(`Error: Faltan columnas: ${missing.join(', ')}`, 'error');
                 return;
             }
 
-            // Convertir a formato de filas
             appState[tipo].rows = parsed.data;
-            
-            // Crear mapeo de columnas (índices)
             appState[tipo].cols = {};
             headers.forEach((h, idx) => {
                 appState[tipo].cols[h.trim()] = idx;
             });
 
-            // Llenar filtros transversales
             populateTransversalFilters(tipo);
 
-            // Mostrar dashboard
-            document.getElementById(`upload-zone-${tipo}`).classList.add('hidden');
+            // Ocultar loader de pestaña y mostrar dashboard
+            document.getElementById(`loading-${tipo}`).classList.add('hidden');
             document.getElementById(`dashboard-${tipo}`).classList.remove('hidden');
             
             renderDashboard(tipo);
@@ -528,40 +471,35 @@
         }
     }
 
-    // --- FILTROS TRANSVERSALES ---
+    // Filtros transversales
     function populateTransversalFilters(tipo) {
         const state = appState[tipo];
         const sectorSet = new Set();
         const zonaSet = new Set();
         
-        const colSector = state.cols['sede_sector'];
-        const colZona = state.cols['sede_zona'];
+        state.rows.forEach(r => {
+            const sector = r['sede_sector'];
+            const zona = r['sede_zona'];
+            if(sector && sector.trim() !== '') sectorSet.add(sector.trim());
+            if(zona && zona.trim() !== '') zonaSet.add(zona.trim());
+        });
 
-        if(colSector !== undefined && colZona !== undefined) {
-            state.rows.forEach(r => {
-                const sector = r['sede_sector'];
-                const zona = r['sede_zona'];
-                if(sector && sector.trim() !== '') sectorSet.add(sector.trim());
-                if(zona && zona.trim() !== '') zonaSet.add(zona.trim());
-            });
+        const selSector = document.getElementById(`filter-sector-${tipo}`);
+        const selZona = document.getElementById(`filter-zona-${tipo}`);
+        
+        selSector.innerHTML = '<option value="TODOS">Todos los Sectores</option>';
+        selZona.innerHTML = '<option value="TODOS">Todas las Zonas</option>';
 
-            const selSector = document.getElementById(`filter-sector-${tipo}`);
-            const selZona = document.getElementById(`filter-zona-${tipo}`);
-            
-            selSector.innerHTML = '<option value="TODOS">Todos los Sectores</option>';
-            selZona.innerHTML = '<option value="TODOS">Todas las Zonas</option>';
-
-            Array.from(sectorSet).sort().forEach(s => {
-                selSector.innerHTML += `<option value="${s}">${s}</option>`;
-            });
-            Array.from(zonaSet).sort().forEach(z => {
-                selZona.innerHTML += `<option value="${z}">${z}</option>`;
-            });
-        }
+        Array.from(sectorSet).sort().forEach(s => {
+            selSector.innerHTML += `<option value="${s}">${s}</option>`;
+        });
+        Array.from(zonaSet).sort().forEach(z => {
+            selZona.innerHTML += `<option value="${z}">${z}</option>`;
+        });
     }
 
-    // --- CÁLCULOS Y PROMEDIOS ---
-    function getAverages(rows, metricsKeys, colMap) {
+    // Cálculos
+    function getAverages(rows, metricsKeys) {
         let sums = {};
         metricsKeys.forEach(k => sums[k] = 0);
         let validRows = 0;
@@ -586,7 +524,7 @@
         return averages;
     }
 
-    // --- RENDERIZADO OPTIMIZADO ---
+    // Renderizado
     function updateVisuals(tipo, filteredRows) {
         const state = appState[tipo];
         
@@ -598,7 +536,6 @@
             filteredRows.forEach(r => {
                 let p = r['LUGAR1'];
                 if(p) modes[p] = (modes[p] || 0) + 1;
-                
                 let o = r['GRUPO OCUPACIONAL'];
                 if(o) ocupaciones.add(o);
             });
@@ -609,30 +546,23 @@
             document.getElementById('kpi-voc-perfil').textContent = topMode;
             document.getElementById('kpi-voc-grupos').textContent = ocupaciones.size;
 
-            const avgs = getAverages(filteredRows, state.metrics, state.cols);
+            const avgs = getAverages(filteredRows, state.metrics);
             const labels = state.metrics;
             const data = labels.map(l => avgs[l]);
 
             let sortedAves = [...labels].sort((a,b) => avgs[b] - avgs[a]); 
             
             document.getElementById('voc-table-scores').innerHTML = `
-                <tr>
-                    <td>CIENTÍFICO</td><td class="font-bold text-blue-600">${avgs['cientifico'] || '-'}</td>
-                    <td>SOCIAL</td><td class="font-bold text-blue-600">${avgs['social'] || '-'}</td>
-                </tr>
-                <tr>
-                    <td>ARTÍSTICO</td><td class="font-bold text-blue-600">${avgs['artistico'] || '-'}</td>
-                    <td>EMPRENDEDOR</td><td class="font-bold text-blue-600">${avgs['emprendedor'] || '-'}</td>
-                </tr>
-                <tr>
-                    <td>REALISTA</td><td class="font-bold text-blue-600">${avgs['realista'] || '-'}</td>
-                    <td>OFICINA</td><td class="font-bold text-blue-600">${avgs['oficina'] || '-'}</td>
-                </tr>
+                <tr><td>CIENTÍFICO</td><td class="font-bold text-blue-600">${avgs['cientifico'] || '-'}</td>
+                    <td>SOCIAL</td><td class="font-bold text-blue-600">${avgs['social'] || '-'}</td></tr>
+                <tr><td>ARTÍSTICO</td><td class="font-bold text-blue-600">${avgs['artistico'] || '-'}</td>
+                    <td>EMPRENDEDOR</td><td class="font-bold text-blue-600">${avgs['emprendedor'] || '-'}</td></tr>
+                <tr><td>REALISTA</td><td class="font-bold text-blue-600">${avgs['realista'] || '-'}</td>
+                    <td>OFICINA</td><td class="font-bold text-blue-600">${avgs['oficina'] || '-'}</td></tr>
             `;
             
             document.getElementById('voc-codigo-ocupacional').textContent = sortedAves.slice(0,2).map(k => labelMapVocacional[k]).join(' - ');
 
-            // Actualizar gráfico existente en lugar de recrear
             if(chartInstances.vocacional.radar) {
                 chartInstances.vocacional.radar.data.datasets[0].data = data;
                 chartInstances.vocacional.radar.data.datasets[0].label = filteredRows.length === 1 ? 'Puntaje Individual' : 'Puntaje Promedio';
@@ -653,13 +583,7 @@
                         }]
                     },
                     options: { 
-                        scales: { 
-                            r: { 
-                                beginAtZero: true, 
-                                suggestedMax: 30,
-                                ticks: { display: false } 
-                            } 
-                        }, 
+                        scales: { r: { beginAtZero: true, suggestedMax: 30, ticks: { display: false } } }, 
                         plugins: { legend: { display: false } },
                         responsive: true,
                         maintainAspectRatio: false
@@ -674,7 +598,7 @@
             filteredRows.forEach(r => centros.add(r['sede_codigo']));
             document.getElementById('kpi-apt-centros').textContent = centros.size;
 
-            const avgs = getAverages(filteredRows, state.metrics, state.cols);
+            const avgs = getAverages(filteredRows, state.metrics);
             const labels = state.metrics;
             const data = labels.map(l => avgs[l] || 0);
 
@@ -685,7 +609,6 @@
             const radarMetrics = ['COMPRENSIÓN VERBAL', 'FLUIDEZ VERBAL', 'APTITUD NUMÉRICA', 'PERCEPCIÓN', 'APTITUD FÍSICA'];
             const radarData = radarMetrics.map(l => avgs[l] || 0);
 
-            // Actualizar gráfico de barras
             if(chartInstances.aptitudinal.bar) {
                 chartInstances.aptitudinal.bar.data.datasets[0].data = data;
                 chartInstances.aptitudinal.bar.data.datasets[0].label = filteredRows.length === 1 ? 'Puntaje Individual' : 'Promedio';
@@ -703,16 +626,10 @@
                             borderRadius: 4
                         }]
                     },
-                    options: { 
-                        indexAxis: 'y', 
-                        responsive: true, 
-                        maintainAspectRatio: false, 
-                        plugins: { legend: { display: false } } 
-                    }
+                    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
                 });
             }
 
-            // Actualizar gráfico radar
             if(chartInstances.aptitudinal.radar) {
                 chartInstances.aptitudinal.radar.data.datasets[0].data = radarData;
                 chartInstances.aptitudinal.radar.data.datasets[0].label = filteredRows.length === 1 ? 'Desempeño Individual' : 'Desempeño Promedio';
@@ -732,18 +649,13 @@
                             borderWidth: 2
                         }]
                     },
-                    options: { 
-                        scales: { r: { beginAtZero: true, suggestedMax: 40 } }, 
-                        plugins: { legend: { display: false } },
-                        responsive: true,
-                        maintainAspectRatio: false
-                    }
+                    options: { scales: { r: { beginAtZero: true, suggestedMax: 40 } }, plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false }
                 });
             }
         }
     }
 
-    // --- MOTOR DRILL-DOWN ---
+    // Motor drill-down
     function renderDashboard(tipo) {
         const state = appState[tipo];
         const currentLevelIndex = state.path.length;
@@ -751,11 +663,9 @@
         
         renderBreadcrumbs(tipo);
 
-        // Filtrar por ruta
         let filteredRows = state.rows;
         state.path.forEach((step, idx) => {
             const hDef = state.hierarchy[idx];
-            const colIndex = state.cols[hDef.key];
             filteredRows = filteredRows.filter(row => {
                 let val = row[hDef.key];
                 if (hDef.prependCode) val = row[hDef.prependCode] + " - " + val;
@@ -763,7 +673,6 @@
             });
         });
 
-        // Filtrar por sector y zona
         const selSector = document.getElementById(`filter-sector-${tipo}`).value;
         const selZona = document.getElementById(`filter-zona-${tipo}`).value;
         
@@ -802,11 +711,8 @@
             }
             groups[groupName].count++;
             
-            const diagnosticoCol = 'LUGAR1'; 
-            if (state.cols[diagnosticoCol] !== undefined) {
-                const diag = row[diagnosticoCol];
-                groups[groupName].modes[diag] = (groups[groupName].modes[diag] || 0) + 1;
-            }
+            const diag = row['LUGAR1'];
+            groups[groupName].modes[diag] = (groups[groupName].modes[diag] || 0) + 1;
         });
 
         const tbody = document.getElementById(`tbody-${tipo}`);
@@ -883,7 +789,7 @@
         ol.innerHTML = html;
     }
 
-    // --- EXPORTACIÓN A EXCEL ---
+    // Exportación
     function exportToExcel(tipo) {
         const table = document.querySelector(`#dashboard-${tipo} table`);
         let csv = '\uFEFF'; 
@@ -899,9 +805,7 @@
         table.querySelectorAll('tbody tr').forEach(tr => {
             const row = [];
             const cells = tr.querySelectorAll('td');
-            
             if (cells.length <= 1) return; 
-            
             cells.forEach((td, index) => {
                 if (index < cells.length - 1) {
                     row.push('"' + td.innerText.replace(/"/g, '""') + '"');
@@ -933,15 +837,12 @@
         showToast('Archivo exportado correctamente', 'success');
     }
 
-    // --- INICIALIZACIÓN ---
+    // Inicialización - CARGA AUTOMÁTICA DESDE GITHUB
     window.addEventListener('DOMContentLoaded', () => {
-        if (CONFIG.AUTO_LOAD) {
-            // Cargar ambos datasets automáticamente
-            loadFromGitHub('vocacional');
-            loadFromGitHub('aptitudinal');
-        }
+        // Cargar ambos datasets automáticamente SIN caché
+        loadFromGitHub('vocacional');
+        loadFromGitHub('aptitudinal');
     });
-
 </script>
 
 </body>
