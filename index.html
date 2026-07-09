@@ -16,13 +16,13 @@
         .holland-table th { background-color: #f8fafc; font-weight: 600; color: #475569; font-size: 0.875rem; }
         .loader { border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
+        
         .full-screen-loader {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(255,255,255,0.95); z-index: 9999;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
-
+        
         .toast {
             position: fixed; bottom: 20px; right: 20px;
             padding: 1rem 1.5rem; border-radius: 0.5rem;
@@ -37,34 +37,70 @@
         .toast.error { background-color: #ef4444; }
         .toast.success { background-color: #10b981; }
         .toast.warning { background-color: #f59e0b; }
-
+        
         .tab-loading {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             min-height: 400px;
         }
 
         .level-legend {
-            display: flex;
-            justify-content: center;
-            gap: 1.5rem;
-            margin-top: 1rem;
-            flex-wrap: wrap;
+            display: flex; justify-content: center; gap: 1.5rem;
+            margin-top: 1rem; flex-wrap: wrap;
         }
         .level-legend-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.75rem;
-            color: #475569;
+            display: flex; align-items: center; gap: 0.5rem;
+            font-size: 0.75rem; color: #475569;
         }
-        .level-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
+        .level-dot { width: 12px; height: 12px; border-radius: 50%; }
         .level-low { background-color: rgba(239, 68, 68, 0.3); border: 2px solid rgba(239, 68, 68, 0.6); }
         .level-mid { background-color: rgba(245, 158, 11, 0.3); border: 2px solid rgba(245, 158, 11, 0.6); }
         .level-high { background-color: rgba(16, 185, 129, 0.3); border: 2px solid rgba(16, 185, 129, 0.6); }
+
+        /* ✅ STICKY: Gráficas siempre visibles */
+        .sticky-charts {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: white;
+            padding: 1rem 0;
+            border-bottom: 2px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+
+        /* Top centros table styles */
+        .top-centros-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .top-centros-table th {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            padding: 0.75rem;
+            text-align: left;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        .top-centros-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .top-centros-table tr:hover {
+            background-color: #f1f5f9;
+        }
+        .rank-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 0.875rem;
+        }
+        .rank-1 { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: white; }
+        .rank-2 { background: linear-gradient(135deg, #cbd5e1, #94a3b8); color: white; }
+        .rank-3 { background: linear-gradient(135deg, #fb923c, #ea580c); color: white; }
+        .rank-other { background: #f1f5f9; color: #475569; }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans min-h-screen">
@@ -88,7 +124,7 @@
 </div>
 
 <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden my-8 mx-4">
-
+    
     <div class="flex border-b border-slate-200 bg-slate-50">
         <button id="btn-tab-vocacional" class="flex-1 py-4 px-6 text-sm font-bold text-blue-600 border-b-2 border-blue-600 bg-white transition-colors" onclick="switchTab('vocacional')">
             Vocacional (9° Grado)
@@ -106,89 +142,134 @@
         </div>
 
         <div id="dashboard-vocacional" class="hidden fade-in">
-            <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h2 class="text-2xl font-bold text-slate-800">Panel Vocacional y Características Personales</h2>
-                    <nav class="flex mt-2 text-sm text-slate-500 bg-slate-100 px-3 py-1.5 rounded-md inline-flex" aria-label="Breadcrumb">
-                        <ol id="breadcrumb-vocacional" class="inline-flex items-center space-x-1 md:space-x-2"></ol>
-                    </nav>
-                </div>
-                <div class="flex flex-wrap items-center gap-3">
-                    <div class="flex bg-slate-50 p-1.5 rounded-lg border border-slate-200">
-                        <select id="filter-sector-vocacional" onchange="renderDashboard('vocacional')" class="text-sm bg-transparent font-medium text-slate-600 focus:outline-none pr-2 border-r border-slate-300">
+            <!-- Breadcrumbs -->
+            <div class="mb-4">
+                <nav class="flex text-sm text-slate-500 bg-slate-100 px-3 py-1.5 rounded-md inline-flex" aria-label="Breadcrumb">
+                    <ol id="breadcrumb-vocacional" class="inline-flex items-center space-x-1 md:space-x-2"></ol>
+                </nav>
+            </div>
+
+            <!-- ✅ STICKY: Filtros + KPIs + Gráficas siempre visibles -->
+            <div class="sticky-charts">
+                <!-- Filtros -->
+                <div class="flex flex-wrap items-center gap-3 mb-4">
+                    <div class="flex bg-slate-50 p-1.5 rounded-lg border border-slate-200 flex-wrap gap-1">
+                        <select id="filter-sector-vocacional" onchange="renderDashboard('vocacional')" class="text-sm bg-transparent font-medium text-slate-600 focus:outline-none px-2 border-r border-slate-300">
                             <option value="TODOS">Todos los Sectores</option>
                         </select>
-                        <select id="filter-zona-vocacional" onchange="renderDashboard('vocacional')" class="text-sm bg-transparent font-medium text-slate-600 focus:outline-none pl-2">
+                        <select id="filter-zona-vocacional" onchange="renderDashboard('vocacional')" class="text-sm bg-transparent font-medium text-slate-600 focus:outline-none px-2 border-r border-slate-300">
                             <option value="TODOS">Todas las Zonas</option>
                         </select>
-                        <select id="filter-sexo-vocacional" onchange="renderDashboard('vocacional')" class="text-sm bg-transparent font-medium text-slate-600 focus:outline-none pl-2 border-l border-slate-300">
+                        <select id="filter-sexo-vocacional" onchange="renderDashboard('vocacional')" class="text-sm bg-transparent font-medium text-slate-600 focus:outline-none px-2 border-r border-slate-300">
                             <option value="TODOS">Todos los Sexos</option>
+                        </select>
+                        <!-- ✅ NUEVO: Filtro por interés -->
+                        <select id="filter-interes-vocacional" onchange="renderDashboard('vocacional')" class="text-sm bg-amber-50 font-semibold text-amber-700 focus:outline-none px-2 border-l-2 border-amber-400">
+                            <option value="TODOS">🎯 Todos los Intereses</option>
+                            <option value="SOCIAL">SOCIAL</option>
+                            <option value="REALISTA">REALISTA</option>
+                            <option value="CIENTÍFICO">CIENTÍFICO</option>
+                            <option value="ARTÍSTICO">ARTÍSTICO</option>
+                            <option value="EMPRENDEDOR">EMPRENDEDOR</option>
+                            <option value="OFICINA">OFICINA</option>
                         </select>
                     </div>
                     <button onclick="exportToExcel('vocacional')" class="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-sm font-bold rounded-lg transition-colors flex items-center gap-2 border border-emerald-200">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> Exportar Excel
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> Exportar
                     </button>
                 </div>
-            </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex items-center">
-                    <div class="p-3 bg-blue-100 text-blue-600 rounded-lg mr-4">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                <!-- KPIs -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex items-center">
+                        <div class="p-3 bg-blue-100 text-blue-600 rounded-lg mr-4">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-xs font-medium text-slate-500">Registros</p>
+                            <p class="text-xl font-bold text-slate-800" id="kpi-voc-total">0</p>
+                        </div>
                     </div>
-                    <div>
-                        <p class="text-sm font-medium text-slate-500">Registros Analizados</p>
-                        <p class="text-2xl font-bold text-slate-800" id="kpi-voc-total">0</p>
+                    <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex items-center">
+                        <div class="p-3 bg-purple-100 text-purple-600 rounded-lg mr-4">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-xs font-medium text-slate-500">Perfil Predominante</p>
+                            <p class="text-lg font-bold text-slate-800" id="kpi-voc-perfil">-</p>
+                        </div>
+                    </div>
+                    <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex items-center">
+                        <div class="p-3 bg-amber-100 text-amber-600 rounded-lg mr-4">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-xs font-medium text-slate-500">Grupos Ocupacionales</p>
+                            <p class="text-xl font-bold text-slate-800" id="kpi-voc-grupos">0</p>
+                        </div>
                     </div>
                 </div>
-                <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex items-center">
-                    <div class="p-3 bg-purple-100 text-purple-600 rounded-lg mr-4">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+
+                <!-- Gráficas -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col items-center justify-center">
+                        <h3 class="text-base font-bold text-slate-700 mb-2">Hexágono de Holland</h3>
+                        <div class="relative w-full max-w-sm aspect-square">
+                            <canvas id="chart-voc-radar"></canvas>
+                        </div>
                     </div>
-                    <div>
-                        <p class="text-sm font-medium text-slate-500">Perfil Predominante</p>
-                        <p class="text-xl font-bold text-slate-800" id="kpi-voc-perfil">-</p>
-                    </div>
-                </div>
-                <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex items-center">
-                    <div class="p-3 bg-amber-100 text-amber-600 rounded-lg mr-4">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                    </div>
-                    <div>
-                        <p class="text-sm font-medium text-slate-500">Grupos Ocupacionales</p>
-                        <p class="text-2xl font-bold text-slate-800" id="kpi-voc-grupos">0</p>
+                    <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                        <h3 class="text-base font-bold text-slate-700 mb-2 text-center">Intereses Profesionales</h3>
+                        <table class="w-full holland-table mb-3">
+                            <thead>
+                                <tr>
+                                    <th>INTERÉS</th>
+                                    <th>PUNTAJE</th>
+                                    <th>INTERÉS</th>
+                                    <th>PUNTAJE</th>
+                                </tr>
+                            </thead>
+                            <tbody id="voc-table-scores"></tbody>
+                        </table>
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 text-center">
+                            <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Código Ocupacional Predominante</span>
+                            <span class="text-base font-bold text-blue-700" id="voc-codigo-ocupacional">-</span>
+                        </div>
                     </div>
                 </div>
             </div>
+            <!-- FIN STICKY -->
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col items-center justify-center">
-                    <h3 class="text-lg font-bold text-slate-700 mb-2">Hexágono de Holland</h3>
-                    <div class="relative w-full max-w-sm aspect-square">
-                        <canvas id="chart-voc-radar"></canvas>
-                    </div>
+            <!-- ✅ NUEVA TABLA: Top Centros por Interés -->
+            <div id="top-centros-vocacional-container" class="mt-6 hidden">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-lg font-bold text-slate-700">
+                        🏆 Top Centros Escolares con interés en 
+                        <span id="interes-seleccionado-voc" class="text-amber-600"></span>
+                    </h3>
+                    <span class="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">
+                        Ordenado por cantidad de estudiantes
+                    </span>
                 </div>
-                <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-                    <h3 class="text-lg font-bold text-slate-700 mb-4 text-center">Intereses Profesionales y Características</h3>
-                    <table class="w-full holland-table mb-4">
+                <div class="bg-white border border-slate-200 rounded-lg overflow-x-auto shadow-sm">
+                    <table class="top-centros-table">
                         <thead>
                             <tr>
-                                <th>INTERÉS</th>
-                                <th>PUNTAJE</th>
-                                <th>INTERÉS</th>
-                                <th>PUNTAJE</th>
+                                <th style="width: 60px;">#</th>
+                                <th>Centro Escolar</th>
+                                <th>Departamento</th>
+                                <th>Distrito</th>
+                                <th style="text-align: center;">Estudiantes</th>
+                                <th style="text-align: center;">% del Total</th>
                             </tr>
                         </thead>
-                        <tbody id="voc-table-scores"></tbody>
+                        <tbody id="tbody-top-centros-vocacional"></tbody>
                     </table>
-                    <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 text-center">
-                        <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Código Ocupacional Predominante</span>
-                        <span class="text-lg font-bold text-blue-700" id="voc-codigo-ocupacional">-</span>
-                    </div>
                 </div>
             </div>
 
-            <h3 class="text-lg font-bold text-slate-700 mb-3">Desglose Geográfico / Institucional / Individual</h3>
+            <!-- Tabla Drill-Down -->
+            <h3 class="text-lg font-bold text-slate-700 mb-3 mt-6">Desglose Geográfico / Institucional / Individual</h3>
             <div class="bg-white border border-slate-200 rounded-lg overflow-x-auto no-scrollbar shadow-sm">
                 <table class="min-w-full divide-y divide-slate-200 text-sm">
                     <thead class="bg-slate-50">
@@ -214,92 +295,132 @@
         </div>
 
         <div id="dashboard-aptitudinal" class="hidden fade-in">
-            <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h2 class="text-2xl font-bold text-slate-800">Panel de Resultados Aptitudinales</h2>
-                    <nav class="flex mt-2 text-sm text-slate-500 bg-slate-100 px-3 py-1.5 rounded-md inline-flex" aria-label="Breadcrumb">
-                        <ol id="breadcrumb-aptitudinal" class="inline-flex items-center space-x-1 md:space-x-2"></ol>
-                    </nav>
-                </div>
-                <div class="flex flex-wrap items-center gap-3">
-                    <div class="flex bg-slate-50 p-1.5 rounded-lg border border-slate-200">
-                        <select id="filter-sector-aptitudinal" onchange="renderDashboard('aptitudinal')" class="text-sm bg-transparent font-medium text-slate-600 focus:outline-none pr-2 border-r border-slate-300">
+            <!-- Breadcrumbs -->
+            <div class="mb-4">
+                <nav class="flex text-sm text-slate-500 bg-slate-100 px-3 py-1.5 rounded-md inline-flex" aria-label="Breadcrumb">
+                    <ol id="breadcrumb-aptitudinal" class="inline-flex items-center space-x-1 md:space-x-2"></ol>
+                </nav>
+            </div>
+
+            <!-- ✅ STICKY: Filtros + KPIs + Gráficas siempre visibles -->
+            <div class="sticky-charts">
+                <!-- Filtros -->
+                <div class="flex flex-wrap items-center gap-3 mb-4">
+                    <div class="flex bg-slate-50 p-1.5 rounded-lg border border-slate-200 flex-wrap gap-1">
+                        <select id="filter-sector-aptitudinal" onchange="renderDashboard('aptitudinal')" class="text-sm bg-transparent font-medium text-slate-600 focus:outline-none px-2 border-r border-slate-300">
                             <option value="TODOS">Todos los Sectores</option>
                         </select>
-                        <select id="filter-zona-aptitudinal" onchange="renderDashboard('aptitudinal')" class="text-sm bg-transparent font-medium text-slate-600 focus:outline-none pl-2">
+                        <select id="filter-zona-aptitudinal" onchange="renderDashboard('aptitudinal')" class="text-sm bg-transparent font-medium text-slate-600 focus:outline-none px-2 border-r border-slate-300">
                             <option value="TODOS">Todas las Zonas</option>
                         </select>
-                        <select id="filter-sexo-aptitudinal" onchange="renderDashboard('aptitudinal')" class="text-sm bg-transparent font-medium text-slate-600 focus:outline-none pl-2 border-l border-slate-300">
+                        <select id="filter-sexo-aptitudinal" onchange="renderDashboard('aptitudinal')" class="text-sm bg-transparent font-medium text-slate-600 focus:outline-none px-2 border-r border-slate-300">
                             <option value="TODOS">Todos los Sexos</option>
+                        </select>
+                        <!-- ✅ NUEVO: Filtro por aptitud -->
+                        <select id="filter-aptitud-aptitudinal" onchange="renderDashboard('aptitudinal')" class="text-sm bg-purple-50 font-semibold text-purple-700 focus:outline-none px-2 border-l-2 border-purple-400">
+                            <option value="TODOS">🎯 Todas las Aptitudes</option>
+                            <option value="SUMA_COMPRENSIÓN VERBAL">COMPRENSIÓN VERBAL</option>
+                            <option value="SUMA_FLUIDEZ VERBAL">FLUIDEZ VERBAL</option>
+                            <option value="SUMA_APTITUD NUMÉRICA">APTITUD NUMÉRICA</option>
+                            <option value="SUMA_RAZONAMIENTO LÓGICO">RAZONAMIENTO LÓGICO</option>
+                            <option value="SUMA_APTITUD ESPACIAL">APTITUD ESPACIAL</option>
+                            <option value="SUMA_APTITUD MECÁNICA">APTITUD MECÁNICA</option>
+                            <option value="SUMA_APTITUD ARTÍSTICA">APTITUD ARTÍSTICA</option>
+                            <option value="SUMA_MEMORIA">MEMORIA</option>
+                            <option value="SUMA_PERCEPCIÓN">PERCEPCIÓN</option>
+                            <option value="SUMA_APTITUD FÍSICA">APTITUD FÍSICA</option>
                         </select>
                     </div>
                     <button onclick="exportToExcel('aptitudinal')" class="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-sm font-bold rounded-lg transition-colors flex items-center gap-2 border border-emerald-200">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> Exportar Excel
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> Exportar
                     </button>
                 </div>
-            </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex items-center">
-                    <div class="p-3 bg-purple-100 text-purple-600 rounded-lg mr-4">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                <!-- KPIs -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex items-center">
+                        <div class="p-3 bg-purple-100 text-purple-600 rounded-lg mr-4">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-xs font-medium text-slate-500">Registros</p>
+                            <p class="text-xl font-bold text-slate-800" id="kpi-apt-total">0</p>
+                        </div>
                     </div>
-                    <div>
-                        <p class="text-sm font-medium text-slate-500">Registros Analizados</p>
-                        <p class="text-2xl font-bold text-slate-800" id="kpi-apt-total">0</p>
+                    <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex items-center">
+                        <div class="p-3 bg-indigo-100 text-indigo-600 rounded-lg mr-4">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-xs font-medium text-slate-500">Aptitud Predominante</p>
+                            <p class="text-lg font-bold text-slate-800" id="kpi-apt-alta">-</p>
+                        </div>
+                    </div>
+                    <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex items-center">
+                        <div class="p-3 bg-teal-100 text-teal-600 rounded-lg mr-4">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-xs font-medium text-slate-500">Centros Seleccionados</p>
+                            <p class="text-xl font-bold text-slate-800" id="kpi-apt-centros">0</p>
+                        </div>
                     </div>
                 </div>
-                <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex items-center">
-                    <div class="p-3 bg-indigo-100 text-indigo-600 rounded-lg mr-4">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    </div>
-                    <div>
-                        <p class="text-sm font-medium text-slate-500">Aptitud Predominante</p>
-                        <p class="text-xl font-bold text-slate-800" id="kpi-apt-alta">-</p>
-                    </div>
-                </div>
-                <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex items-center">
-                    <div class="p-3 bg-teal-100 text-teal-600 rounded-lg mr-4">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                    </div>
-                    <div>
-                        <p class="text-sm font-medium text-slate-500">Centros Seleccionados</p>
-                        <p class="text-2xl font-bold text-slate-800" id="kpi-apt-centros">0</p>
-                    </div>
-                </div>
-            </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-                    <h3 class="text-lg font-bold text-slate-700 mb-2">Desempeño Promedio por Aptitud</h3>
-                    <div class="relative w-full" style="height: 300px;">
-                        <canvas id="chart-apt-bar"></canvas>
-                    </div>
-                </div>
-                <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col items-center justify-center">
-                    <h3 class="text-lg font-bold text-slate-700 mb-2">Perfil Aptitudinal Integral</h3>
-                    <p class="text-xs text-slate-500 mb-2 text-center">Zonas: Bajo (0-13) · Medio (14-26) · Alto (27-40)</p>
-                    <div class="relative w-full" style="height: 450px;">
-                        <canvas id="chart-apt-radar"></canvas>
-                    </div>
-                    <div class="level-legend">
-                        <div class="level-legend-item">
-                            <div class="level-dot level-low"></div>
-                            <span>Nivel Bajo (0-13)</span>
+                <!-- Gráficas -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                        <h3 class="text-base font-bold text-slate-700 mb-2">Desempeño Promedio por Aptitud</h3>
+                        <div class="relative w-full" style="height: 280px;">
+                            <canvas id="chart-apt-bar"></canvas>
                         </div>
-                        <div class="level-legend-item">
-                            <div class="level-dot level-mid"></div>
-                            <span>Nivel Medio (14-26)</span>
+                    </div>
+                    <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col items-center justify-center">
+                        <h3 class="text-base font-bold text-slate-700 mb-2">Perfil Aptitudinal Integral</h3>
+                        <p class="text-xs text-slate-500 mb-1 text-center">Zonas: Bajo (0-13) · Medio (14-26) · Alto (27-40)</p>
+                        <div class="relative w-full" style="height: 380px;">
+                            <canvas id="chart-apt-radar"></canvas>
                         </div>
-                        <div class="level-legend-item">
-                            <div class="level-dot level-high"></div>
-                            <span>Nivel Alto (27-40)</span>
+                        <div class="level-legend">
+                            <div class="level-legend-item"><div class="level-dot level-low"></div><span>Bajo</span></div>
+                            <div class="level-legend-item"><div class="level-dot level-mid"></div><span>Medio</span></div>
+                            <div class="level-legend-item"><div class="level-dot level-high"></div><span>Alto</span></div>
                         </div>
                     </div>
                 </div>
             </div>
+            <!-- FIN STICKY -->
 
-            <h3 class="text-lg font-bold text-slate-700 mb-3">Desglose Geográfico / Institucional / Individual</h3>
+            <!-- ✅ NUEVA TABLA: Top Centros por Aptitud -->
+            <div id="top-centros-aptitudinal-container" class="mt-6 hidden">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-lg font-bold text-slate-700">
+                        🏆 Top Centros Escolares con mayor desempeño en 
+                        <span id="aptitud-seleccionada-apt" class="text-purple-600"></span>
+                    </h3>
+                    <span class="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">
+                        Ordenado por puntaje promedio
+                    </span>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-lg overflow-x-auto shadow-sm">
+                    <table class="top-centros-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;">#</th>
+                                <th>Centro Escolar</th>
+                                <th>Departamento</th>
+                                <th>Distrito / Municipio</th>
+                                <th style="text-align: center;">Estudiantes</th>
+                                <th style="text-align: center;">Puntaje Promedio</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-top-centros-aptitudinal"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tabla Drill-Down -->
+            <h3 class="text-lg font-bold text-slate-700 mb-3 mt-6">Desglose Geográfico / Institucional / Individual</h3>
             <div class="bg-white border border-slate-200 rounded-lg overflow-x-auto no-scrollbar shadow-sm">
                 <table class="min-w-full divide-y divide-slate-200 text-sm">
                     <thead class="bg-slate-50">
@@ -325,7 +446,7 @@
             VOCACIONAL: 'BD_Reporte_Vocacional_9_Ligero.csv',
             APTITUDINAL: 'BD_Reporte_Aptitudinal_6_Ligero.csv'
         },
-        VERSION: 'v2.2'
+        VERSION: 'v3.0'
     };
 
     let chartInstances = {
@@ -334,12 +455,8 @@
     };
 
     const labelMapVocacional = {
-        'social': 'SOCIAL',
-        'realista': 'REALISTA',
-        'cientifico': 'CIENTÍFICO',
-        'artistico': 'ARTÍSTICO',
-        'emprendedor': 'EMPRENDEDOR',
-        'oficina': 'OFICINA'
+        'social': 'SOCIAL', 'realista': 'REALISTA', 'cientifico': 'CIENTÍFICO',
+        'artistico': 'ARTÍSTICO', 'emprendedor': 'EMPRENDEDOR', 'oficina': 'OFICINA'
     };
 
     const REQUIRED_COLUMNS = {
@@ -347,13 +464,8 @@
         aptitudinal: ['sede_nomb_depto', 'sede_nomb_mun', 'sede_nombre', 'sede_codigo', 'NIE', 'LUGAR1', 'sede_sector', 'sede_zona', 'SUMA_COMPRENSIÓN VERBAL', 'SUMA_FLUIDEZ VERBAL', 'SUMA_APTITUD NUMÉRICA', 'SUMA_RAZONAMIENTO LÓGICO', 'SUMA_APTITUD ESPACIAL', 'SUMA_APTITUD MECÁNICA', 'SUMA_APTITUD ARTÍSTICA', 'SUMA_MEMORIA', 'SUMA_PERCEPCIÓN', 'SUMA_APTITUD FÍSICA']
     };
 
-    // ✅ Nombres posibles de la columna de sexo (prioridad de búsqueda)
-    const SEXO_COLUMN_CANDIDATES = ['est_nomb_sexo', 'sexo', 'genero', 'Sexo', 'GENERO', 'est_genero'];
-
-    const loadStatus = {
-        vocacional: false,
-        aptitudinal: false
-    };
+    const SEXO_COLUMN_CANDIDATES = ['est_nomb_sexo', 'sexo', 'genero', 'Sexo', 'GENERO'];
+    const loadStatus = { vocacional: false, aptitudinal: false };
 
     function showToast(message, type = 'success') {
         const toast = document.createElement('div');
@@ -378,8 +490,7 @@
     }
 
     function switchTab(target) {
-        const tabs = ['vocacional', 'aptitudinal'];
-        tabs.forEach(tab => {
+        ['vocacional', 'aptitudinal'].forEach(tab => {
             const btn = document.getElementById(`btn-tab-${tab}`);
             const content = document.getElementById(`tab-${tab}`);
             if (tab === target) {
@@ -415,38 +526,23 @@
                 { key: 'NIE', label: 'Estudiante (NIE)' }
             ],
             metrics: [
-                'SUMA_COMPRENSIÓN VERBAL',
-                'SUMA_FLUIDEZ VERBAL',
-                'SUMA_APTITUD NUMÉRICA',
-                'SUMA_RAZONAMIENTO LÓGICO',
-                'SUMA_APTITUD ESPACIAL',
-                'SUMA_APTITUD MECÁNICA',
-                'SUMA_APTITUD ARTÍSTICA',
-                'SUMA_MEMORIA',
-                'SUMA_PERCEPCIÓN',
-                'SUMA_APTITUD FÍSICA'
+                'SUMA_COMPRENSIÓN VERBAL', 'SUMA_FLUIDEZ VERBAL', 'SUMA_APTITUD NUMÉRICA',
+                'SUMA_RAZONAMIENTO LÓGICO', 'SUMA_APTITUD ESPACIAL', 'SUMA_APTITUD MECÁNICA',
+                'SUMA_APTITUD ARTÍSTICA', 'SUMA_MEMORIA', 'SUMA_PERCEPCIÓN', 'SUMA_APTITUD FÍSICA'
             ],
             metricLabels: {
-                'SUMA_COMPRENSIÓN VERBAL': 'COMPRENSIÓN VERBAL',
-                'SUMA_FLUIDEZ VERBAL': 'FLUIDEZ VERBAL',
-                'SUMA_APTITUD NUMÉRICA': 'APTITUD NUMÉRICA',
-                'SUMA_RAZONAMIENTO LÓGICO': 'RAZONAMIENTO LÓGICO',
-                'SUMA_APTITUD ESPACIAL': 'APTITUD ESPACIAL',
-                'SUMA_APTITUD MECÁNICA': 'APTITUD MECÁNICA',
-                'SUMA_APTITUD ARTÍSTICA': 'APTITUD ARTÍSTICA',
-                'SUMA_MEMORIA': 'MEMORIA',
-                'SUMA_PERCEPCIÓN': 'PERCEPCIÓN',
-                'SUMA_APTITUD FÍSICA': 'APTITUD FÍSICA'
+                'SUMA_COMPRENSIÓN VERBAL': 'COMPRENSIÓN VERBAL', 'SUMA_FLUIDEZ VERBAL': 'FLUIDEZ VERBAL',
+                'SUMA_APTITUD NUMÉRICA': 'APTITUD NUMÉRICA', 'SUMA_RAZONAMIENTO LÓGICO': 'RAZONAMIENTO LÓGICO',
+                'SUMA_APTITUD ESPACIAL': 'APTITUD ESPACIAL', 'SUMA_APTITUD MECÁNICA': 'APTITUD MECÁNICA',
+                'SUMA_APTITUD ARTÍSTICA': 'APTITUD ARTÍSTICA', 'SUMA_MEMORIA': 'MEMORIA',
+                'SUMA_PERCEPCIÓN': 'PERCEPCIÓN', 'SUMA_APTITUD FÍSICA': 'APTITUD FÍSICA'
             }
         }
     };
 
-    // ✅ Función para detectar la columna de sexo
     function detectarColumnaSexo(headers) {
         for (const candidato of SEXO_COLUMN_CANDIDATES) {
-            if (headers.includes(candidato)) {
-                return candidato;
-            }
+            if (headers.includes(candidato)) return candidato;
         }
         return null;
     }
@@ -454,84 +550,48 @@
     async function loadFromGitHub(tipo) {
         const fileName = tipo === 'vocacional' ? CONFIG.FILES.VOCACIONAL : CONFIG.FILES.APTITUDINAL;
         const url = `${CONFIG.GITHUB_BASE_URL}/${fileName}?v=${CONFIG.VERSION}&t=${Date.now()}`;
-
         updateProgress(tipo, 'loading');
-
         try {
             const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-
+            if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             const csvText = await response.text();
             procesarCSV(csvText, tipo);
-
             updateProgress(tipo, 'success');
             loadStatus[tipo] = true;
-
             if (loadStatus.vocacional && loadStatus.aptitudinal) {
                 document.getElementById('global-loader').classList.add('hidden');
                 showToast('Dashboard cargado correctamente', 'success');
             }
-
         } catch (error) {
             console.error(`Error cargando ${tipo}:`, error);
             updateProgress(tipo, 'error');
-
             document.getElementById('loader-message').innerHTML = `
                 <span class="text-red-600 font-bold">Error al cargar datos</span><br>
-                <span class="text-sm">${error.message}</span><br>
-                <span class="text-xs">Recarga la página para intentar de nuevo</span>
-            `;
-
+                <span class="text-sm">${error.message}</span>`;
             showToast(`Error al cargar ${tipo}: ${error.message}`, 'error');
         }
     }
 
     function procesarCSV(csvText, tipo) {
         try {
-            const parsed = Papa.parse(csvText, {
-                header: true,
-                skipEmptyLines: true,
-                dynamicTyping: false
-            });
-
-            if (parsed.errors.length > 0) {
-                console.error('Errores en el CSV:', parsed.errors);
-            }
-
+            const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true, dynamicTyping: false });
+            if (parsed.errors.length > 0) console.error('Errores en el CSV:', parsed.errors);
             const headers = parsed.meta.fields;
             const required = REQUIRED_COLUMNS[tipo];
             const missing = required.filter(col => !headers.includes(col));
-
             if (missing.length > 0) {
-                console.error('Columnas faltantes:', missing);
                 showToast(`Error: Faltan columnas: ${missing.join(', ')}`, 'error');
                 return;
             }
-
-            // ✅ Detectar columna de sexo
             const sexoCol = detectarColumnaSexo(headers);
             appState[tipo].sexoColumn = sexoCol;
-            if (sexoCol) {
-                console.log(`✅ ${tipo}: Columna de sexo detectada → "${sexoCol}"`);
-            } else {
-                console.warn(`⚠️ ${tipo}: No se encontró columna de sexo`);
-            }
-
             appState[tipo].rows = parsed.data;
             appState[tipo].cols = {};
-            headers.forEach((h, idx) => {
-                appState[tipo].cols[h.trim()] = idx;
-            });
-
+            headers.forEach((h, idx) => { appState[tipo].cols[h.trim()] = idx; });
             populateTransversalFilters(tipo);
-
             document.getElementById(`loading-${tipo}`).classList.add('hidden');
             document.getElementById(`dashboard-${tipo}`).classList.remove('hidden');
-
             renderDashboard(tipo);
-
         } catch (error) {
             console.error('Error procesando CSV:', error);
             showToast(`Error al procesar datos: ${error.message}`, 'error');
@@ -540,159 +600,269 @@
 
     function populateTransversalFilters(tipo) {
         const state = appState[tipo];
-        const sectorSet = new Set();
-        const zonaSet = new Set();
-        const sexoSet = new Set();
-
+        const sectorSet = new Set(), zonaSet = new Set(), sexoSet = new Set();
         state.rows.forEach(r => {
-            const sector = r['sede_sector'];
-            const zona = r['sede_zona'];
-
-            // ✅ Usar la columna detectada
+            const sector = r['sede_sector'], zona = r['sede_zona'];
             const sexo = state.sexoColumn ? r[state.sexoColumn] : null;
-
             if(sector && sector.trim() !== '') sectorSet.add(sector.trim());
             if(zona && zona.trim() !== '') zonaSet.add(zona.trim());
             if(sexo && sexo.trim() !== '') sexoSet.add(sexo.trim());
         });
-
         const selSector = document.getElementById(`filter-sector-${tipo}`);
         const selZona = document.getElementById(`filter-zona-${tipo}`);
         const selSexo = document.getElementById(`filter-sexo-${tipo}`);
-
         selSector.innerHTML = '<option value="TODOS">Todos los Sectores</option>';
         selZona.innerHTML = '<option value="TODOS">Todas las Zonas</option>';
         selSexo.innerHTML = '<option value="TODOS">Todos los Sexos</option>';
-
-        Array.from(sectorSet).sort().forEach(s => {
-            selSector.innerHTML += `<option value="${s}">${s}</option>`;
-        });
-        Array.from(zonaSet).sort().forEach(z => {
-            selZona.innerHTML += `<option value="${z}">${z}</option>`;
-        });
-        Array.from(sexoSet).sort().forEach(s => {
-            selSexo.innerHTML += `<option value="${s}">${s}</option>`;
-        });
-
-        // Ocultar filtro de sexo si no hay datos
-        if (sexoSet.size === 0) {
-            selSexo.style.display = 'none';
-        } else {
-            console.log(`✅ ${tipo}: Filtro de sexo poblado con ${sexoSet.size} valores: ${Array.from(sexoSet).join(', ')}`);
-        }
+        Array.from(sectorSet).sort().forEach(s => selSector.innerHTML += `<option value="${s}">${s}</option>`);
+        Array.from(zonaSet).sort().forEach(z => selZona.innerHTML += `<option value="${z}">${z}</option>`);
+        Array.from(sexoSet).sort().forEach(s => selSexo.innerHTML += `<option value="${s}">${s}</option>`);
+        if (sexoSet.size === 0) selSexo.style.display = 'none';
     }
 
     function getAverages(rows, metricsKeys) {
         let sums = {};
         metricsKeys.forEach(k => sums[k] = 0);
         let validRows = 0;
-
         rows.forEach(r => {
             let hasValidData = false;
             metricsKeys.forEach(k => {
                 let val = parseFloat(r[k]);
-                if (!isNaN(val)) {
-                    sums[k] += val;
-                    hasValidData = true;
-                }
+                if (!isNaN(val)) { sums[k] += val; hasValidData = true; }
             });
             if (hasValidData) validRows++;
         });
-
         let averages = {};
         let count = validRows || 1;
-        metricsKeys.forEach(k => {
-            averages[k] = parseFloat((sums[k] / count).toFixed(1));
-        });
+        metricsKeys.forEach(k => { averages[k] = parseFloat((sums[k] / count).toFixed(1)); });
         return averages;
+    }
+
+    // ✅ NUEVA FUNCIÓN: Renderizar Top Centros por Interés (9°)
+    function renderTopCentrosVocacional(filteredRows, interesSeleccionado) {
+        const container = document.getElementById('top-centros-vocacional-container');
+        const tbody = document.getElementById('tbody-top-centros-vocacional');
+        const label = document.getElementById('interes-seleccionado-voc');
+        
+        if (interesSeleccionado === 'TODOS') {
+            container.classList.add('hidden');
+            return;
+        }
+        
+        container.classList.remove('hidden');
+        label.textContent = interesSeleccionado;
+        
+        // Mapeo inverso: de nombre bonito a key de columna
+        const interesKeyMap = {
+            'SOCIAL': 'social', 'REALISTA': 'realista', 'CIENTÍFICO': 'cientifico',
+            'ARTÍSTICO': 'artistico', 'EMPRENDEDOR': 'emprendedor', 'OFICINA': 'oficina'
+        };
+        
+        // Agrupar por centro escolar
+        const centros = {};
+        filteredRows.forEach(r => {
+            // Contar estudiantes cuyo LUGAR1 coincide con el interés seleccionado
+            if (r['LUGAR1'] !== interesSeleccionado) return;
+            
+            const codigo = r['sede_codigo'];
+            if (!centros[codigo]) {
+                centros[codigo] = {
+                    codigo: codigo,
+                    nombre: r['sede_nombre'],
+                    depto: r['sede_nomb_depto'],
+                    distrito: r['distrito'],
+                    count: 0,
+                    puntajes: { social: 0, realista: 0, cientifico: 0, artistico: 0, emprendedor: 0, oficina: 0 }
+                };
+            }
+            centros[codigo].count++;
+        });
+        
+        const totalConInteres = Object.values(centros).reduce((sum, c) => sum + c.count, 0);
+        
+        // Ordenar por cantidad descendente y tomar top 15
+        const topCentros = Object.values(centros)
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 15);
+        
+        tbody.innerHTML = '';
+        if (topCentros.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-500">No hay datos para el interés seleccionado</td></tr>`;
+            return;
+        }
+        
+        topCentros.forEach((c, idx) => {
+            const rank = idx + 1;
+            let rankClass = 'rank-other';
+            if (rank === 1) rankClass = 'rank-1';
+            else if (rank === 2) rankClass = 'rank-2';
+            else if (rank === 3) rankClass = 'rank-3';
+            
+            const porcentaje = totalConInteres > 0 ? ((c.count / totalConInteres) * 100).toFixed(1) : 0;
+            
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><span class="rank-badge ${rankClass}">${rank}</span></td>
+                <td class="font-medium text-slate-800">${c.nombre}</td>
+                <td class="text-slate-600">${c.depto}</td>
+                <td class="text-slate-600">${c.distrito}</td>
+                <td style="text-align: center;"><span class="font-bold text-blue-600">${c.count.toLocaleString('es-SV')}</span></td>
+                <td style="text-align: center;">
+                    <div class="flex items-center gap-2">
+                        <div class="flex-1 bg-slate-200 rounded-full h-2">
+                            <div class="bg-amber-500 h-2 rounded-full" style="width: ${porcentaje}%"></div>
+                        </div>
+                        <span class="text-xs font-semibold text-slate-600">${porcentaje}%</span>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // ✅ NUEVA FUNCIÓN: Renderizar Top Centros por Aptitud (6°)
+    function renderTopCentrosAptitudinal(filteredRows, aptitudSeleccionada) {
+        const container = document.getElementById('top-centros-aptitudinal-container');
+        const tbody = document.getElementById('tbody-top-centros-aptitudinal');
+        const label = document.getElementById('aptitud-seleccionada-apt');
+        
+        if (aptitudSeleccionada === 'TODOS') {
+            container.classList.add('hidden');
+            return;
+        }
+        
+        container.classList.remove('hidden');
+        const nombreAptitud = appState.aptitudinal.metricLabels[aptitudSeleccionada] || aptitudSeleccionada;
+        label.textContent = nombreAptitud;
+        
+        // Agrupar por centro escolar y calcular promedio de la aptitud
+        const centros = {};
+        filteredRows.forEach(r => {
+            const puntaje = parseFloat(r[aptitudSeleccionada]);
+            if (isNaN(puntaje)) return;
+            
+            const codigo = r['sede_codigo'];
+            if (!centros[codigo]) {
+                centros[codigo] = {
+                    codigo: codigo,
+                    nombre: r['sede_nombre'],
+                    depto: r['sede_nomb_depto'],
+                    mun: r['sede_nomb_mun'],
+                    count: 0,
+                    suma: 0
+                };
+            }
+            centros[codigo].count++;
+            centros[codigo].suma += puntaje;
+        });
+        
+        // Calcular promedios
+        Object.values(centros).forEach(c => {
+            c.promedio = c.count > 0 ? (c.suma / c.count).toFixed(1) : 0;
+        });
+        
+        // Ordenar por promedio descendente y tomar top 15
+        const topCentros = Object.values(centros)
+            .filter(c => c.count >= 5) // Mínimo 5 estudiantes para ser relevante
+            .sort((a, b) => b.promedio - a.promedio)
+            .slice(0, 15);
+        
+        tbody.innerHTML = '';
+        if (topCentros.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-500">No hay datos suficientes para la aptitud seleccionada</td></tr>`;
+            return;
+        }
+        
+        topCentros.forEach((c, idx) => {
+            const rank = idx + 1;
+            let rankClass = 'rank-other';
+            if (rank === 1) rankClass = 'rank-1';
+            else if (rank === 2) rankClass = 'rank-2';
+            else if (rank === 3) rankClass = 'rank-3';
+            
+            // Color del puntaje según nivel
+            let puntajeColor = 'text-slate-700';
+            if (c.promedio >= 27) puntajeColor = 'text-emerald-600';
+            else if (c.promedio >= 14) puntajeColor = 'text-amber-600';
+            else puntajeColor = 'text-red-600';
+            
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><span class="rank-badge ${rankClass}">${rank}</span></td>
+                <td class="font-medium text-slate-800">${c.nombre}</td>
+                <td class="text-slate-600">${c.depto}</td>
+                <td class="text-slate-600">${c.mun}</td>
+                <td style="text-align: center;"><span class="text-slate-600">${c.count.toLocaleString('es-SV')}</span></td>
+                <td style="text-align: center;"><span class="font-bold text-lg ${puntajeColor}">${c.promedio}</span><span class="text-xs text-slate-400"> / 40</span></td>
+            `;
+            tbody.appendChild(tr);
+        });
     }
 
     function updateVisuals(tipo, filteredRows) {
         const state = appState[tipo];
-
+        
         if(tipo === 'vocacional') {
-    document.getElementById('kpi-voc-total').textContent = filteredRows.length.toLocaleString('es-SV');
-    
-    let modes = {};
-    let ocupaciones = new Set();
-    filteredRows.forEach(r => {
-        let p = r['LUGAR1'];
-        if(p) modes[p] = (modes[p] || 0) + 1;
-        let o = r['GRUPO OCUPACIONAL'];
-        if(o) ocupaciones.add(o);
-    });
-    
-    let topMode = 'N/A'; let max = 0;
-    for(let m in modes) { if(modes[m] > max) { max = modes[m]; topMode = m; } }
-    
-    document.getElementById('kpi-voc-perfil').textContent = topMode;
-    document.getElementById('kpi-voc-grupos').textContent = ocupaciones.size;
+            document.getElementById('kpi-voc-total').textContent = filteredRows.length.toLocaleString('es-SV');
+            let modes = {}, ocupaciones = new Set();
+            filteredRows.forEach(r => {
+                let p = r['LUGAR1'];
+                if(p) modes[p] = (modes[p] || 0) + 1;
+                let o = r['GRUPO OCUPACIONAL'];
+                if(o) ocupaciones.add(o);
+            });
+            let topMode = 'N/A'; let max = 0;
+            for(let m in modes) { if(modes[m] > max) { max = modes[m]; topMode = m; } }
+            document.getElementById('kpi-voc-perfil').textContent = topMode;
+            document.getElementById('kpi-voc-grupos').textContent = ocupaciones.size;
 
-    const avgs = getAverages(filteredRows, state.metrics);
-    const labels = state.metrics;
-    const data = labels.map(l => avgs[l]);
+            const avgs = getAverages(filteredRows, state.metrics);
+            const labels = state.metrics;
+            const data = labels.map(l => avgs[l]);
+            const maxDataValue = Math.max(...data);
+            const maxScale = Math.ceil(maxDataValue / 5) * 5 + 5;
 
-    // ✅ Calcular escala dinámica basada en los datos reales
-    const maxDataValue = Math.max(...data);
-    const maxScale = Math.ceil(maxDataValue / 5) * 5 + 5; // Redondear al siguiente múltiplo de 5 + margen
+            let sortedAves = [...labels].sort((a,b) => avgs[b] - avgs[a]); 
+            document.getElementById('voc-table-scores').innerHTML = `
+                <tr><td>CIENTÍFICO</td><td class="font-bold text-blue-600">${avgs['cientifico'] || '-'}</td>
+                    <td>SOCIAL</td><td class="font-bold text-blue-600">${avgs['social'] || '-'}</td></tr>
+                <tr><td>ARTÍSTICO</td><td class="font-bold text-blue-600">${avgs['artistico'] || '-'}</td>
+                    <td>EMPRENDEDOR</td><td class="font-bold text-blue-600">${avgs['emprendedor'] || '-'}</td></tr>
+                <tr><td>REALISTA</td><td class="font-bold text-blue-600">${avgs['realista'] || '-'}</td>
+                    <td>OFICINA</td><td class="font-bold text-blue-600">${avgs['oficina'] || '-'}</td></tr>
+            `;
+            document.getElementById('voc-codigo-ocupacional').textContent = sortedAves.slice(0,2).map(k => labelMapVocacional[k]).join(' - ');
 
-    let sortedAves = [...labels].sort((a,b) => avgs[b] - avgs[a]); 
-    
-    document.getElementById('voc-table-scores').innerHTML = `
-        <tr><td>CIENTÍFICO</td><td class="font-bold text-blue-600">${avgs['cientifico'] || '-'}</td>
-            <td>SOCIAL</td><td class="font-bold text-blue-600">${avgs['social'] || '-'}</td></tr>
-        <tr><td>ARTÍSTICO</td><td class="font-bold text-blue-600">${avgs['artistico'] || '-'}</td>
-            <td>EMPRENDEDOR</td><td class="font-bold text-blue-600">${avgs['emprendedor'] || '-'}</td></tr>
-        <tr><td>REALISTA</td><td class="font-bold text-blue-600">${avgs['realista'] || '-'}</td>
-            <td>OFICINA</td><td class="font-bold text-blue-600">${avgs['oficina'] || '-'}</td></tr>
-    `;
-    
-    document.getElementById('voc-codigo-ocupacional').textContent = sortedAves.slice(0,2).map(k => labelMapVocacional[k]).join(' - ');
-
-    if(chartInstances.vocacional.radar) {
-        chartInstances.vocacional.radar.data.datasets[0].data = data;
-        chartInstances.vocacional.radar.data.datasets[0].label = filteredRows.length === 1 ? 'Puntaje Individual' : 'Puntaje Promedio';
-        // ✅ Actualizar escala dinámica
-        chartInstances.vocacional.radar.options.scales.r.max = maxScale;
-        chartInstances.vocacional.radar.options.scales.r.ticks.stepSize = Math.ceil(maxScale / 5);
-        chartInstances.vocacional.radar.update();
-    } else {
-        const ctx = document.getElementById('chart-voc-radar').getContext('2d');
-        chartInstances.vocacional.radar = new Chart(ctx, {
-            type: 'radar',
-            data: {
-                labels: labels.map(l => labelMapVocacional[l]),
-                datasets: [{
-                    label: filteredRows.length === 1 ? 'Puntaje Individual' : 'Puntaje Promedio',
-                    data: data,
-                    backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                    borderColor: 'rgba(59, 130, 246, 1)',
-                    pointBackgroundColor: 'rgba(59, 130, 246, 1)',
-                    borderWidth: 2
-                }]
-            },
-            options: { 
-                scales: { 
-                    r: { 
-                        beginAtZero: true, 
-                        max: maxScale,  // ✅ Escala dinámica
-                        ticks: { 
-                            display: true,  // ✅ Mostrar ticks para referencia
-                            stepSize: Math.ceil(maxScale / 5),
-                            font: { size: 10 }
-                        }
-                    } 
-                }, 
-                plugins: { legend: { display: false } },
-                responsive: true,
-                maintainAspectRatio: false
+            if(chartInstances.vocacional.radar) {
+                chartInstances.vocacional.radar.data.datasets[0].data = data;
+                chartInstances.vocacional.radar.data.datasets[0].label = filteredRows.length === 1 ? 'Puntaje Individual' : 'Puntaje Promedio';
+                chartInstances.vocacional.radar.options.scales.r.max = maxScale;
+                chartInstances.vocacional.radar.update();
+            } else {
+                const ctx = document.getElementById('chart-voc-radar').getContext('2d');
+                chartInstances.vocacional.radar = new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: labels.map(l => labelMapVocacional[l]),
+                        datasets: [{
+                            label: filteredRows.length === 1 ? 'Puntaje Individual' : 'Puntaje Promedio',
+                            data: data,
+                            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: { 
+                        scales: { r: { beginAtZero: true, max: maxScale, ticks: { display: true, stepSize: Math.ceil(maxScale / 5), font: { size: 10 } } } }, 
+                        plugins: { legend: { display: false } },
+                        responsive: true, maintainAspectRatio: false
+                    }
+                });
             }
-        });
-    }
 
         } else if (tipo === 'aptitudinal') {
             document.getElementById('kpi-apt-total').textContent = filteredRows.length.toLocaleString('es-SV');
-
             let centros = new Set();
             filteredRows.forEach(r => centros.add(r['sede_codigo']));
             document.getElementById('kpi-apt-centros').textContent = centros.size;
@@ -701,13 +871,9 @@
             const labels = state.metrics;
             const data = labels.map(l => avgs[l] || 0);
 
-            let topApt = 'N/A';
-            let maxApt = 0;
-            for(let a in avgs) {
-                if(avgs[a] > maxApt) {
-                    maxApt = avgs[a];
-                    topApt = state.metricLabels[a] || a;
-                }
+            let topApt = 'N/A'; let maxApt = 0;
+            for(let a in avgs) { 
+                if(avgs[a] > maxApt) { maxApt = avgs[a]; topApt = state.metricLabels[a] || a; } 
             }
             document.getElementById('kpi-apt-alta').textContent = topApt;
 
@@ -731,14 +897,10 @@
                             borderRadius: 4
                         }]
                     },
-                    options: {
-                        indexAxis: 'y',
-                        responsive: true,
-                        maintainAspectRatio: false,
+                    options: { 
+                        indexAxis: 'y', responsive: true, maintainAspectRatio: false, 
                         plugins: { legend: { display: false } },
-                        scales: {
-                            x: { beginAtZero: true, max: 40 }
-                        }
+                        scales: { x: { beginAtZero: true, max: 40 } }
                     }
                 });
             }
@@ -757,71 +919,41 @@
                 chartInstances.aptitudinal.radar.update();
             } else {
                 const ctxRadar = document.getElementById('chart-apt-radar').getContext('2d');
-
                 const zoneDatasets = zonasData.map(zona => ({
                     label: zona.label,
                     data: Array(labels.length).fill(zona.value),
-                    backgroundColor: zona.color,
-                    borderColor: zona.borderColor,
-                    borderWidth: 1,
-                    pointRadius: 0,
-                    fill: true,
-                    order: 2
+                    backgroundColor: zona.color, borderColor: zona.borderColor,
+                    borderWidth: 1, pointRadius: 0, fill: true, order: 2
                 }));
-
                 const mainDataset = {
                     label: filteredRows.length === 1 ? 'Perfil Actual' : 'Perfil Promedio',
                     data: data,
                     backgroundColor: 'rgba(16, 185, 129, 0.3)',
                     borderColor: 'rgba(16, 185, 129, 1)',
                     pointBackgroundColor: 'rgba(16, 185, 129, 1)',
-                    pointBorderColor: '#ffffff',
-                    pointBorderWidth: 2,
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
-                    borderWidth: 3,
-                    fill: true,
-                    order: 1
+                    pointBorderColor: '#ffffff', pointBorderWidth: 2,
+                    pointRadius: 5, pointHoverRadius: 7,
+                    borderWidth: 3, fill: true, order: 1
                 };
-
                 chartInstances.aptitudinal.radar = new Chart(ctxRadar, {
                     type: 'radar',
-                    data: {
-                        labels: prettyLabels,
-                        datasets: [...zoneDatasets, mainDataset]
-                    },
-                    options: {
-                        scales: {
-                            r: {
-                                beginAtZero: true,
-                                max: 40,
-                                ticks: {
-                                    stepSize: 10,
-                                    font: { size: 10 },
-                                    backdropColor: 'transparent',
-                                    color: '#64748b'
-                                },
-                                pointLabels: {
-                                    font: { size: 11, weight: 'bold' },
-                                    color: '#334155'
-                                },
-                                grid: {
-                                    color: 'rgba(148, 163, 184, 0.2)',
-                                    circular: true
-                                },
-                                angleLines: {
-                                    color: 'rgba(148, 163, 184, 0.3)'
-                                }
-                            }
-                        },
-                        plugins: {
+                    data: { labels: prettyLabels, datasets: [...zoneDatasets, mainDataset] },
+                    options: { 
+                        scales: { 
+                            r: { 
+                                beginAtZero: true, max: 40,
+                                ticks: { stepSize: 10, font: { size: 10 }, backdropColor: 'transparent', color: '#64748b' },
+                                pointLabels: { font: { size: 11, weight: 'bold' }, color: '#334155' },
+                                grid: { color: 'rgba(148, 163, 184, 0.2)', circular: true },
+                                angleLines: { color: 'rgba(148, 163, 184, 0.3)' }
+                            } 
+                        }, 
+                        plugins: { 
                             legend: { display: false },
                             tooltip: {
                                 backgroundColor: 'rgba(15, 23, 42, 0.95)',
                                 titleFont: { size: 13, weight: 'bold' },
-                                bodyFont: { size: 12 },
-                                padding: 10,
-                                cornerRadius: 8,
+                                bodyFont: { size: 12 }, padding: 10, cornerRadius: 8,
                                 callbacks: {
                                     label: function(context) {
                                         if (context.datasetIndex === zoneDatasets.length) {
@@ -836,13 +968,9 @@
                                     }
                                 }
                             }
-                        },
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        animation: {
-                            duration: 800,
-                            easing: 'easeOutQuart'
-                        }
+                        }, 
+                        responsive: true, maintainAspectRatio: false,
+                        animation: { duration: 800, easing: 'easeOutQuart' }
                     }
                 });
             }
@@ -853,7 +981,6 @@
         const state = appState[tipo];
         const currentLevelIndex = state.path.length;
         const isMaxLevel = currentLevelIndex >= state.hierarchy.length;
-
         renderBreadcrumbs(tipo);
 
         let filteredRows = state.rows;
@@ -869,19 +996,21 @@
         const selSector = document.getElementById(`filter-sector-${tipo}`).value;
         const selZona = document.getElementById(`filter-zona-${tipo}`).value;
         const selSexo = document.getElementById(`filter-sexo-${tipo}`).value;
-
-        if(selSector !== 'TODOS') {
-            filteredRows = filteredRows.filter(r => r['sede_sector'] === selSector);
-        }
-        if(selZona !== 'TODOS') {
-            filteredRows = filteredRows.filter(r => r['sede_zona'] === selZona);
-        }
-        // ✅ Filtrar por sexo usando la columna detectada
-        if(selSexo !== 'TODOS' && state.sexoColumn) {
-            filteredRows = filteredRows.filter(r => r[state.sexoColumn] === selSexo);
-        }
+        
+        if(selSector !== 'TODOS') filteredRows = filteredRows.filter(r => r['sede_sector'] === selSector);
+        if(selZona !== 'TODOS') filteredRows = filteredRows.filter(r => r['sede_zona'] === selZona);
+        if(selSexo !== 'TODOS' && state.sexoColumn) filteredRows = filteredRows.filter(r => r[state.sexoColumn] === selSexo);
 
         updateVisuals(tipo, filteredRows);
+
+        // ✅ Renderizar tabla Top Centros según filtro específico
+        if (tipo === 'vocacional') {
+            const selInteres = document.getElementById('filter-interes-vocacional').value;
+            renderTopCentrosVocacional(filteredRows, selInteres);
+        } else if (tipo === 'aptitudinal') {
+            const selAptitud = document.getElementById('filter-aptitud-aptitudinal').value;
+            renderTopCentrosAptitudinal(filteredRows, selAptitud);
+        }
 
         if (isMaxLevel) {
             document.getElementById(`tbody-${tipo}`).innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-slate-500 bg-slate-50">Has llegado al perfil individual de este estudiante.<br>Observa sus resultados exactos en los gráficos superiores.</td></tr>`;
@@ -890,10 +1019,8 @@
         }
 
         document.getElementById(`table-footer-${tipo}`).classList.remove('hidden');
-
         const currentHierachyDef = state.hierarchy[currentLevelIndex];
         document.getElementById(`th-name-${tipo}`).textContent = currentHierachyDef.label;
-
         const groupColKey = currentHierachyDef.key;
         const groups = {};
 
@@ -903,12 +1030,8 @@
                 const code = row[currentHierachyDef.prependCode];
                 groupName = code + " - " + groupName;
             }
-
-            if (!groups[groupName]) {
-                groups[groupName] = { count: 0, modes: {} };
-            }
+            if (!groups[groupName]) groups[groupName] = { count: 0, modes: {} };
             groups[groupName].count++;
-
             const diag = row['LUGAR1'];
             groups[groupName].modes[diag] = (groups[groupName].modes[diag] || 0) + 1;
         });
@@ -916,22 +1039,17 @@
         const tbody = document.getElementById(`tbody-${tipo}`);
         tbody.innerHTML = '';
         const sortedGroups = Object.keys(groups).sort();
-
         sortedGroups.forEach(name => {
             const g = groups[name];
-            let topMode = 'N/A';
-            let maxCount = 0;
+            let topMode = 'N/A'; let maxCount = 0;
             for (const [modeName, count] of Object.entries(g.modes)) {
                 if (count > maxCount && modeName !== "" && modeName !== "Sin Especificar") {
-                    maxCount = count;
-                    topMode = modeName;
+                    maxCount = count; topMode = modeName;
                 }
             }
-
             const tr = document.createElement('tr');
             tr.className = "hover:bg-blue-50 cursor-pointer transition-colors group";
             tr.onclick = () => drillDown(tipo, name, currentHierachyDef.label);
-
             tr.innerHTML = `
                 <td class="px-6 py-4 whitespace-nowrap text-slate-800 font-medium group-hover:text-blue-700">${name}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-center text-slate-600">${g.count.toLocaleString('es-SV')}</td>
@@ -952,15 +1070,14 @@
     }
 
     function jumpToBreadcrumb(tipo, index) {
-        if (index === -1) { appState[tipo].path = []; }
-        else { appState[tipo].path = appState[tipo].path.slice(0, index + 1); }
+        if (index === -1) appState[tipo].path = [];
+        else appState[tipo].path = appState[tipo].path.slice(0, index + 1);
         renderDashboard(tipo);
     }
 
     function renderBreadcrumbs(tipo) {
         const ol = document.getElementById(`breadcrumb-${tipo}`);
         const path = appState[tipo].path;
-
         let html = `
             <li class="inline-flex items-center">
                 <a href="#" onclick="jumpToBreadcrumb('${tipo}', -1); return false;" class="inline-flex items-center hover:text-blue-600 transition-colors font-bold text-slate-700">
@@ -969,7 +1086,6 @@
                 </a>
             </li>
         `;
-
         path.forEach((step, index) => {
             const isLast = index === path.length - 1;
             html += `
@@ -983,54 +1099,43 @@
                 </li>
             `;
         });
-
         ol.innerHTML = html;
     }
 
     function exportToExcel(tipo) {
-        const table = document.querySelector(`#dashboard-${tipo} table`);
+        const tables = document.querySelectorAll(`#dashboard-${tipo} table`);
         let csv = '\uFEFF';
-
-        const headers = [];
-        table.querySelectorAll('thead th').forEach((th, index, array) => {
-            if (index < array.length - 1) {
-                headers.push('"' + th.innerText.replace(/"/g, '""') + '"');
-            }
-        });
-        csv += headers.join(',') + '\n';
-
-        table.querySelectorAll('tbody tr').forEach(tr => {
-            const row = [];
-            const cells = tr.querySelectorAll('td');
-            if (cells.length <= 1) return;
-            cells.forEach((td, index) => {
-                if (index < cells.length - 1) {
-                    row.push('"' + td.innerText.replace(/"/g, '""') + '"');
-                }
+        tables.forEach((table, tableIdx) => {
+            if (tableIdx > 0) csv += '\n\n';
+            const headers = [];
+            table.querySelectorAll('thead th').forEach((th, index, array) => {
+                if (index < array.length - 1) headers.push('"' + th.innerText.replace(/"/g, '""') + '"');
             });
-            csv += row.join(',') + '\n';
+            csv += headers.join(',') + '\n';
+            table.querySelectorAll('tbody tr').forEach(tr => {
+                const row = [];
+                const cells = tr.querySelectorAll('td');
+                if (cells.length <= 1) return;
+                cells.forEach((td, index) => {
+                    if (index < cells.length - 1) row.push('"' + td.innerText.replace(/"/g, '""') + '"');
+                });
+                csv += row.join(',') + '\n';
+            });
         });
-
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         const url = URL.createObjectURL(blob);
-
         const pathState = appState[tipo].path;
         let filename = `Reporte_${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`;
-        if (pathState.length > 0) {
-            filename += `_${pathState[pathState.length-1].value.replace(/\s+/g, '_')}`;
-        } else {
-            filename += `_Nacional`;
-        }
+        if (pathState.length > 0) filename += `_${pathState[pathState.length-1].value.replace(/\s+/g, '_')}`;
+        else filename += `_Nacional`;
         filename += '.csv';
-
         link.setAttribute("href", url);
         link.setAttribute("download", filename);
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-
         showToast('Archivo exportado correctamente', 'success');
     }
 
