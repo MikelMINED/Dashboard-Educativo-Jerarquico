@@ -135,7 +135,6 @@
                     <div class="flex bg-slate-50 p-2 rounded-xl border border-slate-200 flex-wrap gap-2 shadow-sm">
                         <select id="filter-sector-aptitudinal" onchange="renderDashboard('aptitudinal')" class="filter-select text-sm"><option value="TODOS">Todos los Sectores</option></select>
                         <select id="filter-zona-aptitudinal" onchange="renderDashboard('aptitudinal')" class="filter-select text-sm"><option value="TODOS">Todas las Zonas</option></select>
-                        <select id="filter-sexo-aptitudinal" onchange="renderDashboard('aptitudinal')" class="filter-select text-sm"><option value="TODOS">Todos los Sexos</option></select>
                         <select id="filter-aptitud-aptitudinal" onchange="renderDashboard('aptitudinal')" class="filter-select text-sm bg-purple-50 font-semibold text-purple-700">
                             <option value="TODOS">🎯 Todas las Aptitudes</option>
                             <option value="SUMA_COMPRENSIÓN VERBAL">COMPRENSIÓN VERBAL</option>
@@ -166,11 +165,6 @@
                 <div class="flex items-center justify-between mb-4"><h3 class="text-lg font-bold text-slate-700">🏆 Top Centros - <span id="aptitud-seleccionada-apt" class="text-purple-600"></span></h3><span class="text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full">Por puntaje promedio</span></div>
                 <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-lg"><table class="top-centros-table"><thead><tr><th style="width: 60px;">#</th><th>Centro Escolar</th><th>Departamento</th><th>Municipio</th><th style="text-align: center;">Estudiantes</th><th style="text-align: center;">Promedio</th></tr></thead><tbody id="tbody-top-centros-aptitudinal"></tbody></table></div>
             </div>
-            <h3 class="text-lg font-bold text-slate-700 mb-4 mt-6">📈 Distribución Demográfica</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="chart-container"><h3 class="text-sm font-bold text-slate-700 mb-3">👥 Distribución por Sexo</h3><div class="relative w-full" style="height: 250px;"><canvas id="chart-apt-sexo"></canvas></div></div>
-                <div class="chart-container"><h3 class="text-sm font-bold text-slate-700 mb-3">🏙️ Distribución por Zona</h3><div class="relative w-full" style="height: 250px;"><canvas id="chart-apt-zona"></canvas></div></div>
-            </div>
             <h3 class="text-lg font-bold text-slate-700 mb-4 mt-6">🗂️ Desglose Geográfico / Institucional</h3>
             <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-lg"><table class="min-w-full divide-y divide-slate-200 text-sm"><thead class="bg-slate-50"><tr><th id="th-name-aptitudinal" class="px-6 py-4 text-left font-semibold text-slate-600 uppercase">Estructura</th><th class="px-6 py-4 text-center font-semibold text-slate-600 uppercase">Registros</th><th class="px-6 py-4 text-left font-semibold text-slate-600 uppercase">Aptitud Destacada</th><th class="px-6 py-4 text-right font-semibold text-slate-600 uppercase">Acción</th></tr></thead><tbody id="tbody-aptitudinal" class="bg-white divide-y divide-slate-200"></tbody></table></div>
             <p id="table-footer-aptitudinal" class="text-xs text-slate-400 mt-3 text-right italic">💡 Haz clic en una fila para profundizar</p>
@@ -187,7 +181,6 @@
                     <div class="flex bg-slate-50 p-2 rounded-xl border border-slate-200 flex-wrap gap-2 shadow-sm">
                         <select id="filter-sector-vocacional" onchange="renderDashboard('vocacional')" class="filter-select text-sm"><option value="TODOS">Todos los Sectores</option></select>
                         <select id="filter-zona-vocacional" onchange="renderDashboard('vocacional')" class="filter-select text-sm"><option value="TODOS">Todas las Zonas</option></select>
-                        <select id="filter-sexo-vocacional" onchange="renderDashboard('vocacional')" class="filter-select text-sm"><option value="TODOS">Todos los Sexos</option></select>
                         <select id="filter-interes-vocacional" onchange="renderDashboard('vocacional')" class="filter-select text-sm bg-amber-50 font-semibold text-amber-700">
                             <option value="TODOS">🎯 Todos los Intereses</option>
                             <option value="SOCIAL">SOCIAL</option><option value="REALISTA">REALISTA</option><option value="CIENTÍFICO">CIENTÍFICO</option>
@@ -210,12 +203,7 @@
                 <div class="flex items-center justify-between mb-4"><h3 class="text-lg font-bold text-slate-700">🏆 Top Centros - <span id="interes-seleccionado-voc" class="text-amber-600"></span></h3><span class="text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full">Por cantidad de estudiantes</span></div>
                 <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-lg"><table class="top-centros-table"><thead><tr><th style="width: 60px;">#</th><th>Centro Escolar</th><th>Departamento</th><th>Distrito</th><th style="text-align: center;">Estudiantes</th><th style="text-align: center;">% del Total</th></tr></thead><tbody id="tbody-top-centros-vocacional"></tbody></table></div>
             </div>
-            <h3 class="text-lg font-bold text-slate-700 mb-4 mt-6">📈 Distribución Demográfica</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="chart-container"><h3 class="text-sm font-bold text-slate-700 mb-3">👥 Distribución por Sexo</h3><div class="relative w-full" style="height: 250px;"><canvas id="chart-voc-sexo"></canvas></div></div>
-                <div class="chart-container"><h3 class="text-sm font-bold text-slate-700 mb-3">🏙️ Distribución por Zona</h3><div class="relative w-full" style="height: 250px;"><canvas id="chart-voc-zona"></canvas></div></div>
-            </div>
-            <h3 class="text-lg font-bold text-slate-700 mb-4 mt-6">🗂️ Desglose Geográfico / Institucional</h3>
+            <h3 class="text-lg font-bold text-slate-700 mb-4 mt-6">️ Desglose Geográfico / Institucional</h3>
             <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-lg"><table class="min-w-full divide-y divide-slate-200 text-sm"><thead class="bg-slate-50"><tr><th id="th-name-vocacional" class="px-6 py-4 text-left font-semibold text-slate-600 uppercase">Estructura</th><th class="px-6 py-4 text-center font-semibold text-slate-600 uppercase">Registros</th><th class="px-6 py-4 text-left font-semibold text-slate-600 uppercase">Perfil Predominante</th><th class="px-6 py-4 text-right font-semibold text-slate-600 uppercase">Acción</th></tr></thead><tbody id="tbody-vocacional" class="bg-white divide-y divide-slate-200"></tbody></table></div>
             <p id="table-footer-vocacional" class="text-xs text-slate-400 mt-3 text-right italic">💡 Haz clic en una fila para profundizar</p>
         </div>
@@ -231,7 +219,6 @@
                     <div class="flex bg-slate-50 p-2 rounded-xl border border-slate-200 flex-wrap gap-2 shadow-sm">
                         <select id="filter-sector-2b" onchange="renderDashboard('2b')" class="filter-select text-sm"><option value="TODOS">Todos los Sectores</option></select>
                         <select id="filter-zona-2b" onchange="renderDashboard('2b')" class="filter-select text-sm"><option value="TODOS">Todas las Zonas</option></select>
-                        <select id="filter-sexo-2b" onchange="renderDashboard('2b')" class="filter-select text-sm"><option value="TODOS">Todos los Sexos</option></select>
                         <select id="filter-interes-2b" onchange="renderDashboard('2b')" class="filter-select text-sm bg-emerald-50 font-semibold text-emerald-700">
                             <option value="TODOS">🎯 Todos los Intereses</option>
                             <option value="SOCIAL">SOCIAL</option><option value="REALISTA">REALISTA</option><option value="CIENTÍFICO">CIENTÍFICO</option>
@@ -242,8 +229,8 @@
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <div class="kpi-card"><div class="flex items-center"><div class="p-3 bg-gradient-to-br from-emerald-400 to-emerald-600 text-white rounded-xl mr-4 shadow-lg">👥</div><div><p class="text-xs font-medium text-slate-500">Registros</p><p class="text-2xl font-bold text-slate-800" id="kpi-2b-total">0</p></div></div></div>
-                    <div class="kpi-card"><div class="flex items-center"><div class="p-3 bg-gradient-to-br from-purple-400 to-purple-600 text-white rounded-xl mr-4 shadow-lg">🎯</div><div><p class="text-xs font-medium text-slate-500">Perfil Predominante</p><p class="text-lg font-bold text-slate-800" id="kpi-2b-perfil">-</p></div></div></div>
-                    <div class="kpi-card"><div class="flex items-center"><div class="p-3 bg-gradient-to-br from-amber-400 to-amber-600 text-white rounded-xl mr-4 shadow-lg">💼</div><div><p class="text-xs font-medium text-slate-500">Códigos Ocupacionales</p><p class="text-2xl font-bold text-slate-800" id="kpi-2b-codigo">0</p></div></div></div>
+                    <div class="kpi-card"><div class="flex items-center"><div class="p-3 bg-gradient-to-br from-purple-400 to-purple-600 text-white rounded-xl mr-4 shadow-lg"></div><div><p class="text-xs font-medium text-slate-500">Perfil Predominante</p><p class="text-lg font-bold text-slate-800" id="kpi-2b-perfil">-</p></div></div></div>
+                    <div class="kpi-card"><div class="flex items-center"><div class="p-3 bg-gradient-to-br from-amber-400 to-amber-600 text-white rounded-xl mr-4 shadow-lg"></div><div><p class="text-xs font-medium text-slate-500">Códigos Ocupacionales</p><p class="text-2xl font-bold text-slate-800" id="kpi-2b-codigo">0</p></div></div></div>
                 </div>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="chart-container"><h3 class="text-sm font-bold text-slate-700 mb-3 text-center">⬡ Hexágono de Holland</h3><div class="relative w-full" style="height: 280px;"><canvas id="chart-2b-radar"></canvas></div></div>
@@ -251,13 +238,8 @@
                 </div>
             </div>
             <div id="top-centros-2b-container" class="mt-6 hidden scale-in">
-                <div class="flex items-center justify-between mb-4"><h3 class="text-lg font-bold text-slate-700">🏆 Top Centros - <span id="interes-seleccionado-2b" class="text-emerald-600"></span></h3><span class="text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full">Por cantidad de estudiantes</span></div>
+                <div class="flex items-center justify-between mb-4"><h3 class="text-lg font-bold text-slate-700"> Top Centros - <span id="interes-seleccionado-2b" class="text-emerald-600"></span></h3><span class="text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full">Por cantidad de estudiantes</span></div>
                 <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-lg"><table class="top-centros-table"><thead><tr><th style="width: 60px;">#</th><th>Centro Escolar</th><th>Departamento</th><th>Municipio</th><th style="text-align: center;">Estudiantes</th><th style="text-align: center;">% del Total</th></tr></thead><tbody id="tbody-top-centros-2b"></tbody></table></div>
-            </div>
-            <h3 class="text-lg font-bold text-slate-700 mb-4 mt-6">📈 Distribución Demográfica</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="chart-container"><h3 class="text-sm font-bold text-slate-700 mb-3">👥 Distribución por Sexo</h3><div class="relative w-full" style="height: 250px;"><canvas id="chart-2b-sexo"></canvas></div></div>
-                <div class="chart-container"><h3 class="text-sm font-bold text-slate-700 mb-3">🏙️ Distribución por Zona</h3><div class="relative w-full" style="height: 250px;"><canvas id="chart-2b-zona"></canvas></div></div>
             </div>
             <h3 class="text-lg font-bold text-slate-700 mb-4 mt-6">🗂️ Desglose Geográfico / Institucional</h3>
             <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-lg"><table class="min-w-full divide-y divide-slate-200 text-sm"><thead class="bg-slate-50"><tr><th id="th-name-2b" class="px-6 py-4 text-left font-semibold text-slate-600 uppercase">Estructura</th><th class="px-6 py-4 text-center font-semibold text-slate-600 uppercase">Registros</th><th class="px-6 py-4 text-left font-semibold text-slate-600 uppercase">Perfil Predominante</th><th class="px-6 py-4 text-right font-semibold text-slate-600 uppercase">Acción</th></tr></thead><tbody id="tbody-2b" class="bg-white divide-y divide-slate-200"></tbody></table></div>
@@ -286,8 +268,8 @@
             <div class="text-center md:text-right">
                 <p class="text-xs text-slate-400 mb-1">Desarrollo y Soporte</p>
                 <p class="font-semibold text-sm">Miguel Hernández</p>
-                <p class="text-xs text-slate-400">📧 miguel.hernandez@mined.gob.sv</p>
-                <p class="text-xs text-slate-400">📱 +503 7677 3292</p>
+                <p class="text-xs text-slate-400"> miguel.hernandez@mined.gob.sv</p>
+                <p class="text-xs text-slate-400"> +503 7677 3292</p>
             </div>
         </div>
         <div class="border-t border-slate-700 mt-4 pt-4 text-center">
@@ -300,13 +282,13 @@
 const CONFIG = {
     GITHUB_BASE_URL: 'https://raw.githubusercontent.com/MikelMINED/Dashboard-Educativo-Jerarquico/main',
     FILES: { APTITUDINAL: 'BD_Reporte_Aptitudinal_6_Ligero.csv', VOCACIONAL: 'BD_Reporte_Vocacional_9_Ligero.csv', VOCACIONAL_2B: 'BD_Reporte_Vocacional_2B_Ligero.csv' },
-    VERSION: 'v8.0'
+    VERSION: 'v9.0'
 };
 
 let chartInstances = { 
-    aptitudinal: { bar: null, radar: null, sexo: null, zona: null }, 
-    vocacional: { radar: null, sexo: null, zona: null }, 
-    '2b': { radar: null, sexo: null, zona: null } 
+    aptitudinal: { bar: null, radar: null }, 
+    vocacional: { radar: null }, 
+    '2b': { radar: null } 
 };
 const labelMapVocacional = { 'social': 'SOCIAL', 'realista': 'REALISTA', 'cientifico': 'CIENTÍFICO', 'artistico': 'ARTÍSTICO', 'emprendedor': 'EMPRENDEDOR', 'oficina': 'OFICINA' };
 
@@ -316,25 +298,23 @@ const REQUIRED_COLUMNS = {
     '2b': ['sede_nomb_depto', 'sede_nomb_mun', 'sede_nombre', 'sede_codigo', 'secc_codigo', 'NIE', 'LUGAR1', 'codigo_ocupacional', 'sede_sector', 'sede_zona', 'realista', 'cientifico', 'artistico', 'social', 'emprendedor', 'oficina']
 };
 
-// Lista amplia de candidatos para detectar columna de sexo
-const SEXO_COLUMN_CANDIDATES = ['est_nomb_sexo', 'sexo', 'genero', 'Sexo', 'GENERO', 'EST_SEXO', 'est_sexo', 'sexo_estudiante', 'estudiante_sexo'];
 const loadStatus = { aptitudinal: false, vocacional: false, '2b': false };
 let lugar1ValoresUnicos = { vocacional: new Set(), '2b': new Set() };
 
 const appState = {
     aptitudinal: {
-        rows: [], cols: {}, path: [], sexoColumn: null,
+        rows: [], cols: {}, path: [],
         hierarchy: [{ key: 'sede_nomb_depto', label: 'Departamento' }, { key: 'sede_nomb_mun', label: 'Municipio' }, { key: 'sede_nombre', label: 'Centro Escolar', prependCode: 'sede_codigo' }, { key: 'NIE', label: 'Estudiante (NIE)' }],
         metrics: ['SUMA_COMPRENSIÓN VERBAL', 'SUMA_FLUIDEZ VERBAL', 'SUMA_APTITUD NUMÉRICA', 'SUMA_RAZONAMIENTO LÓGICO', 'SUMA_APTITUD ESPACIAL', 'SUMA_APTITUD MECÁNICA', 'SUMA_APTITUD ARTÍSTICA', 'SUMA_MEMORIA', 'SUMA_PERCEPCIÓN', 'SUMA_APTITUD FÍSICA'],
         metricLabels: { 'SUMA_COMPRENSIÓN VERBAL': 'COMPRENSIÓN VERBAL', 'SUMA_FLUIDEZ VERBAL': 'FLUIDEZ VERBAL', 'SUMA_APTITUD NUMÉRICA': 'APTITUD NUMÉRICA', 'SUMA_RAZONAMIENTO LÓGICO': 'RAZONAMIENTO LÓGICO', 'SUMA_APTITUD ESPACIAL': 'APTITUD ESPACIAL', 'SUMA_APTITUD MECÁNICA': 'APTITUD MECÁNICA', 'SUMA_APTITUD ARTÍSTICA': 'APTITUD ARTÍSTICA', 'SUMA_MEMORIA': 'MEMORIA', 'SUMA_PERCEPCIÓN': 'PERCEPCIÓN', 'SUMA_APTITUD FÍSICA': 'APTITUD FÍSICA' }
     },
     vocacional: {
-        rows: [], cols: {}, path: [], sexoColumn: null,
+        rows: [], cols: {}, path: [],
         hierarchy: [{ key: 'sede_nomb_depto', label: 'Departamento' }, { key: 'distrito', label: 'Distrito' }, { key: 'sede_nombre', label: 'Centro Escolar', prependCode: 'sede_codigo' }, { key: 'secc_codigo', label: 'Sección' }, { key: 'NIE', label: 'Estudiante (NIE)' }],
         metrics: ['social', 'realista', 'cientifico', 'artistico', 'emprendedor', 'oficina']
     },
     '2b': {
-        rows: [], cols: {}, path: [], sexoColumn: null,
+        rows: [], cols: {}, path: [],
         hierarchy: [{ key: 'sede_nomb_depto', label: 'Departamento' }, { key: 'sede_nomb_mun', label: 'Municipio' }, { key: 'sede_nombre', label: 'Centro Escolar', prependCode: 'sede_codigo' }, { key: 'secc_codigo', label: 'Sección' }, { key: 'NIE', label: 'Estudiante (NIE)' }],
         metrics: ['social', 'realista', 'cientifico', 'artistico', 'emprendedor', 'oficina']
     }
@@ -375,35 +355,6 @@ function switchTab(target) {
     });
 }
 
-// ✅ DETECCIÓN ROBUSTA DE COLUMNA DE SEXO
-function detectarColumnaSexo(headers) {
-    // 1. Búsqueda exacta (case-sensitive)
-    for (const c of SEXO_COLUMN_CANDIDATES) { 
-        if (headers.includes(c)) {
-            console.log(`✅ [sexo] Coincidencia exacta: "${c}"`);
-            return c; 
-        }
-    }
-    // 2. Búsqueda case-insensitive
-    const lowerHeaders = headers.map(h => h.toLowerCase().trim());
-    for (const c of SEXO_COLUMN_CANDIDATES) {
-        const idx = lowerHeaders.indexOf(c.toLowerCase());
-        if (idx !== -1) {
-            console.log(`✅ [sexo] Coincidencia case-insensitive: "${headers[idx]}"`);
-            return headers[idx];
-        }
-    }
-    // 3. Búsqueda parcial (contiene "sexo" o "genero")
-    for (let i = 0; i < lowerHeaders.length; i++) {
-        if (lowerHeaders[i].includes('sexo') || lowerHeaders[i].includes('genero') || lowerHeaders[i].includes('género')) {
-            console.log(`✅ [sexo] Coincidencia parcial: "${headers[i]}"`);
-            return headers[i];
-        }
-    }
-    console.warn(`⚠️ [sexo] No se encontró columna de sexo. Headers disponibles:`, headers);
-    return null;
-}
-
 async function loadFromGitHub(tipo) {
     let fileName;
     if (tipo === 'aptitudinal') fileName = CONFIG.FILES.APTITUDINAL;
@@ -432,12 +383,9 @@ function procesarCSV(csvText, tipo) {
     try {
         const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true, dynamicTyping: false });
         const headers = parsed.meta.fields;
-        console.log(`📋 [${tipo}] Headers del CSV:`, headers);
         const required = REQUIRED_COLUMNS[tipo];
         const missing = required.filter(col => !headers.includes(col));
         if (missing.length > 0) { showToast(`Error: Faltan columnas: ${missing.join(', ')}`, 'error'); return; }
-        const sexoCol = detectarColumnaSexo(headers);
-        appState[tipo].sexoColumn = sexoCol;
         appState[tipo].rows = parsed.data;
         appState[tipo].cols = {};
         headers.forEach((h, idx) => { appState[tipo].cols[h.trim()] = idx; });
@@ -457,29 +405,18 @@ function procesarCSV(csvText, tipo) {
 
 function populateTransversalFilters(tipo) {
     const state = appState[tipo];
-    const sectorSet = new Set(), zonaSet = new Set(), sexoSet = new Set();
+    const sectorSet = new Set(), zonaSet = new Set();
     state.rows.forEach(r => {
         const sector = r['sede_sector'], zona = r['sede_zona'];
-        const sexo = state.sexoColumn ? r[state.sexoColumn] : null;
         if (sector && sector.trim() !== '') sectorSet.add(sector.trim());
         if (zona && zona.trim() !== '') zonaSet.add(zona.trim());
-        if (sexo && sexo.trim() !== '') sexoSet.add(sexo.trim());
     });
     const selSector = document.getElementById(`filter-sector-${tipo}`);
     const selZona = document.getElementById(`filter-zona-${tipo}`);
-    const selSexo = document.getElementById(`filter-sexo-${tipo}`);
     selSector.innerHTML = '<option value="TODOS">Todos los Sectores</option>';
     selZona.innerHTML = '<option value="TODOS">Todas las Zonas</option>';
-    selSexo.innerHTML = '<option value="TODOS">Todos los Sexos</option>';
     Array.from(sectorSet).sort().forEach(s => selSector.innerHTML += `<option value="${s}">${s}</option>`);
     Array.from(zonaSet).sort().forEach(z => selZona.innerHTML += `<option value="${z}">${z}</option>`);
-    Array.from(sexoSet).sort().forEach(s => selSexo.innerHTML += `<option value="${s}">${s}</option>`);
-    if (sexoSet.size === 0) {
-        selSexo.style.display = 'none';
-        console.log(`⚠️ [${tipo}] No se detectaron valores de sexo`);
-    } else {
-        console.log(`✅ [${tipo}] Sexo detectado (${sexoSet.size} valores): ${Array.from(sexoSet).join(', ')}`);
-    }
 }
 
 function normalizarTexto(texto) {
@@ -558,120 +495,6 @@ function renderTopCentrosAptitudinal(filteredRows, aptitudSeleccionada) {
     });
 }
 
-// ✅ GRÁFICA DE SEXO - ROBUSTA PARA LAS 3 PESTAÑAS
-function renderDistribucionSexo(tipo, filteredRows) {
-    const chartId = `chart-${tipo}-sexo`;
-    const ctx = document.getElementById(chartId);
-    if (!ctx) {
-        console.warn(`⚠️ [${tipo}] Canvas no encontrado: ${chartId}`);
-        return;
-    }
-    
-    const sexoCol = appState[tipo].sexoColumn;
-    console.log(` [${tipo}] renderDistribucionSexo - sexoColumn: "${sexoCol}"`);
-    
-    if (!sexoCol) {
-        console.warn(`⚠️ [${tipo}] No hay columna de sexo detectada`);
-        return;
-    }
-    
-    const counts = {};
-    filteredRows.forEach(r => {
-        const sexo = r[sexoCol];
-        if (sexo && sexo.trim() !== '') counts[sexo] = (counts[sexo] || 0) + 1;
-    });
-    
-    const labels = Object.keys(counts);
-    const data = Object.values(counts);
-    
-    console.log(`📊 [${tipo}] Sexo counts:`, counts);
-    
-    if (labels.length === 0) {
-        console.warn(`⚠️ [${tipo}] No hay valores de sexo en los datos filtrados`);
-        return;
-    }
-    
-    const colors = labels.map(l => {
-        const lower = l.toLowerCase();
-        if (lower.includes('mujer') || lower.includes('femenino') || lower === 'f') return 'rgba(236, 72, 153, 0.8)';
-        if (lower.includes('hombre') || lower.includes('masculino') || lower === 'm') return 'rgba(59, 130, 246, 0.8)';
-        return 'rgba(148, 163, 184, 0.8)';
-    });
-    
-    if (chartInstances[tipo].sexo) {
-        chartInstances[tipo].sexo.data.labels = labels;
-        chartInstances[tipo].sexo.data.datasets[0].data = data;
-        chartInstances[tipo].sexo.data.datasets[0].backgroundColor = colors;
-        chartInstances[tipo].sexo.update();
-    } else {
-        chartInstances[tipo].sexo = new Chart(ctx, {
-            type: 'doughnut',
-            data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }] },
-            options: { 
-                responsive: true, 
-                maintainAspectRatio: false, 
-                plugins: { 
-                    legend: { position: 'bottom', labels: { font: { size: 11 } } } 
-                }, 
-                animation: { duration: 800 } 
-            }
-        });
-    }
-}
-
-// ✅ GRÁFICA DE ZONA - ROBUSTA PARA LAS 3 PESTAÑAS
-function renderDistribucionZona(tipo, filteredRows) {
-    const chartId = `chart-${tipo}-zona`;
-    const ctx = document.getElementById(chartId);
-    if (!ctx) {
-        console.warn(`️ [${tipo}] Canvas no encontrado: ${chartId}`);
-        return;
-    }
-    
-    const counts = {};
-    filteredRows.forEach(r => {
-        const zona = r['sede_zona'];
-        if (zona && zona.trim() !== '') counts[zona] = (counts[zona] || 0) + 1;
-    });
-    
-    const labels = Object.keys(counts);
-    const data = Object.values(counts);
-    
-    console.log(`📊 [${tipo}] Zona counts:`, counts);
-    
-    if (labels.length === 0) {
-        console.warn(`⚠️ [${tipo}] No hay valores de zona en los datos filtrados`);
-        return;
-    }
-    
-    const colors = labels.map(l => {
-        const lower = l.toLowerCase();
-        if (lower.includes('urbana')) return 'rgba(139, 92, 246, 0.8)';
-        if (lower.includes('rural')) return 'rgba(16, 185, 129, 0.8)';
-        return 'rgba(148, 163, 184, 0.8)';
-    });
-    
-    if (chartInstances[tipo].zona) {
-        chartInstances[tipo].zona.data.labels = labels;
-        chartInstances[tipo].zona.data.datasets[0].data = data;
-        chartInstances[tipo].zona.data.datasets[0].backgroundColor = colors;
-        chartInstances[tipo].zona.update();
-    } else {
-        chartInstances[tipo].zona = new Chart(ctx, {
-            type: 'pie',
-            data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }] },
-            options: { 
-                responsive: true, 
-                maintainAspectRatio: false, 
-                plugins: { 
-                    legend: { position: 'bottom', labels: { font: { size: 11 } } } 
-                }, 
-                animation: { duration: 800 } 
-            }
-        });
-    }
-}
-
 function updateVisuals(tipo, filteredRows) {
     const state = appState[tipo];
     
@@ -728,10 +551,6 @@ function updateVisuals(tipo, filteredRows) {
             chartInstances[tipo].radar = new Chart(ctx, { type: 'radar', data: { labels: labels.map(l => labelMapVocacional[l]), datasets: [{ label: 'Promedio', data: data, backgroundColor: tipo === '2b' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(59, 130, 246, 0.2)', borderColor: tipo === '2b' ? 'rgba(16, 185, 129, 1)' : 'rgba(59, 130, 246, 1)', pointBackgroundColor: tipo === '2b' ? 'rgba(16, 185, 129, 1)' : 'rgba(59, 130, 246, 1)', pointRadius: 3, borderWidth: 2 }] }, options: { scales: { r: { beginAtZero: true, max: maxScale, ticks: { display: true, stepSize: Math.ceil(maxScale / 5), font: { size: 9 } }, pointLabels: { font: { size: 10, weight: '600' } }, grid: { color: 'rgba(148, 163, 184, 0.15)' } } }, plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false, animation: { duration: 800 } } });
         }
     }
-    
-    // Renderizar distribuciones (siempre, para las 3 pestañas)
-    renderDistribucionSexo(tipo, filteredRows);
-    renderDistribucionZona(tipo, filteredRows);
 }
 
 function renderDashboard(tipo) {
@@ -752,10 +571,8 @@ function renderDashboard(tipo) {
 
     const selSector = document.getElementById(`filter-sector-${tipo}`).value;
     const selZona = document.getElementById(`filter-zona-${tipo}`).value;
-    const selSexo = document.getElementById(`filter-sexo-${tipo}`).value;
     if (selSector !== 'TODOS') filteredRows = filteredRows.filter(r => r['sede_sector'] === selSector);
     if (selZona !== 'TODOS') filteredRows = filteredRows.filter(r => r['sede_zona'] === selZona);
-    if (selSexo !== 'TODOS' && state.sexoColumn) filteredRows = filteredRows.filter(r => r[state.sexoColumn] === selSexo);
 
     updateVisuals(tipo, filteredRows);
 
@@ -840,7 +657,7 @@ function exportToExcel(tipo) {
     filename += '.csv';
     link.setAttribute("href", url); link.setAttribute("download", filename); link.style.visibility = 'hidden';
     document.body.appendChild(link); link.click(); document.body.removeChild(link);
-    showToast('📥 Archivo exportado correctamente', 'success');
+    showToast(' Archivo exportado correctamente', 'success');
 }
 
 window.addEventListener('DOMContentLoaded', () => {
