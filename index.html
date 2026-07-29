@@ -16,6 +16,8 @@
         @keyframes slideIn { from { transform: translateX(-20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         .scale-in { animation: scaleIn 0.3s ease-out; }
         @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .pulse-dot { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .holland-table th, .holland-table td { border: 1px solid #e2e8f0; padding: 0.4rem; text-align: center; font-size: 0.875rem; transition: all 0.2s; }
@@ -57,9 +59,30 @@
         .filter-select:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
         .btn-export { background: linear-gradient(135deg, #10b981 0%, #059669 100%); transition: all 0.3s; }
         .btn-export:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(16, 185, 129, 0.4); }
+        
+        /* Mapa de departamentos */
+        .mapa-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem; }
+        .depto-card { background: white; border: 2px solid #e2e8f0; border-radius: 0.75rem; padding: 0.75rem; cursor: pointer; transition: all 0.3s; text-align: center; position: relative; overflow: hidden; }
+        .depto-card:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 8px 16px rgba(0,0,0,0.15); border-color: #3b82f6; }
+        .depto-card.active { border-color: #3b82f6; background: linear-gradient(135deg, #eff6ff, #dbeafe); }
+        .depto-card .perfil-badge { display: inline-block; padding: 0.25rem 0.5rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; margin-top: 0.5rem; }
+        .perfil-social { background: #dbeafe; color: #1e40af; }
+        .perfil-realista { background: #fef3c7; color: #92400e; }
+        .perfil-cientifico { background: #d1fae5; color: #065f46; }
+        .perfil-artistico { background: #fce7f3; color: #9d174d; }
+        .perfil-emprendedor { background: #ede9fe; color: #5b21b6; }
+        .perfil-oficina { background: #e0e7ff; color: #3730a3; }
+        
+        /* Tooltip de ayuda */
+        .help-tooltip { position: relative; display: inline-block; }
+        .help-tooltip .tooltip-text { visibility: hidden; width: 220px; background-color: #1e293b; color: #fff; text-align: center; border-radius: 0.5rem; padding: 0.5rem; position: absolute; z-index: 100; bottom: 125%; left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity 0.3s; font-size: 0.75rem; font-weight: normal; }
+        .help-tooltip:hover .tooltip-text { visibility: visible; opacity: 1; }
+        
+        /* Footer */
+        .footer-gradient { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); }
     </style>
 </head>
-<body class="bg-gradient-to-br from-slate-50 to-slate-100 text-slate-800 min-h-screen">
+<body class="bg-gradient-to-br from-slate-50 to-slate-100 text-slate-800 min-h-screen flex flex-col">
 
 <header class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white py-4 px-4 shadow-xl">
     <div class="max-w-7xl mx-auto">
@@ -67,6 +90,10 @@
             <div>
                 <h2 class="text-amber-400 font-bold text-base">Ministerio de Educación, Ciencia y Tecnología</h2>
                 <p class="text-slate-400 text-xs uppercase tracking-wider">MINEDUCYT · Gerencia de Estadísticas</p>
+            </div>
+            <div class="hidden md:flex items-center gap-2 text-xs text-slate-400">
+                <span class="w-2 h-2 bg-green-400 rounded-full pulse-dot"></span>
+                <span>Sistema en línea</span>
             </div>
         </div>
         <h1 class="text-xl md:text-2xl font-bold mt-2 bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent">
@@ -80,13 +107,13 @@
     <p class="text-xl font-bold mb-2">Cargando Dashboard</p>
     <p class="text-sm opacity-90 mb-6">Conectando con el servidor de datos...</p>
     <div id="loader-progress" class="flex gap-3 flex-wrap justify-center">
-        <span id="progress-aptitudinal" class="px-4 py-2 bg-white/10 rounded-lg text-sm backdrop-blur-sm">6°: <span class="font-bold">⏳</span></span>
-        <span id="progress-vocacional" class="px-4 py-2 bg-white/10 rounded-lg text-sm backdrop-blur-sm">9°: <span class="font-bold"></span></span>
+        <span id="progress-aptitudinal" class="px-4 py-2 bg-white/10 rounded-lg text-sm backdrop-blur-sm">6°: <span class="font-bold"></span></span>
+        <span id="progress-vocacional" class="px-4 py-2 bg-white/10 rounded-lg text-sm backdrop-blur-sm">9°: <span class="font-bold">⏳</span></span>
         <span id="progress-2b" class="px-4 py-2 bg-white/10 rounded-lg text-sm backdrop-blur-sm">2°B: <span class="font-bold">⏳</span></span>
     </div>
 </div>
 
-<div class="max-w-7xl mx-auto bg-white rounded-2xl shadow-2xl border border-slate-200 my-6 mx-4 overflow-hidden">
+<div class="max-w-7xl mx-auto bg-white rounded-2xl shadow-2xl border border-slate-200 my-6 mx-4 overflow-hidden flex-1">
     
     <div class="flex border-b border-slate-200 bg-slate-50">
         <button id="btn-tab-aptitudinal" class="flex-1 py-4 px-4 text-sm font-bold tab-btn active border-b-2 border-purple-600 text-purple-600" onclick="switchTab('aptitudinal')">
@@ -100,7 +127,7 @@
         </button>
         <button id="btn-tab-vocacional" class="flex-1 py-4 px-4 text-sm font-semibold tab-btn text-slate-500 border-b-2 border-transparent" onclick="switchTab('vocacional')">
             <div class="flex items-center justify-center gap-2">
-                <span class="text-xl"></span>
+                <span class="text-xl">🎯</span>
                 <div class="text-left">
                     <div>Vocacional</div>
                     <div class="text-xs text-slate-500 font-normal">9° Grado</div>
@@ -123,7 +150,7 @@
         <div id="loading-aptitudinal" class="tab-loading"><div class="loader mb-4" style="border-top-color: #8b5cf6;"></div><p class="text-purple-600 font-bold">Cargando datos aptitudinales...</p></div>
         <div id="dashboard-aptitudinal" class="hidden fade-in">
             <div class="mb-4"><nav class="flex text-sm text-slate-500 bg-slate-100 px-3 py-2 rounded-lg inline-flex"><ol id="breadcrumb-aptitudinal" class="inline-flex items-center space-x-2"></ol></nav></div>
-            <div class="sticky-charts rounded-xl">
+            <div class="sticky-charts rounded-xl px-4">
                 <div class="flex flex-wrap items-center gap-3 mb-4">
                     <div class="flex bg-slate-50 p-2 rounded-xl border border-slate-200 flex-wrap gap-2 shadow-sm">
                         <select id="filter-sector-aptitudinal" onchange="renderDashboard('aptitudinal')" class="filter-select text-sm"><option value="TODOS">Todos los Sectores</option></select>
@@ -143,7 +170,7 @@
                             <option value="SUMA_APTITUD FÍSICA">APTITUD FÍSICA</option>
                         </select>
                     </div>
-                    <button onclick="exportToExcel('aptitudinal')" class="btn-export px-5 py-2 text-white text-sm font-bold rounded-xl flex items-center gap-2 shadow-lg"> Exportar</button>
+                    <button onclick="exportToExcel('aptitudinal')" class="btn-export px-5 py-2 text-white text-sm font-bold rounded-xl flex items-center gap-2 shadow-lg">📥 Exportar</button>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <div class="kpi-card"><div class="flex items-center"><div class="p-3 bg-gradient-to-br from-purple-400 to-purple-600 text-white rounded-xl mr-4 shadow-lg">👥</div><div><p class="text-xs font-medium text-slate-500">Registros</p><p class="text-2xl font-bold text-slate-800" id="kpi-apt-total">0</p></div></div></div>
@@ -156,10 +183,20 @@
                 </div>
             </div>
             <div id="top-centros-aptitudinal-container" class="mt-6 hidden scale-in">
-                <div class="flex items-center justify-between mb-4"><h3 class="text-lg font-bold text-slate-700"> Top Centros - <span id="aptitud-seleccionada-apt" class="text-purple-600"></span></h3><span class="text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full">Por puntaje promedio</span></div>
+                <div class="flex items-center justify-between mb-4"><h3 class="text-lg font-bold text-slate-700">🏆 Top Centros - <span id="aptitud-seleccionada-apt" class="text-purple-600"></span></h3><span class="text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full">Por puntaje promedio</span></div>
                 <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-lg"><table class="top-centros-table"><thead><tr><th style="width: 60px;">#</th><th>Centro Escolar</th><th>Departamento</th><th>Municipio</th><th style="text-align: center;">Estudiantes</th><th style="text-align: center;">Promedio</th></tr></thead><tbody id="tbody-top-centros-aptitudinal"></tbody></table></div>
             </div>
-            <h3 class="text-lg font-bold text-slate-700 mb-4 mt-6">🗺️ Desglose Geográfico / Institucional</h3>
+            <h3 class="text-lg font-bold text-slate-700 mb-4 mt-6">🗺️ Mapa de Departamentos - Perfil Predominante</h3>
+            <div class="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-4 border border-slate-200">
+                <p class="text-xs text-slate-500 mb-3 text-center"> Haz clic en un departamento para filtrar los datos</p>
+                <div id="mapa-aptitudinal" class="mapa-grid"></div>
+            </div>
+            <h3 class="text-lg font-bold text-slate-700 mb-4 mt-6">📈 Distribución por Sexo y Zona</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="chart-container"><h3 class="text-sm font-bold text-slate-700 mb-3">👥 Distribución por Sexo</h3><div class="relative w-full" style="height: 250px;"><canvas id="chart-apt-sexo"></canvas></div></div>
+                <div class="chart-container"><h3 class="text-sm font-bold text-slate-700 mb-3">🏙️ Distribución por Zona</h3><div class="relative w-full" style="height: 250px;"><canvas id="chart-apt-zona"></canvas></div></div>
+            </div>
+            <h3 class="text-lg font-bold text-slate-700 mb-4 mt-6">🗂️ Desglose Geográfico / Institucional</h3>
             <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-lg"><table class="min-w-full divide-y divide-slate-200 text-sm"><thead class="bg-slate-50"><tr><th id="th-name-aptitudinal" class="px-6 py-4 text-left font-semibold text-slate-600 uppercase">Estructura</th><th class="px-6 py-4 text-center font-semibold text-slate-600 uppercase">Registros</th><th class="px-6 py-4 text-left font-semibold text-slate-600 uppercase">Aptitud Destacada</th><th class="px-6 py-4 text-right font-semibold text-slate-600 uppercase">Acción</th></tr></thead><tbody id="tbody-aptitudinal" class="bg-white divide-y divide-slate-200"></tbody></table></div>
             <p id="table-footer-aptitudinal" class="text-xs text-slate-400 mt-3 text-right italic">💡 Haz clic en una fila para profundizar</p>
         </div>
@@ -170,7 +207,7 @@
         <div id="loading-vocacional" class="tab-loading"><div class="loader mb-4" style="border-top-color: #3b82f6;"></div><p class="text-blue-600 font-bold">Cargando datos vocacionales 9°...</p></div>
         <div id="dashboard-vocacional" class="hidden fade-in">
             <div class="mb-4"><nav class="flex text-sm text-slate-500 bg-slate-100 px-3 py-2 rounded-lg inline-flex"><ol id="breadcrumb-vocacional" class="inline-flex items-center space-x-2"></ol></nav></div>
-            <div class="sticky-charts rounded-xl">
+            <div class="sticky-charts rounded-xl px-4">
                 <div class="flex flex-wrap items-center gap-3 mb-4">
                     <div class="flex bg-slate-50 p-2 rounded-xl border border-slate-200 flex-wrap gap-2 shadow-sm">
                         <select id="filter-sector-vocacional" onchange="renderDashboard('vocacional')" class="filter-select text-sm"><option value="TODOS">Todos los Sectores</option></select>
@@ -182,23 +219,33 @@
                             <option value="ARTÍSTICO">ARTÍSTICO</option><option value="EMPRENDEDOR">EMPRENDEDOR</option><option value="OFICINA">OFICINA</option>
                         </select>
                     </div>
-                    <button onclick="exportToExcel('vocacional')" class="btn-export px-5 py-2 text-white text-sm font-bold rounded-xl flex items-center gap-2 shadow-lg">📥 Exportar</button>
+                    <button onclick="exportToExcel('vocacional')" class="btn-export px-5 py-2 text-white text-sm font-bold rounded-xl flex items-center gap-2 shadow-lg"> Exportar</button>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <div class="kpi-card"><div class="flex items-center"><div class="p-3 bg-gradient-to-br from-blue-400 to-blue-600 text-white rounded-xl mr-4 shadow-lg">👥</div><div><p class="text-xs font-medium text-slate-500">Registros</p><p class="text-2xl font-bold text-slate-800" id="kpi-voc-total">0</p></div></div></div>
-                    <div class="kpi-card"><div class="flex items-center"><div class="p-3 bg-gradient-to-br from-purple-400 to-purple-600 text-white rounded-xl mr-4 shadow-lg"></div><div><p class="text-xs font-medium text-slate-500">Perfil Predominante</p><p class="text-lg font-bold text-slate-800" id="kpi-voc-perfil">-</p></div></div></div>
+                    <div class="kpi-card"><div class="flex items-center"><div class="p-3 bg-gradient-to-br from-purple-400 to-purple-600 text-white rounded-xl mr-4 shadow-lg">🎯</div><div><p class="text-xs font-medium text-slate-500">Perfil Predominante</p><p class="text-lg font-bold text-slate-800" id="kpi-voc-perfil">-</p></div></div></div>
                     <div class="kpi-card"><div class="flex items-center"><div class="p-3 bg-gradient-to-br from-amber-400 to-amber-600 text-white rounded-xl mr-4 shadow-lg">💼</div><div><p class="text-xs font-medium text-slate-500">Grupos Ocupacionales</p><p class="text-2xl font-bold text-slate-800" id="kpi-voc-grupos">0</p></div></div></div>
                 </div>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="chart-container"><h3 class="text-sm font-bold text-slate-700 mb-3 text-center">⬡ Hexágono de Holland</h3><div class="relative w-full" style="height: 280px;"><canvas id="chart-voc-radar"></canvas></div></div>
-                    <div class="chart-container"><h3 class="text-sm font-bold text-slate-700 mb-3 text-center"> Intereses Profesionales</h3><table class="w-full holland-table mb-3"><thead><tr><th class="text-xs">INTERÉS</th><th class="text-xs">PUNTAJE</th><th class="text-xs">INTERÉS</th><th class="text-xs">PUNTAJE</th></tr></thead><tbody id="voc-table-scores"></tbody></table><div class="bg-slate-50 border border-slate-200 rounded-lg p-2 text-center"><span class="block text-xs font-bold text-slate-500 uppercase mb-1">Código Ocupacional Predominante</span><span class="text-sm font-bold text-blue-700" id="voc-codigo-ocupacional">-</span></div></div>
+                    <div class="chart-container"><h3 class="text-sm font-bold text-slate-700 mb-3 text-center">💼 Intereses Profesionales</h3><table class="w-full holland-table mb-3"><thead><tr><th class="text-xs">INTERÉS</th><th class="text-xs">PUNTAJE</th><th class="text-xs">INTERÉS</th><th class="text-xs">PUNTAJE</th></tr></thead><tbody id="voc-table-scores"></tbody></table><div class="bg-slate-50 border border-slate-200 rounded-lg p-2 text-center"><span class="block text-xs font-bold text-slate-500 uppercase mb-1">Código Ocupacional Predominante</span><span class="text-sm font-bold text-blue-700" id="voc-codigo-ocupacional">-</span></div></div>
                 </div>
             </div>
             <div id="top-centros-vocacional-container" class="mt-6 hidden scale-in">
                 <div class="flex items-center justify-between mb-4"><h3 class="text-lg font-bold text-slate-700">🏆 Top Centros - <span id="interes-seleccionado-voc" class="text-amber-600"></span></h3><span class="text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full">Por cantidad de estudiantes</span></div>
                 <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-lg"><table class="top-centros-table"><thead><tr><th style="width: 60px;">#</th><th>Centro Escolar</th><th>Departamento</th><th>Distrito</th><th style="text-align: center;">Estudiantes</th><th style="text-align: center;">% del Total</th></tr></thead><tbody id="tbody-top-centros-vocacional"></tbody></table></div>
             </div>
-            <h3 class="text-lg font-bold text-slate-700 mb-4 mt-6">🗺️ Desglose Geográfico / Institucional</h3>
+            <h3 class="text-lg font-bold text-slate-700 mb-4 mt-6">🗺️ Mapa de Departamentos - Perfil Predominante</h3>
+            <div class="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-4 border border-slate-200">
+                <p class="text-xs text-slate-500 mb-3 text-center">💡 Haz clic en un departamento para filtrar los datos</p>
+                <div id="mapa-vocacional" class="mapa-grid"></div>
+            </div>
+            <h3 class="text-lg font-bold text-slate-700 mb-4 mt-6">📈 Distribución por Sexo y Zona</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="chart-container"><h3 class="text-sm font-bold text-slate-700 mb-3">👥 Distribución por Sexo</h3><div class="relative w-full" style="height: 250px;"><canvas id="chart-voc-sexo"></canvas></div></div>
+                <div class="chart-container"><h3 class="text-sm font-bold text-slate-700 mb-3">🏙️ Distribución por Zona</h3><div class="relative w-full" style="height: 250px;"><canvas id="chart-voc-zona"></canvas></div></div>
+            </div>
+            <h3 class="text-lg font-bold text-slate-700 mb-4 mt-6">🗂️ Desglose Geográfico / Institucional</h3>
             <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-lg"><table class="min-w-full divide-y divide-slate-200 text-sm"><thead class="bg-slate-50"><tr><th id="th-name-vocacional" class="px-6 py-4 text-left font-semibold text-slate-600 uppercase">Estructura</th><th class="px-6 py-4 text-center font-semibold text-slate-600 uppercase">Registros</th><th class="px-6 py-4 text-left font-semibold text-slate-600 uppercase">Perfil Predominante</th><th class="px-6 py-4 text-right font-semibold text-slate-600 uppercase">Acción</th></tr></thead><tbody id="tbody-vocacional" class="bg-white divide-y divide-slate-200"></tbody></table></div>
             <p id="table-footer-vocacional" class="text-xs text-slate-400 mt-3 text-right italic">💡 Haz clic en una fila para profundizar</p>
         </div>
@@ -209,7 +256,7 @@
         <div id="loading-2b" class="tab-loading"><div class="loader mb-4" style="border-top-color: #10b981;"></div><p class="text-emerald-600 font-bold">Cargando datos vocacionales 2° Bachillerato...</p></div>
         <div id="dashboard-2b" class="hidden fade-in">
             <div class="mb-4"><nav class="flex text-sm text-slate-500 bg-slate-100 px-3 py-2 rounded-lg inline-flex"><ol id="breadcrumb-2b" class="inline-flex items-center space-x-2"></ol></nav></div>
-            <div class="sticky-charts rounded-xl">
+            <div class="sticky-charts rounded-xl px-4">
                 <div class="flex flex-wrap items-center gap-3 mb-4">
                     <div class="flex bg-slate-50 p-2 rounded-xl border border-slate-200 flex-wrap gap-2 shadow-sm">
                         <select id="filter-sector-2b" onchange="renderDashboard('2b')" class="filter-select text-sm"><option value="TODOS">Todos los Sectores</option></select>
@@ -221,38 +268,81 @@
                             <option value="ARTÍSTICO">ARTÍSTICO</option><option value="EMPRENDEDOR">EMPRENDEDOR</option><option value="OFICINA">OFICINA</option>
                         </select>
                     </div>
-                    <button onclick="exportToExcel('2b')" class="btn-export px-5 py-2 text-white text-sm font-bold rounded-xl flex items-center gap-2 shadow-lg"> Exportar</button>
+                    <button onclick="exportToExcel('2b')" class="btn-export px-5 py-2 text-white text-sm font-bold rounded-xl flex items-center gap-2 shadow-lg">📥 Exportar</button>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <div class="kpi-card"><div class="flex items-center"><div class="p-3 bg-gradient-to-br from-emerald-400 to-emerald-600 text-white rounded-xl mr-4 shadow-lg">👥</div><div><p class="text-xs font-medium text-slate-500">Registros</p><p class="text-2xl font-bold text-slate-800" id="kpi-2b-total">0</p></div></div></div>
                     <div class="kpi-card"><div class="flex items-center"><div class="p-3 bg-gradient-to-br from-purple-400 to-purple-600 text-white rounded-xl mr-4 shadow-lg">🎯</div><div><p class="text-xs font-medium text-slate-500">Perfil Predominante</p><p class="text-lg font-bold text-slate-800" id="kpi-2b-perfil">-</p></div></div></div>
-                    <div class="kpi-card"><div class="flex items-center"><div class="p-3 bg-gradient-to-br from-amber-400 to-amber-600 text-white rounded-xl mr-4 shadow-lg">💼</div><div><p class="text-xs font-medium text-slate-500">Código Ocupacional</p><p class="text-lg font-bold text-slate-800" id="kpi-2b-codigo">-</p></div></div></div>
-                    <div class="kpi-card"><div class="flex items-center"><div class="p-3 bg-gradient-to-br from-blue-400 to-blue-600 text-white rounded-xl mr-4 shadow-lg">📚</div><div><p class="text-xs font-medium text-slate-500">Opción Bachillerato</p><p class="text-lg font-bold text-slate-800" id="kpi-2b-opcion">-</p></div></div></div>
+                    <div class="kpi-card"><div class="flex items-center"><div class="p-3 bg-gradient-to-br from-amber-400 to-amber-600 text-white rounded-xl mr-4 shadow-lg">💼</div><div><p class="text-xs font-medium text-slate-500">Códigos Ocupacionales</p><p class="text-2xl font-bold text-slate-800" id="kpi-2b-codigo">0</p></div></div></div>
                 </div>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="chart-container"><h3 class="text-sm font-bold text-slate-700 mb-3 text-center">⬡ Hexágono de Holland</h3><div class="relative w-full" style="height: 280px;"><canvas id="chart-2b-radar"></canvas></div></div>
-                    <div class="chart-container"><h3 class="text-sm font-bold text-slate-700 mb-3 text-center"> Intereses Profesionales</h3><table class="w-full holland-table mb-3"><thead><tr><th class="text-xs">INTERÉS</th><th class="text-xs">PUNTAJE</th><th class="text-xs">INTERÉS</th><th class="text-xs">PUNTAJE</th></tr></thead><tbody id="2b-table-scores"></tbody></table><div class="bg-slate-50 border border-slate-200 rounded-lg p-2 text-center"><span class="block text-xs font-bold text-slate-500 uppercase mb-1">Código Ocupacional Predominante</span><span class="text-sm font-bold text-emerald-700" id="2b-codigo-ocupacional">-</span></div></div>
+                    <div class="chart-container"><h3 class="text-sm font-bold text-slate-700 mb-3 text-center">💼 Intereses Profesionales</h3><table class="w-full holland-table mb-3"><thead><tr><th class="text-xs">INTERÉS</th><th class="text-xs">PUNTAJE</th><th class="text-xs">INTERÉS</th><th class="text-xs">PUNTAJE</th></tr></thead><tbody id="2b-table-scores"></tbody></table><div class="bg-slate-50 border border-slate-200 rounded-lg p-2 text-center"><span class="block text-xs font-bold text-slate-500 uppercase mb-1">Código Ocupacional Predominante</span><span class="text-sm font-bold text-emerald-700" id="2b-codigo-ocupacional">-</span></div></div>
                 </div>
             </div>
             <div id="top-centros-2b-container" class="mt-6 hidden scale-in">
                 <div class="flex items-center justify-between mb-4"><h3 class="text-lg font-bold text-slate-700">🏆 Top Centros - <span id="interes-seleccionado-2b" class="text-emerald-600"></span></h3><span class="text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full">Por cantidad de estudiantes</span></div>
                 <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-lg"><table class="top-centros-table"><thead><tr><th style="width: 60px;">#</th><th>Centro Escolar</th><th>Departamento</th><th>Municipio</th><th style="text-align: center;">Estudiantes</th><th style="text-align: center;">% del Total</th></tr></thead><tbody id="tbody-top-centros-2b"></tbody></table></div>
             </div>
-            <h3 class="text-lg font-bold text-slate-700 mb-4 mt-6">🗺️ Desglose Geográfico / Institucional</h3>
+            <h3 class="text-lg font-bold text-slate-700 mb-4 mt-6">🗺️ Mapa de Departamentos - Perfil Predominante</h3>
+            <div class="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-4 border border-slate-200">
+                <p class="text-xs text-slate-500 mb-3 text-center">💡 Haz clic en un departamento para filtrar los datos</p>
+                <div id="mapa-2b" class="mapa-grid"></div>
+            </div>
+            <h3 class="text-lg font-bold text-slate-700 mb-4 mt-6">📈 Distribución por Sexo y Zona</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="chart-container"><h3 class="text-sm font-bold text-slate-700 mb-3">👥 Distribución por Sexo</h3><div class="relative w-full" style="height: 250px;"><canvas id="chart-2b-sexo"></canvas></div></div>
+                <div class="chart-container"><h3 class="text-sm font-bold text-slate-700 mb-3">🏙️ Distribución por Zona</h3><div class="relative w-full" style="height: 250px;"><canvas id="chart-2b-zona"></canvas></div></div>
+            </div>
+            <h3 class="text-lg font-bold text-slate-700 mb-4 mt-6">🗂️ Desglose Geográfico / Institucional</h3>
             <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-lg"><table class="min-w-full divide-y divide-slate-200 text-sm"><thead class="bg-slate-50"><tr><th id="th-name-2b" class="px-6 py-4 text-left font-semibold text-slate-600 uppercase">Estructura</th><th class="px-6 py-4 text-center font-semibold text-slate-600 uppercase">Registros</th><th class="px-6 py-4 text-left font-semibold text-slate-600 uppercase">Perfil Predominante</th><th class="px-6 py-4 text-right font-semibold text-slate-600 uppercase">Acción</th></tr></thead><tbody id="tbody-2b" class="bg-white divide-y divide-slate-200"></tbody></table></div>
             <p id="table-footer-2b" class="text-xs text-slate-400 mt-3 text-right italic">💡 Haz clic en una fila para profundizar</p>
         </div>
     </div>
 </div>
 
+<!-- PIE DE PÁGINA -->
+<footer class="footer-gradient text-white mt-8 py-6 px-4">
+    <div class="max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+            <div class="text-center md:text-left">
+                <div class="flex items-center justify-center md:justify-start gap-2 mb-2">
+                    <div class="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center font-bold text-white text-sm">M</div>
+                    <div>
+                        <p class="font-bold text-sm">MINEDUCYT</p>
+                        <p class="text-xs text-slate-400">Gerencia de Estadísticas</p>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center">
+                <p class="text-xs text-slate-400 mb-1">Versión del Sistema</p>
+                <p class="text-lg font-bold bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">2.0</p>
+                <p class="text-xs text-slate-500 mt-1">Prueba de Orientación Profesional Autoaplicada</p>
+            </div>
+            <div class="text-center md:text-right">
+                <p class="text-xs text-slate-400 mb-1">Desarrollo y Soporte</p>
+                <p class="font-semibold text-sm">Miguel Hernández</p>
+                <p class="text-xs text-slate-400"> miguel.hernandez@mined.gob.sv</p>
+                <p class="text-xs text-slate-400">📱 +503 7677 3292</p>
+            </div>
+        </div>
+        <div class="border-t border-slate-700 mt-4 pt-4 text-center">
+            <p class="text-xs text-slate-500">© 2026 Ministerio de Educación, Ciencia y Tecnología de El Salvador. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</footer>
+
 <script>
 const CONFIG = {
     GITHUB_BASE_URL: 'https://raw.githubusercontent.com/MikelMINED/Dashboard-Educativo-Jerarquico/main',
     FILES: { APTITUDINAL: 'BD_Reporte_Aptitudinal_6_Ligero.csv', VOCACIONAL: 'BD_Reporte_Vocacional_9_Ligero.csv', VOCACIONAL_2B: 'BD_Reporte_Vocacional_2B_Ligero.csv' },
-    VERSION: 'v5.1'
+    VERSION: 'v6.0'
 };
 
-let chartInstances = { aptitudinal: { bar: null, radar: null }, vocacional: { radar: null }, '2b': { radar: null } };
+// Lista de los 14 departamentos de El Salvador
+const DEPARTAMENTOS_SV = ['Ahuachapán','Santa Ana','Sonsonate','Chalatenango','La Libertad','San Salvador','Cuscatlán','La Paz','Cabañas','San Vicente','Usulután','San Miguel','Morazán','La Unión'];
+
+let chartInstances = { aptitudinal: { bar: null, radar: null, sexo: null, zona: null }, vocacional: { radar: null, sexo: null, zona: null }, '2b': { radar: null, sexo: null, zona: null } };
 const labelMapVocacional = { 'social': 'SOCIAL', 'realista': 'REALISTA', 'cientifico': 'CIENTÍFICO', 'artistico': 'ARTÍSTICO', 'emprendedor': 'EMPRENDEDOR', 'oficina': 'OFICINA' };
 
 const REQUIRED_COLUMNS = {
@@ -296,7 +386,7 @@ function updateProgress(tipo, status) {
     const el = document.getElementById(`progress-${tipo}`);
     if (!el) return;
     const label = tipo === '2b' ? '2°B' : (tipo === 'vocacional' ? '9°' : '6°');
-    if (status === 'loading') { el.innerHTML = `${label}: <span class="font-bold"></span>`; el.className = 'px-4 py-2 bg-white/10 rounded-lg text-sm backdrop-blur-sm'; }
+    if (status === 'loading') { el.innerHTML = `${label}: <span class="font-bold">⏳</span>`; el.className = 'px-4 py-2 bg-white/10 rounded-lg text-sm backdrop-blur-sm'; }
     else if (status === 'success') { el.innerHTML = `${label}: <span class="font-bold">✅</span>`; el.className = 'px-4 py-2 bg-green-500/30 rounded-lg text-sm backdrop-blur-sm border border-green-400'; }
     else { el.innerHTML = `${label}: <span class="font-bold">❌</span>`; el.className = 'px-4 py-2 bg-red-500/30 rounded-lg text-sm backdrop-blur-sm border border-red-400'; }
 }
@@ -306,8 +396,7 @@ function switchTab(target) {
         const btn = document.getElementById(`btn-tab-${tab}`);
         const content = document.getElementById(`tab-${tab}`);
         if (tab === target) {
-            btn.classList.add('active');
-            btn.classList.remove('text-slate-500');
+            btn.classList.add('active'); btn.classList.remove('text-slate-500');
             if (tab === 'aptitudinal') { btn.classList.add('text-purple-600', 'border-purple-600'); btn.classList.remove('border-transparent'); }
             else if (tab === 'vocacional') { btn.classList.add('text-blue-600', 'border-blue-600'); btn.classList.remove('border-transparent'); }
             else { btn.classList.add('text-emerald-600', 'border-emerald-600'); btn.classList.remove('border-transparent'); }
@@ -330,7 +419,6 @@ async function loadFromGitHub(tipo) {
     if (tipo === 'aptitudinal') fileName = CONFIG.FILES.APTITUDINAL;
     else if (tipo === 'vocacional') fileName = CONFIG.FILES.VOCACIONAL;
     else fileName = CONFIG.FILES.VOCACIONAL_2B;
-    
     const url = `${CONFIG.GITHUB_BASE_URL}/${fileName}?v=${CONFIG.VERSION}&t=${Date.now()}`;
     updateProgress(tipo, 'loading');
     try {
@@ -416,6 +504,57 @@ function getAverages(rows, metricsKeys) {
     return averages;
 }
 
+// Mapa de departamentos
+function renderMapa(tipo, filteredRows) {
+    const container = document.getElementById(`mapa-${tipo}`);
+    if (!container) return;
+    container.innerHTML = '';
+    
+    const deptoData = {};
+    DEPARTAMENTOS_SV.forEach(d => { deptoData[d] = { count: 0, modes: {} }; });
+    
+    filteredRows.forEach(r => {
+        const depto = r['sede_nomb_depto'];
+        if (!depto || !deptoData[depto]) return;
+        deptoData[depto].count++;
+        const lugar1 = r['LUGAR1'];
+        if (lugar1) deptoData[depto].modes[lugar1] = (deptoData[depto].modes[lugar1] || 0) + 1;
+    });
+    
+    DEPARTAMENTOS_SV.forEach(depto => {
+        const data = deptoData[depto];
+        let topPerfil = '-'; let maxCount = 0;
+        for (const [mode, count] of Object.entries(data.modes)) {
+            if (count > maxCount) { maxCount = count; topPerfil = mode; }
+        }
+        const perfilNorm = normalizarTexto(topPerfil);
+        let badgeClass = 'perfil-social';
+        if (perfilNorm.includes('REALISTA')) badgeClass = 'perfil-realista';
+        else if (perfilNorm.includes('CIENT')) badgeClass = 'perfil-cientifico';
+        else if (perfilNorm.includes('ART')) badgeClass = 'perfil-artistico';
+        else if (perfilNorm.includes('EMPREN')) badgeClass = 'perfil-emprendedor';
+        else if (perfilNorm.includes('OFICINA')) badgeClass = 'perfil-oficina';
+        
+        const card = document.createElement('div');
+        card.className = 'depto-card scale-in';
+        card.onclick = () => filtrarPorDepartamento(tipo, depto);
+        card.innerHTML = `
+            <div class="text-xs font-bold text-slate-700">${depto}</div>
+            <div class="text-lg font-bold text-slate-900">${data.count.toLocaleString('es-SV')}</div>
+            <div class="text-xs text-slate-500">estudiantes</div>
+            <div class="perfil-badge ${badgeClass}">${topPerfil}</div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function filtrarPorDepartamento(tipo, depto) {
+    // Resetear path y aplicar filtro de departamento
+    appState[tipo].path = [{ value: depto, label: 'Departamento' }];
+    renderDashboard(tipo);
+    showToast(`📍 Filtrando por: ${depto}`, 'success');
+}
+
 function renderTopCentrosVocacional(filteredRows, interesSeleccionado, tipo) {
     const container = document.getElementById(`top-centros-${tipo}-container`);
     const tbody = document.getElementById(`tbody-top-centros-${tipo}`);
@@ -474,6 +613,65 @@ function renderTopCentrosAptitudinal(filteredRows, aptitudSeleccionada) {
     });
 }
 
+function renderDistribucionSexo(tipo, filteredRows) {
+    const chartId = `chart-${tipo}-sexo`;
+    const ctx = document.getElementById(chartId);
+    if (!ctx) return;
+    
+    const sexoCol = appState[tipo].sexoColumn;
+    if (!sexoCol) return;
+    
+    const counts = {};
+    filteredRows.forEach(r => {
+        const sexo = r[sexoCol];
+        if (sexo) counts[sexo] = (counts[sexo] || 0) + 1;
+    });
+    
+    const labels = Object.keys(counts);
+    const data = Object.values(counts);
+    const colors = labels.map(l => l.toLowerCase().includes('mujer') || l.toLowerCase().includes('femenino') ? 'rgba(236, 72, 153, 0.7)' : 'rgba(59, 130, 246, 0.7)');
+    
+    if (chartInstances[tipo].sexo) {
+        chartInstances[tipo].sexo.data.labels = labels;
+        chartInstances[tipo].sexo.data.datasets[0].data = data;
+        chartInstances[tipo].sexo.update();
+    } else {
+        chartInstances[tipo].sexo = new Chart(ctx, {
+            type: 'doughnut',
+            data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } }, animation: { duration: 800 } }
+        });
+    }
+}
+
+function renderDistribucionZona(tipo, filteredRows) {
+    const chartId = `chart-${tipo}-zona`;
+    const ctx = document.getElementById(chartId);
+    if (!ctx) return;
+    
+    const counts = {};
+    filteredRows.forEach(r => {
+        const zona = r['sede_zona'];
+        if (zona) counts[zona] = (counts[zona] || 0) + 1;
+    });
+    
+    const labels = Object.keys(counts);
+    const data = Object.values(counts);
+    const colors = labels.map(l => l.toLowerCase().includes('urbana') ? 'rgba(139, 92, 246, 0.7)' : 'rgba(16, 185, 129, 0.7)');
+    
+    if (chartInstances[tipo].zona) {
+        chartInstances[tipo].zona.data.labels = labels;
+        chartInstances[tipo].zona.data.datasets[0].data = data;
+        chartInstances[tipo].zona.update();
+    } else {
+        chartInstances[tipo].zona = new Chart(ctx, {
+            type: 'pie',
+            data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } }, animation: { duration: 800 } }
+        });
+    }
+}
+
 function updateVisuals(tipo, filteredRows) {
     const state = appState[tipo];
     
@@ -514,12 +712,6 @@ function updateVisuals(tipo, filteredRows) {
         } else {
             let codigos = new Set(); filteredRows.forEach(r => { let c = r['codigo_ocupacional']; if (c) codigos.add(c); });
             document.getElementById(`kpi-${prefix}-codigo`).textContent = codigos.size;
-            let opciones = new Set(); filteredRows.forEach(r => { let o = r['opcion_nombre']; if (o) opciones.add(o); });
-            let topOpcion = '-'; let maxOp = 0;
-            const opCount = {};
-            filteredRows.forEach(r => { let o = r['opcion_nombre']; if (o) opCount[o] = (opCount[o] || 0) + 1; });
-            for (let o in opCount) { if (opCount[o] > maxOp) { maxOp = opCount[o]; topOpcion = o; } }
-            document.getElementById(`kpi-${prefix}-opcion`).textContent = topOpcion;
         }
 
         const avgs = getAverages(filteredRows, state.metrics);
@@ -536,6 +728,11 @@ function updateVisuals(tipo, filteredRows) {
             chartInstances[tipo].radar = new Chart(ctx, { type: 'radar', data: { labels: labels.map(l => labelMapVocacional[l]), datasets: [{ label: 'Promedio', data: data, backgroundColor: tipo === '2b' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(59, 130, 246, 0.2)', borderColor: tipo === '2b' ? 'rgba(16, 185, 129, 1)' : 'rgba(59, 130, 246, 1)', pointBackgroundColor: tipo === '2b' ? 'rgba(16, 185, 129, 1)' : 'rgba(59, 130, 246, 1)', pointRadius: 3, borderWidth: 2 }] }, options: { scales: { r: { beginAtZero: true, max: maxScale, ticks: { display: true, stepSize: Math.ceil(maxScale / 5), font: { size: 9 } }, pointLabels: { font: { size: 10, weight: '600' } }, grid: { color: 'rgba(148, 163, 184, 0.15)' } } }, plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false, animation: { duration: 800 } } });
         }
     }
+    
+    // Renderizar mapa y distribuciones
+    renderMapa(tipo, filteredRows);
+    renderDistribucionSexo(tipo, filteredRows);
+    renderDistribucionZona(tipo, filteredRows);
 }
 
 function renderDashboard(tipo) {
@@ -612,7 +809,7 @@ function jumpToBreadcrumb(tipo, index) { if (index === -1) appState[tipo].path =
 function renderBreadcrumbs(tipo) {
     const ol = document.getElementById(`breadcrumb-${tipo}`);
     const path = appState[tipo].path;
-    let html = `<li class="inline-flex items-center"><a href="#" onclick="jumpToBreadcrumb('${tipo}', -1); return false;" class="inline-flex items-center hover:text-blue-600 transition-colors font-bold text-slate-700">🏠 Nacional</a></li>`;
+    let html = `<li class="inline-flex items-center"><a href="#" onclick="jumpToBreadcrumb('${tipo}', -1); return false;" class="inline-flex items-center hover:text-blue-600 transition-colors font-bold text-slate-700"> Nacional</a></li>`;
     path.forEach((step, index) => {
         const isLast = index === path.length - 1;
         html += `<li><div class="flex items-center"><svg class="w-4 h-4 text-slate-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg><a href="#" onclick="jumpToBreadcrumb('${tipo}', ${index}); return false;" class="ml-1 font-medium hover:text-blue-600 transition-colors ${isLast ? 'text-blue-600 font-bold' : 'text-slate-500'}"><span class="hidden sm:inline text-slate-400">${step.label}: </span>${step.value}</a></div></li>`;
